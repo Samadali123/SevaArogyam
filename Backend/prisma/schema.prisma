@@ -1,0 +1,272 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  ADMIN
+  DOCTOR
+  PATIENT
+  STAFF
+}
+
+enum BookingMode {
+  PHYSICAL
+  VIRTUAL
+}
+
+enum PatientClassification {
+  NEW
+  EXISTING
+  FOLLOW_UP
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentMode {
+  CASH
+  ONLINE
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+}
+
+enum ServiceCategory {
+  PHARMACY
+  DIAGNOSTICS
+  LABORATORY
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  FULFILLED
+  CANCELLED
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FLAT
+}
+
+model User {
+  id                   String    @id @default(uuid())
+  name                 String
+  email                String?   @unique
+  phone                String?   @unique
+  role                 Role
+  isActive             Boolean   @default(true)
+  
+  // Auth Fields
+  password             String?
+  refreshToken         String?
+  passwordResetToken   String?
+  passwordResetExpires DateTime?
+
+  // Patient Fields (OTP & Info)
+  patientId            String?   @unique
+  otp                  String?
+  otpExpiry            DateTime?
+  age                  Int?
+
+  // Profile Fields
+  profilePhoto         String?
+  clinicalBio          String?
+  opdScheduleSummary   String?
+  languagesSpoken      String[]  @default([])
+  clinicsCovered       String[]  @default([])
+
+  // Doctor Fields
+  specialization       String?
+  qualifications       String?
+  regNumber            String?
+  consultationFee      Float?
+  videoFee             Float?
+  experienceYears      Int?
+  
+  // Staff Fields
+  branch               String?
+
+  // Referral & Wallet Fields
+  referralCode         String?   @unique
+  referredById         String?
+  walletBalance        Float     @default(0.0)
+  
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  // Relations
+  referredBy           User?     @relation("Referrals", fields: [referredById], references: [id])
+  referrals            User[]    @relation("Referrals")
+  coupons              Coupon[]
+  
+  patientAppointments  Appointment[] @relation("PatientAppointments")
+  doctorAppointments   Appointment[] @relation("DoctorAppointments")
+  
+  careServices         CareService[] @relation("DoctorCareServices")
+  serviceOrders        ServiceOrder[] @relation("PatientServiceOrders")
+}
+
+model Branch {
+  id               String    @id @default(uuid())
+  name             String
+  title            String
+  city             String
+  receptionPhone   String
+  emergencyPhone   String
+  opdSlotInterval  Int
+  address          String
+  operatingHours   String
+  
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  appointments     Appointment[]
+}
+
+model Appointment {
+  id                     String    @id @default(uuid())
+  patientId              String
+  doctorId               String
+  branchId               String?   // Optional for pure virtual without branch
+  
+  bookingMode            BookingMode
+  patientClassification  PatientClassification
+  
+  appointmentDate        DateTime
+  timeSlot               String
+  
+  symptoms               String[]
+  medicalConcerns        String?
+  documents              String[]  @default([])
+  voiceNoteUrl           String?
+  
+  status                 AppointmentStatus @default(PENDING)
+  paymentMode            PaymentMode
+  paymentStatus          PaymentStatus     @default(PENDING)
+  fee                    Float
+  platformFee            Float             @default(0.0)
+  
+  tokenNumber            Int?
+  razorpayOrderId        String?
+  razorpayPaymentId      String?
+  
+  prescription           Json?
+  isRescheduled          Boolean   @default(false)
+  
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  // Relations
+  patient                User      @relation("PatientAppointments", fields: [patientId], references: [id])
+  doctor                 User      @relation("DoctorAppointments", fields: [doctorId], references: [id])
+  branch                 Branch?   @relation(fields: [branchId], references: [id])
+}
+
+model CareService {
+  id               String          @id @default(uuid())
+  doctorId         String
+  name             String
+  description      String?
+  category         ServiceCategory
+  price            Float
+  isActive         Boolean         @default(true)
+  
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  doctor           User            @relation("DoctorCareServices", fields: [doctorId], references: [id])
+  orders           ServiceOrder[]
+}
+
+model ServiceOrder {
+  id               String          @id @default(uuid())
+  patientId        String
+  serviceId        String
+  
+  amount           Float
+  platformFee      Float           @default(0.0)
+  status           OrderStatus     @default(PENDING)
+  
+  razorpayOrderId  String?
+  razorpayPaymentId String?
+
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  patient          User            @relation("PatientServiceOrders", fields: [patientId], references: [id])
+  service          CareService     @relation(fields: [serviceId], references: [id])
+}
+
+model Coupon {
+  id               String          @id @default(uuid())
+  code             String
+  discountType     DiscountType
+  discountValue    Float
+  userId           String
+  isUsed           Boolean         @default(false)
+  isActive         Boolean         @default(true)
+  expiresAt        DateTime?
+  
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  user             User            @relation(fields: [userId], references: [id])
+}
+
+model SystemSetting {
+  id               String          @id @default(uuid())
+  key              String          @unique
+  value            Json
+  
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+}
+
+model Specialty {
+  id                String          @id @default(uuid())
+  nameEn            String
+  nameHi            String?
+  category          String
+  tagline           String?
+  description       String?
+  conditionsTreated String[]
+  proceduresAndTech String[]
+  bannerUrl         String?
+  isActive          Boolean         @default(true)
+  
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+}
+
+model Article {
+  id               String    @id @default(uuid())
+  title            String
+  category         String
+  authorId         String?
+  authorName       String
+  authorRole       String?
+  readTimeMinutes  Int       @default(5)
+  date             String?
+  excerpt          String
+  content          String?
+  imageUrl         String?
+  published        Boolean   @default(true)
+  
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+}
+
