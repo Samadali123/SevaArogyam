@@ -85,7 +85,7 @@ export const sendAdminOTP = asyncHandler(async (req: Request, res: Response) => 
 
   if (!user.isActive) throw new AppError('Account is inactive', HTTP_STATUS.FORBIDDEN, ERROR_CODES.FORBIDDEN, true);
   console.log(`[AUTH] Admin OTP generated for ${user.email}: ${otp}`);
-  await sendEmail(user.email!, 'SevaArogyam Admin Login Verification Code', getAdminOTPEmailHTML(otp));
+  sendEmail(user.email!, 'SevaArogyam Admin Login Verification Code', getAdminOTPEmailHTML(otp)).catch(err => console.error('[AUTH] Admin OTP email error:', err));
   
   res.status(HTTP_STATUS.OK).json({ status: 'success', message: 'OTP sent to admin email.' });
 });
@@ -124,7 +124,7 @@ export const sendPatientOTP = asyncHandler(async (req: Request, res: Response) =
   });
 
   console.log(`[AUTH] Patient OTP generated for ${user.email}: ${otp}`);
-  await sendEmail(user.email!, 'SevaArogyam Login Verification Code', getPatientOTPEmailHTML(otp));
+  sendEmail(user.email!, 'SevaArogyam Login Verification Code', getPatientOTPEmailHTML(otp)).catch(err => console.error('[AUTH] Patient OTP email error:', err));
   res.status(HTTP_STATUS.OK).json({ status: 'success', message: 'OTP sent to email.' });
 });
 
@@ -197,7 +197,7 @@ export const forgotPassword = asyncHandler(async (req: Request, res: Response) =
   });
 
   const resetURL = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password/${resetToken}`;
-  await sendEmail(user.email!, 'SevaArogyam Password Reset Request', getForgotPasswordEmailHTML(resetURL));
+  sendEmail(user.email!, 'SevaArogyam Password Reset Request', getForgotPasswordEmailHTML(resetURL)).catch(err => console.error('[AUTH] Forgot password email error:', err));
 
   res.status(HTTP_STATUS.OK).json({
     status: 'success',
