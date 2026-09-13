@@ -34,10 +34,10 @@ class Server {
      *
      */
     setupMiddlewares() {
-        // Parse JSON request bodies
-        this.app.use(express_1.default.json());
+        // Parse JSON request bodies (50mb limit for base64 image uploads)
+        this.app.use(express_1.default.json({ limit: '50mb' }));
         // Parse URL-encoded form data
-        this.app.use(express_1.default.urlencoded({ extended: true }));
+        this.app.use(express_1.default.urlencoded({ extended: true, limit: '50mb' }));
         // Serve local uploads and public images statically
         this.app.use('/uploads', express_1.default.static(path_1.default.join(process.cwd(), 'uploads')));
         this.app.use('/images', express_1.default.static(path_1.default.join(__dirname, 'public', 'images')));

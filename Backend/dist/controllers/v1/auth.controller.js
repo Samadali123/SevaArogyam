@@ -9,6 +9,7 @@ const asyncHandler_1 = require("@utilities/asyncHandler");
 const settings_1 = require("@utilities/settings");
 const auth_1 = require("@utilities/auth");
 const mailer_1 = require("@utilities/mailer");
+const emailTemplates_1 = require("@utilities/emailTemplates");
 // ─────────────────────────────────────────────
 // Admin / Doctor / Staff Login (Email + Password)
 // ─────────────────────────────────────────────
@@ -68,7 +69,7 @@ exports.sendAdminOTP = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
     if (!user.isActive)
         throw new AppError_1.AppError('Account is inactive', constants_1.HTTP_STATUS.FORBIDDEN, errorCodes_1.ERROR_CODES.FORBIDDEN, true);
     console.log(`[AUTH] Admin OTP generated for ${user.email}: ${otp}`);
-    await (0, mailer_1.sendEmail)(user.email, 'Admin Login OTP', `<h3>Your Admin OTP is: ${otp}</h3>`);
+    await (0, mailer_1.sendEmail)(user.email, 'SevaArogyam Admin Login Verification Code', (0, emailTemplates_1.getAdminOTPEmailHTML)(otp));
     res.status(constants_1.HTTP_STATUS.OK).json({ status: 'success', message: 'OTP sent to admin email.' });
 });
 exports.verifyAdminOTP = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
@@ -101,7 +102,7 @@ exports.sendPatientOTP = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
         create: { email, name: 'Patient', role: constants_1.USER_ROLES.PATIENT, patientId: patientIdGen, otp, otpExpiry },
     });
     console.log(`[AUTH] Patient OTP generated for ${user.email}: ${otp}`);
-    await (0, mailer_1.sendEmail)(user.email, 'Patient Login OTP', `<h3>Your OTP is: ${otp}</h3>`);
+    await (0, mailer_1.sendEmail)(user.email, 'SevaArogyam Login Verification Code', (0, emailTemplates_1.getPatientOTPEmailHTML)(otp));
     res.status(constants_1.HTTP_STATUS.OK).json({ status: 'success', message: 'OTP sent to email.' });
 });
 exports.verifyPatientOTP = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
@@ -147,7 +148,7 @@ exports.forgotPassword = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
         throw new AppError_1.AppError('Please provide your email', constants_1.HTTP_STATUS.BAD_REQUEST, errorCodes_1.ERROR_CODES.VALIDATION_ERROR, true);
     }
     const user = await database_1.prisma.user.findUnique({ where: { email } });
-    if (!user || user.role === constants_1.USER_ROLES.PATIENT || user.role === constants_1.USER_ROLES.ADMIN) {
+    if (!user || user.role === constants_1.USER_ROLES.PATIENT) {
         throw new AppError_1.AppError('User not found or role logs in via OTP', constants_1.HTTP_STATUS.NOT_FOUND, errorCodes_1.ERROR_CODES.NOT_FOUND, true);
     }
     const resetToken = (0, auth_1.generateResetToken)();
@@ -159,12 +160,8 @@ exports.forgotPassword = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
             passwordResetExpires: resetExpires,
         },
     });
-    // Example front-end URL (should be moved to env in prod)
     const resetURL = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password/${resetToken}`;
-    const message = `<p>You requested a password reset. Click the link below to set a new password:</p>
-                   <a href="${resetURL}">Reset Password</a>
-                   <p>If you didn't request this, please ignore this email.</p>`;
-    await (0, mailer_1.sendEmail)(user.email, 'Password Reset Request', message);
+    await (0, mailer_1.sendEmail)(user.email, 'SevaArogyam Password Reset Request', (0, emailTemplates_1.getForgotPasswordEmailHTML)(resetURL));
     res.status(constants_1.HTTP_STATUS.OK).json({
         status: 'success',
         message: 'Password reset link sent to email',
@@ -200,9 +197,14 @@ exports.resetPassword = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
             passwordResetExpires: null,
         },
     });
+    const tokens = (0, auth_1.generateTokens)({ id: user.id, role: user.role });
     res.status(constants_1.HTTP_STATUS.OK).json({
         status: 'success',
-        message: 'Password updated successfully. You can now log in.',
+        message: 'Password updated successfully.',
+        data: {
+            user: { id: user.id, name: user.name, email: user.email, role: user.role },
+            ...tokens,
+        },
     });
 });
 //# sourceMappingURL=auth.controller.js.map

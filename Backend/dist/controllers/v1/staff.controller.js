@@ -137,11 +137,33 @@ exports.bookWalkInAppointment = (0, asyncHandler_1.asyncHandler)(async (req, res
     });
     const tokenNumber = count + 1; // Sequential token
     const actualFee = fee ? parseFloat(fee) : 300; // fallback if not provided
+    let validStaffBranchId = null;
+    if (staff.branch) {
+        const existingBranch = await database_1.prisma.branch.findFirst({
+            where: {
+                OR: [
+                    { id: staff.branch },
+                    { name: { equals: staff.branch, mode: 'insensitive' } },
+                    { title: { contains: staff.branch, mode: 'insensitive' } },
+                    { city: { equals: staff.branch, mode: 'insensitive' } }
+                ]
+            }
+        });
+        if (existingBranch) {
+            validStaffBranchId = existingBranch.id;
+        }
+    }
+    if (!validStaffBranchId) {
+        const firstBranch = await database_1.prisma.branch.findFirst();
+        if (firstBranch) {
+            validStaffBranchId = firstBranch.id;
+        }
+    }
     const appointment = await database_1.prisma.appointment.create({
         data: {
             patientId: patient.id,
             doctorId,
-            branchId: staff.branch,
+            branchId: validStaffBranchId,
             bookingMode: 'PHYSICAL',
             patientClassification: 'NEW', // Defaulting for walkins unless specified
             appointmentDate: appointmentDate,

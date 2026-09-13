@@ -11,4 +11,5 @@ export * as publicController from './v1/public.controller';
 export * as appointmentController from './v1/appointment.controller';
 export * as doctorController from './v1/doctor.controller';
 export * as patientController from './v1/patient.controller';
+export * as articleController from './v1/article.controller';
 //# sourceMappingURL=index.d.ts.map

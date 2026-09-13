@@ -1,1 +1,1 @@
-{"version":3,"file":"appointment.controller.d.ts","sourceRoot":"","sources":["../../../src/controllers/v1/appointment.controller.ts"],"names":[],"mappings":"AAiBA;;GAEG;AACH,eAAO,MAAM,eAAe,8IAoN1B,CAAC;AAEH;;GAEG;AACH,eAAO,MAAM,aAAa,8IAsCxB,CAAC"}
+{"version":3,"file":"appointment.controller.d.ts","sourceRoot":"","sources":["../../../src/controllers/v1/appointment.controller.ts"],"names":[],"mappings":"AAiBA;;GAEG;AACH,eAAO,MAAM,eAAe,8IA6O1B,CAAC;AAEH;;GAEG;AACH,eAAO,MAAM,aAAa,8IAsCxB,CAAC"}

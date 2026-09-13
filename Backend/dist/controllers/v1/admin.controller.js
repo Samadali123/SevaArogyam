@@ -8,6 +8,7 @@ const constants_1 = require("@utilities/constants");
 const asyncHandler_1 = require("@utilities/asyncHandler");
 const auth_1 = require("@utilities/auth");
 const mailer_1 = require("@utilities/mailer");
+const emailTemplates_1 = require("@utilities/emailTemplates");
 const upload_1 = require("@utilities/upload");
 // ─────────────────────────────────────────────
 // Doctors Management
@@ -63,14 +64,7 @@ exports.createDoctor = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
             profilePhoto: profilePhotoUrl,
         },
     });
-    const emailBody = `
-    <h2>Welcome to Sevasadan Portal, Dr. ${name}</h2>
-    <p>An administrator has created an account for you.</p>
-    <p><strong>Login Email:</strong> ${email}</p>
-    <p><strong>Password:</strong> ${rawPassword}</p>
-    <p>Please log in and change your password as soon as possible.</p>
-  `;
-    await (0, mailer_1.sendEmail)(email, 'Your Sevasadan Doctor Account Credentials', emailBody);
+    await (0, mailer_1.sendEmail)(email, 'Welcome to SevaArogyam - Doctor Portal Credentials', (0, emailTemplates_1.getDoctorCredentialsEmailHTML)(name, email, rawPassword));
     res.status(constants_1.HTTP_STATUS.CREATED).json({
         status: 'success',
         message: 'Doctor created successfully and credentials sent to their email.',
@@ -203,14 +197,7 @@ exports.createStaff = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
             profilePhoto: profilePhotoUrl,
         },
     });
-    const emailBody = `
-    <h2>Welcome to Sevasadan Portal, ${name}</h2>
-    <p>An administrator has created a staff account for you.</p>
-    <p><strong>Login Email:</strong> ${email}</p>
-    <p><strong>Password:</strong> ${rawPassword}</p>
-    <p>Please log in and change your password as soon as possible.</p>
-  `;
-    await (0, mailer_1.sendEmail)(email, 'Your Sevasadan Staff Account Credentials', emailBody);
+    await (0, mailer_1.sendEmail)(email, 'Welcome to SevaArogyam - Staff Portal Credentials', (0, emailTemplates_1.getStaffCredentialsEmailHTML)(name, email, rawPassword));
     res.status(constants_1.HTTP_STATUS.CREATED).json({
         status: 'success',
         message: 'Staff created successfully and credentials sent to their email.',
@@ -536,22 +523,42 @@ exports.getAdminCareServices = (0, asyncHandler_1.asyncHandler)(async (_req, res
 exports.updateCareService = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
     const { id } = req.params;
     const { name, description, category, price, doctorId, isActive } = req.body;
-    const service = await database_1.prisma.careService.update({
-        where: { id },
-        data: {
-            ...(name && { name }),
-            ...(description !== undefined && { description }),
-            ...(category && { category }),
-            ...(price !== undefined && { price: Number(price) }),
-            ...(doctorId && { doctorId }),
-            ...(isActive !== undefined && { isActive }),
-        }
-    });
+    const existing = await database_1.prisma.careService.findUnique({ where: { id } });
+    let service;
+    if (!existing) {
+        service = await database_1.prisma.careService.create({
+            data: {
+                id: id.startsWith('cs-') ? undefined : id,
+                name: name || 'Care Service',
+                description: description || '',
+                category: category || 'PHARMACY',
+                price: price !== undefined ? Number(price) : 0,
+                doctorId: doctorId || null,
+                isActive: isActive !== undefined ? isActive : true
+            }
+        });
+    }
+    else {
+        service = await database_1.prisma.careService.update({
+            where: { id },
+            data: {
+                ...(name && { name }),
+                ...(description !== undefined && { description }),
+                ...(category && { category }),
+                ...(price !== undefined && { price: Number(price) }),
+                ...(doctorId !== undefined && { doctorId }),
+                ...(isActive !== undefined && { isActive }),
+            }
+        });
+    }
     res.status(constants_1.HTTP_STATUS.OK).json({ status: 'success', data: service });
 });
 exports.deleteCareService = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
     const { id } = req.params;
-    await database_1.prisma.careService.delete({ where: { id } });
+    const existing = await database_1.prisma.careService.findUnique({ where: { id } });
+    if (existing) {
+        await database_1.prisma.careService.delete({ where: { id } });
+    }
     res.status(constants_1.HTTP_STATUS.NO_CONTENT).send();
 });
 // ─────────────────────────────────────────────

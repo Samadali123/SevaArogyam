@@ -24,5 +24,10 @@ router.post('/care-services', index_1.doctorController.createCareService);
 router.get('/care-services', index_1.doctorController.getMyCareServices);
 router.put('/care-services/:id', index_1.doctorController.updateCareService);
 router.delete('/care-services/:id', index_1.doctorController.deleteCareService);
+// Health Articles Management (Doctor Publications)
+router.get('/articles', index_1.articleController.getDoctorArticles);
+router.post('/articles', index_1.articleController.createArticle);
+router.put('/articles/:id', index_1.articleController.updateArticle);
+router.delete('/articles/:id', index_1.articleController.deleteArticle);
 exports.default = router;
 //# sourceMappingURL=doctor.js.map

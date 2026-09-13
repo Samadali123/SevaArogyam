@@ -485,24 +485,29 @@ export const getTransactionRecords = asyncHandler(async (req: Request, res: Resp
   const appointments = await prisma.appointment.findMany({
     where: apptWhere,
     include: {
-      patient: { select: { name: true } },
+      patient: { select: { name: true, phone: true } },
       doctor: { select: { name: true } },
       branch: { select: { name: true } }
     },
     orderBy: { createdAt: 'desc' }
   });
 
-  const transactions = appointments.map(appt => ({
-    id: appt.id,
-    paymentId: appt.razorpayPaymentId || `CASH-${appt.id.substring(0,6)}`,
-    patientName: appt.patient.name,
-    doctorName: appt.doctor.name,
-    branchName: appt.branch?.name || 'Virtual',
-    method: appt.paymentMode,
-    gateway: appt.paymentMode === 'ONLINE' ? 'RAZORPAY' : 'OFFLINE',
-    amount: appt.fee,
-    status: appt.paymentStatus
-  }));
+  const transactions = appointments.map(appt => {
+    const rawName = (appt as any).patientName || appt.patient?.name;
+    const patientName = rawName || (appt.patient?.phone ? `Patient (${appt.patient.phone})` : 'N/A');
+
+    return {
+      id: appt.id,
+      paymentId: appt.razorpayPaymentId || `CASH-${appt.id.substring(0,6)}`,
+      patientName,
+      patientPhone: appt.patient?.phone || '',
+      doctorName: appt.doctor?.name || 'Doctor',
+      branchName: appt.branch?.name || 'Virtual',
+      method: appt.paymentMode,
+      amount: appt.fee,
+      status: appt.paymentStatus
+    };
+  });
 
   res.status(HTTP_STATUS.OK).json({ status: 'success', data: { transactions } });
 });
@@ -598,24 +603,44 @@ export const updateCareService = asyncHandler(async (req: Request, res: Response
   const { id } = req.params;
   const { name, description, category, price, doctorId, isActive } = req.body;
   
-  const service = await prisma.careService.update({
-    where: { id },
-    data: {
-      ...(name && { name }),
-      ...(description !== undefined && { description }),
-      ...(category && { category }),
-      ...(price !== undefined && { price: Number(price) }),
-      ...(doctorId && { doctorId }),
-      ...(isActive !== undefined && { isActive }),
-    }
-  });
+  const existing = await prisma.careService.findUnique({ where: { id } });
+
+  let service;
+  if (!existing) {
+    service = await prisma.careService.create({
+      data: {
+        id: id.startsWith('cs-') ? undefined : id,
+        name: name || 'Care Service',
+        description: description || '',
+        category: category || 'PHARMACY',
+        price: price !== undefined ? Number(price) : 0,
+        doctorId: doctorId || null,
+        isActive: isActive !== undefined ? isActive : true
+      }
+    });
+  } else {
+    service = await prisma.careService.update({
+      where: { id },
+      data: {
+        ...(name && { name }),
+        ...(description !== undefined && { description }),
+        ...(category && { category }),
+        ...(price !== undefined && { price: Number(price) }),
+        ...(doctorId !== undefined && { doctorId }),
+        ...(isActive !== undefined && { isActive }),
+      }
+    });
+  }
   
   res.status(HTTP_STATUS.OK).json({ status: 'success', data: service });
 });
 
 export const deleteCareService = asyncHandler(async (req: Request, res: Response) => {
   const { id } = req.params;
-  await prisma.careService.delete({ where: { id } });
+  const existing = await prisma.careService.findUnique({ where: { id } });
+  if (existing) {
+    await prisma.careService.delete({ where: { id } });
+  }
   res.status(HTTP_STATUS.NO_CONTENT).send();
 });
 

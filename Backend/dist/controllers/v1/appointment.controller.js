@@ -149,12 +149,35 @@ exports.bookAppointment = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
         const doctorCommissionRate = Number(await (0, settings_1.getSystemSetting)('COMMISSION_RATE_DOCTOR', 10));
         platformFee = (fee * doctorCommissionRate) / 100;
     }
+    // Resolve valid Branch ID from Database (supports ID, name, or city slug)
+    let validBranchId = null;
+    if (branchId) {
+        const existingBranch = await database_1.prisma.branch.findFirst({
+            where: {
+                OR: [
+                    { id: branchId },
+                    { name: { equals: branchId, mode: 'insensitive' } },
+                    { title: { contains: branchId, mode: 'insensitive' } },
+                    { city: { equals: branchId, mode: 'insensitive' } }
+                ]
+            }
+        });
+        if (existingBranch) {
+            validBranchId = existingBranch.id;
+        }
+    }
+    if (!validBranchId && bookingMode === 'PHYSICAL') {
+        const firstBranch = await database_1.prisma.branch.findFirst();
+        if (firstBranch) {
+            validBranchId = firstBranch.id;
+        }
+    }
     // Create Appointment
     const appointment = await database_1.prisma.appointment.create({
         data: {
             patientId,
             doctorId,
-            branchId: branchId || null,
+            branchId: validBranchId,
             bookingMode,
             patientClassification: calculatedClassification,
             appointmentDate: new Date(appointmentDate),

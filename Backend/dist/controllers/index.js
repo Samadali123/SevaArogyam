@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.patientController = exports.doctorController = exports.appointmentController = exports.publicController = exports.branchController = exports.adminController = exports.authController = exports.healthCheckController = void 0;
+exports.articleController = exports.patientController = exports.doctorController = exports.appointmentController = exports.publicController = exports.branchController = exports.adminController = exports.authController = exports.healthCheckController = void 0;
 /**
  * @file controllers/index.ts
  * @description Barrel export for all controllers.
@@ -47,4 +47,5 @@ exports.publicController = __importStar(require("./v1/public.controller"));
 exports.appointmentController = __importStar(require("./v1/appointment.controller"));
 exports.doctorController = __importStar(require("./v1/doctor.controller"));
 exports.patientController = __importStar(require("./v1/patient.controller"));
+exports.articleController = __importStar(require("./v1/article.controller"));
 //# sourceMappingURL=index.js.map
