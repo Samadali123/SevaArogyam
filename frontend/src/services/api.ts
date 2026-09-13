@@ -1,4 +1,18 @@
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://sevaarogyam.onrender.com/api/v1';
+const getProductionApiUrl = () => {
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname;
+    if (host !== 'localhost' && host !== '127.0.0.1') {
+      return 'https://sevaarogyam.onrender.com/api/v1';
+    }
+  }
+  const envUrl = import.meta.env.VITE_API_BASE_URL;
+  if (envUrl && !envUrl.includes('localhost') && !envUrl.includes('127.0.0.1')) {
+    return envUrl;
+  }
+  return 'https://sevaarogyam.onrender.com/api/v1';
+};
+
+export const API_BASE_URL = getProductionApiUrl();
 export const AUTH_TOKEN_KEY = 'SEVASADAN_TOKEN';
 
 export const saveAuthToken = (token: unknown) => {
