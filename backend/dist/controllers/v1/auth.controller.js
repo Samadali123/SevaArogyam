@@ -69,7 +69,7 @@ exports.sendAdminOTP = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
     if (!user.isActive)
         throw new AppError_1.AppError('Account is inactive', constants_1.HTTP_STATUS.FORBIDDEN, errorCodes_1.ERROR_CODES.FORBIDDEN, true);
     console.log(`[AUTH] Admin OTP generated for ${user.email}: ${otp}`);
-    await (0, mailer_1.sendEmail)(user.email, 'SevaArogyam Admin Login Verification Code', (0, emailTemplates_1.getAdminOTPEmailHTML)(otp));
+    (0, mailer_1.sendEmail)(user.email, 'SevaArogyam Admin Login Verification Code', (0, emailTemplates_1.getAdminOTPEmailHTML)(otp)).catch(err => console.error('[AUTH] Admin OTP email error:', err));
     res.status(constants_1.HTTP_STATUS.OK).json({ status: 'success', message: 'OTP sent to admin email.' });
 });
 exports.verifyAdminOTP = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
@@ -102,7 +102,7 @@ exports.sendPatientOTP = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
         create: { email, name: 'Patient', role: constants_1.USER_ROLES.PATIENT, patientId: patientIdGen, otp, otpExpiry },
     });
     console.log(`[AUTH] Patient OTP generated for ${user.email}: ${otp}`);
-    await (0, mailer_1.sendEmail)(user.email, 'SevaArogyam Login Verification Code', (0, emailTemplates_1.getPatientOTPEmailHTML)(otp));
+    (0, mailer_1.sendEmail)(user.email, 'SevaArogyam Login Verification Code', (0, emailTemplates_1.getPatientOTPEmailHTML)(otp)).catch(err => console.error('[AUTH] Patient OTP email error:', err));
     res.status(constants_1.HTTP_STATUS.OK).json({ status: 'success', message: 'OTP sent to email.' });
 });
 exports.verifyPatientOTP = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
@@ -161,7 +161,7 @@ exports.forgotPassword = (0, asyncHandler_1.asyncHandler)(async (req, res) => {
         },
     });
     const resetURL = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password/${resetToken}`;
-    await (0, mailer_1.sendEmail)(user.email, 'SevaArogyam Password Reset Request', (0, emailTemplates_1.getForgotPasswordEmailHTML)(resetURL));
+    (0, mailer_1.sendEmail)(user.email, 'SevaArogyam Password Reset Request', (0, emailTemplates_1.getForgotPasswordEmailHTML)(resetURL)).catch(err => console.error('[AUTH] Forgot password email error:', err));
     res.status(constants_1.HTTP_STATUS.OK).json({
         status: 'success',
         message: 'Password reset link sent to email',
