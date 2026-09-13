@@ -10,7 +10,7 @@ const getTransporter = () => {
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
 
-  return nodemailer.createTransport({
+  const transporterOptions: any = {
     host,
     port,
     secure: port === 465,
@@ -20,7 +20,9 @@ const getTransporter = () => {
     socketTimeout: 10000,
     // Force IPv4 to prevent ENETUNREACH errors on cloud platforms (e.g. Render) without IPv6 network routes
     family: 4,
-  } as nodemailer.TransportOptions);
+  };
+
+  return nodemailer.createTransport(transporterOptions);
 };
 
 /**
