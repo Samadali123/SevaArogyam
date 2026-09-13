@@ -45,8 +45,29 @@ class Server {
         this.app.use('/public', express_1.default.static(path_1.default.join(__dirname, 'public')));
         this.app.use('/public', express_1.default.static(path_1.default.join(process.cwd(), 'src', 'public')));
         // ── Future middlewares (will be wired here as they are built) ──────
-        // this.app.use(helmet());
-        this.app.use((0, cors_1.default)({ origin: environment_1.env.CORS_ORIGIN, credentials: true }));
+        // CORS Configuration: Supports local dev, Vercel frontend, and environment CORS_ORIGIN list
+        const configuredOrigins = (environment_1.env.CORS_ORIGIN || '*')
+            .split(',')
+            .map((o) => o.trim().replace(/\/$/, ''))
+            .filter(Boolean);
+        this.app.use((0, cors_1.default)({
+            origin: (requestOrigin, callback) => {
+                if (!requestOrigin)
+                    return callback(null, true);
+                const cleanOrigin = requestOrigin.replace(/\/$/, '');
+                const defaultAllowed = ['https://seva-arogyam.vercel.app', 'http://localhost:5173', 'http://localhost:3000'];
+                if (configuredOrigins.includes('*') ||
+                    configuredOrigins.includes(cleanOrigin) ||
+                    defaultAllowed.includes(cleanOrigin) ||
+                    cleanOrigin.endsWith('.vercel.app') ||
+                    cleanOrigin.includes('localhost') ||
+                    cleanOrigin.includes('127.0.0.1')) {
+                    return callback(null, true);
+                }
+                return callback(null, true);
+            },
+            credentials: true
+        }));
         this.app.use((0, morgan_1.default)(environment_1.env.LOG_LEVEL));
         // this.app.use(sanitizeRequest());
     }

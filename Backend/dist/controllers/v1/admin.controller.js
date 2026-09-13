@@ -423,23 +423,27 @@ exports.getTransactionRecords = (0, asyncHandler_1.asyncHandler)(async (req, res
     const appointments = await database_1.prisma.appointment.findMany({
         where: apptWhere,
         include: {
-            patient: { select: { name: true } },
+            patient: { select: { name: true, phone: true } },
             doctor: { select: { name: true } },
             branch: { select: { name: true } }
         },
         orderBy: { createdAt: 'desc' }
     });
-    const transactions = appointments.map(appt => ({
-        id: appt.id,
-        paymentId: appt.razorpayPaymentId || `CASH-${appt.id.substring(0, 6)}`,
-        patientName: appt.patient.name,
-        doctorName: appt.doctor.name,
-        branchName: appt.branch?.name || 'Virtual',
-        method: appt.paymentMode,
-        gateway: appt.paymentMode === 'ONLINE' ? 'RAZORPAY' : 'OFFLINE',
-        amount: appt.fee,
-        status: appt.paymentStatus
-    }));
+    const transactions = appointments.map(appt => {
+        const rawName = appt.patientName || appt.patient?.name;
+        const patientName = rawName || (appt.patient?.phone ? `Patient (${appt.patient.phone})` : 'N/A');
+        return {
+            id: appt.id,
+            paymentId: appt.razorpayPaymentId || `CASH-${appt.id.substring(0, 6)}`,
+            patientName,
+            patientPhone: appt.patient?.phone || '',
+            doctorName: appt.doctor?.name || 'Doctor',
+            branchName: appt.branch?.name || 'Virtual',
+            method: appt.paymentMode,
+            amount: appt.fee,
+            status: appt.paymentStatus
+        };
+    });
     res.status(constants_1.HTTP_STATUS.OK).json({ status: 'success', data: { transactions } });
 });
 exports.getEMRLogs = (0, asyncHandler_1.asyncHandler)(async (_req, res) => {
