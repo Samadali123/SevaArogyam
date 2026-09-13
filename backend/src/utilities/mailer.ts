@@ -2,17 +2,24 @@ import nodemailer from 'nodemailer';
 import { env } from '@config/environment';
 
 /**
- * Creates the reusable transporter object using the default SMTP transport
+ * Creates a reusable transporter object with short connection timeouts
  */
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT),
-  secure: Number(process.env.SMTP_PORT) === 465, // true for 465, false for other ports
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
+const getTransporter = () => {
+  const host = process.env.SMTP_HOST || 'smtp.gmail.com';
+  const port = Number(process.env.SMTP_PORT) || 587;
+  const user = process.env.SMTP_USER;
+  const pass = process.env.SMTP_PASS;
+
+  return nodemailer.createTransport({
+    host,
+    port,
+    secure: port === 465,
+    auth: user && pass ? { user, pass } : undefined,
+    connectionTimeout: 5000, // 5 seconds
+    greetingTimeout: 5000,
+    socketTimeout: 10000,
+  });
+};
 
 /**
  * Sends an email using Nodemailer
@@ -21,23 +28,30 @@ const transporter = nodemailer.createTransport({
  * @param html The HTML body of the email
  */
 export const sendEmail = async (to: string, subject: string, html: string): Promise<boolean> => {
+  const user = process.env.SMTP_USER;
+  const pass = process.env.SMTP_PASS;
+
+  if (!user || !pass) {
+    console.warn(`[MAILER] SMTP_USER or SMTP_PASS environment variables are missing on server. Skipping email send to ${to}.`);
+    return false;
+  }
+
   try {
+    const transporter = getTransporter();
     const info = await transporter.sendMail({
-      from: process.env.EMAIL_FROM || '"Sevasadan Portal" <no-reply@sevasadan.com>',
+      from: process.env.EMAIL_FROM || `"${user}" <${user}>`,
       to,
       subject,
       html,
     });
     
-    // In development mode, log the email details
     if (env.isDevelopment) {
-      console.log('Message sent: %s', info.messageId);
-      // For ethereal email if ever used, you can log preview URL here
+      console.log('[MAILER] Message sent: %s', info.messageId);
     }
-    
     return true;
   } catch (error) {
-    console.error('Error sending email:', error);
+    console.error('[MAILER] Error sending email:', error);
     return false;
   }
 };
+
