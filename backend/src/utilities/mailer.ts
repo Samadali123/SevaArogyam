@@ -18,7 +18,9 @@ const getTransporter = () => {
     connectionTimeout: 5000, // 5 seconds
     greetingTimeout: 5000,
     socketTimeout: 10000,
-  });
+    // Force IPv4 to prevent ENETUNREACH errors on cloud platforms (e.g. Render) without IPv6 network routes
+    family: 4,
+  } as nodemailer.TransportOptions);
 };
 
 /**
