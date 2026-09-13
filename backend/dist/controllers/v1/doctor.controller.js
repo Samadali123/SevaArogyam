@@ -1,12 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteCareService = exports.updateCareService = exports.getMyCareServices = exports.createCareService = exports.joinVideoCall = exports.downloadPrescription = exports.writePrescription = exports.updateStatus = exports.getPatientQueue = void 0;
-const database_1 = require("@config/database");
-const AppError_1 = require("@errors/AppError");
-const errorCodes_1 = require("@errors/errorCodes");
-const constants_1 = require("@utilities/constants");
-const asyncHandler_1 = require("@utilities/asyncHandler");
-const pdf_1 = require("@utilities/pdf");
+const database_1 = require("../../config/database.js");
+const AppError_1 = require("../../errors/AppError.js");
+const errorCodes_1 = require("../../errors/errorCodes.js");
+const constants_1 = require("../../utilities/constants.js");
+const asyncHandler_1 = require("../../utilities/asyncHandler.js");
+const pdf_1 = require("../../utilities/pdf.js");
 const livekit_server_sdk_1 = require("livekit-server-sdk");
 /**
  * Fetch patient queues for the doctor (ALL, WAITING, IN_PROGRESS, COMPLETED)

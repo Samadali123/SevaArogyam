@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const staff_controller_1 = require("@controllers/v1/staff.controller");
-const auth_1 = require("@middlewares/auth");
-const constants_1 = require("@utilities/constants");
+const staff_controller_1 = require("../../controllers/v1/staff.controller.js");
+const auth_1 = require("../../middlewares/auth.js");
+const constants_1 = require("../../utilities/constants.js");
 const router = (0, express_1.Router)();
 router.use(auth_1.isLoggedIn);
 router.use((0, auth_1.restrictTo)(constants_1.USER_ROLES.STAFF, constants_1.USER_ROLES.ADMIN));

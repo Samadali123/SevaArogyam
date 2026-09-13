@@ -1,11 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.updateAppointmentStatus = exports.bookWalkInAppointment = exports.getDoctorOfflineAppointments = exports.getLiveQueue = exports.getDashboardStats = void 0;
-const database_1 = require("@config/database");
-const AppError_1 = require("@errors/AppError");
-const errorCodes_1 = require("@errors/errorCodes");
-const constants_1 = require("@utilities/constants");
-const asyncHandler_1 = require("@utilities/asyncHandler");
+const database_1 = require("../../config/database.js");
+const AppError_1 = require("../../errors/AppError.js");
+const errorCodes_1 = require("../../errors/errorCodes.js");
+const constants_1 = require("../../utilities/constants.js");
+const asyncHandler_1 = require("../../utilities/asyncHandler.js");
 /**
  * Get Staff Dashboard Stats (Waiting, Inside, Completed, Active Doctors)
  */

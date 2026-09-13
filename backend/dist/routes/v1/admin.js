@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const admin_controller_1 = require("@controllers/v1/admin.controller");
-const auth_1 = require("@middlewares/auth");
-const constants_1 = require("@utilities/constants");
-const upload_1 = require("@utilities/upload");
+const admin_controller_1 = require("../../controllers/v1/admin.controller.js");
+const auth_1 = require("../../middlewares/auth.js");
+const constants_1 = require("../../utilities/constants.js");
+const upload_1 = require("../../utilities/upload.js");
 const router = (0, express_1.Router)();
 // Protect all admin routes
 router.use(auth_1.isLoggedIn);

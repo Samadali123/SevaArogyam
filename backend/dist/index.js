@@ -11,7 +11,7 @@
  *
  */
 Object.defineProperty(exports, "__esModule", { value: true });
-const environment_1 = require("@config/environment");
+const environment_1 = require("./config/environment.js");
 const Server_1 = require("./Server");
 // ── Step 1: Validate ENV before anything else ─────────────────────────────
 (0, environment_1.validateEnv)();

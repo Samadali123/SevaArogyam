@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.globalErrorHandler = void 0;
-const AppError_1 = require("@errors/AppError");
-const errorCodes_1 = require("@errors/errorCodes");
-const constants_1 = require("@utilities/constants");
-const environment_1 = require("@config/environment");
+const AppError_1 = require("../errors/AppError.js");
+const errorCodes_1 = require("../errors/errorCodes.js");
+const constants_1 = require("../utilities/constants.js");
+const environment_1 = require("../config/environment.js");
 // ─────────────────────────────────────────────
 // Helper: build the error JSON body
 // ─────────────────────────────────────────────

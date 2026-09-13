@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { UserRole } from '@utilities/constants';
+import { UserRole } from '../utilities/constants.js';
 /**
  * Middleware to verify that the incoming request has a valid JWT Access Token.
  * If valid, it fetches the user and attaches it to `req.user`.

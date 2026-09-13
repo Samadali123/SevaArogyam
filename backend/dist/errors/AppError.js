@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppError = void 0;
-const errorCodes_1 = require("@errors/errorCodes");
+const errorCodes_1 = require("./errorCodes.js");
 /**
  * @class AppError
  * @extends Error

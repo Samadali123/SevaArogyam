@@ -1,8 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const index_1 = require("@controllers/index");
-const auth_1 = require("@middlewares/auth");
+const index_1 = require("../../controllers/index.js");
+const auth_1 = require("../../middlewares/auth.js");
 const router = (0, express_1.Router)();
 // Admin OTP Auth
 router.post('/admin/send-otp', index_1.authController.sendAdminOTP);

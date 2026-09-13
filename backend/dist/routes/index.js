@@ -5,9 +5,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.setupRoutes = void 0;
 const index_1 = __importDefault(require("./v1/index"));
-const AppError_1 = require("@errors/AppError");
-const errorCodes_1 = require("@errors/errorCodes");
-const constants_1 = require("@utilities/constants");
+const AppError_1 = require("../errors/AppError.js");
+const errorCodes_1 = require("../errors/errorCodes.js");
+const constants_1 = require("../utilities/constants.js");
 /**
  * @function setupRoutes
  * @description Mounts all versioned API routers onto the Express app.

@@ -5,7 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.env = exports.validateEnv = void 0;
 const dotenv_1 = __importDefault(require("dotenv"));
-const constants_1 = require("@utilities/constants");
+const constants_1 = require("../utilities/constants.js");
 // Load .env file before anything else reads process.env
 dotenv_1.default.config();
 /**
@@ -39,7 +39,7 @@ exports.validateEnv = validateEnv;
  *              `process.env` directly.
  *
  * @example
- *   import { env } from '@config/environment';
+ *   import { env } from './environment.js';
  *   const port = env.PORT;
  */
 exports.env = {

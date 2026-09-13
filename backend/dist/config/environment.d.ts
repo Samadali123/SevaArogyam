@@ -11,7 +11,7 @@ export declare const validateEnv: () => void;
  *              `process.env` directly.
  *
  * @example
- *   import { env } from '@config/environment';
+ *   import { env } from './environment.js';
  *   const port = env.PORT;
  */
 export declare const env: {

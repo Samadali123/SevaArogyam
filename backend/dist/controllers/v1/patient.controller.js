@@ -4,13 +4,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getPatientById = exports.cancelAppointment = exports.rescheduleAppointment = exports.getMyOrders = exports.verifyServicePayment = exports.createServiceOrder = exports.joinVideoCall = exports.downloadPrescription = exports.downloadToken = exports.getMyAppointments = void 0;
-const database_1 = require("@config/database");
-const AppError_1 = require("@errors/AppError");
-const errorCodes_1 = require("@errors/errorCodes");
-const constants_1 = require("@utilities/constants");
-const asyncHandler_1 = require("@utilities/asyncHandler");
-const pdf_1 = require("@utilities/pdf");
-const settings_1 = require("@utilities/settings");
+const database_1 = require("../../config/database.js");
+const AppError_1 = require("../../errors/AppError.js");
+const errorCodes_1 = require("../../errors/errorCodes.js");
+const constants_1 = require("../../utilities/constants.js");
+const asyncHandler_1 = require("../../utilities/asyncHandler.js");
+const pdf_1 = require("../../utilities/pdf.js");
+const settings_1 = require("../../utilities/settings.js");
 const livekit_server_sdk_1 = require("livekit-server-sdk");
 /**
  * Fetch all appointments for the logged-in patient

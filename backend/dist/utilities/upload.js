@@ -41,7 +41,7 @@ exports.uploadMiddleware = (0, multer_1.default)({
             cb(null, true);
         }
         else {
-            const { AppError } = require('@errors/AppError');
+            const { AppError } = require('../errors/AppError.js');
             cb(new AppError(`File type not allowed (${file.mimetype}). Only images, audio, and standard documents are allowed.`, 400, 'VALIDATION_ERROR', true));
         }
     },

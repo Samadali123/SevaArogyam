@@ -5,10 +5,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Server = void 0;
 const express_1 = __importDefault(require("express"));
-const index_1 = require("@routes/index");
-const errorHandler_1 = require("@middlewares/errorHandler");
-const environment_1 = require("@config/environment");
-const constants_1 = require("@utilities/constants");
+const index_1 = require("./routes/index.js");
+const errorHandler_1 = require("./middlewares/errorHandler.js");
+const environment_1 = require("./config/environment.js");
+const constants_1 = require("./utilities/constants.js");
 const cors_1 = __importDefault(require("cors"));
 const path_1 = __importDefault(require("path"));
 const morgan_1 = __importDefault(require("morgan"));

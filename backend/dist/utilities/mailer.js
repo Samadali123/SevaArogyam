@@ -5,7 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.sendEmail = void 0;
 const nodemailer_1 = __importDefault(require("nodemailer"));
-const environment_1 = require("@config/environment");
+const environment_1 = require("../config/environment.js");
 /**
  * Creates the reusable transporter object using the default SMTP transport
  */

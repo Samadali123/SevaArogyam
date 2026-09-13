@@ -4,13 +4,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.verifyPayment = exports.bookAppointment = void 0;
-const database_1 = require("@config/database");
-const AppError_1 = require("@errors/AppError");
-const errorCodes_1 = require("@errors/errorCodes");
-const constants_1 = require("@utilities/constants");
-const asyncHandler_1 = require("@utilities/asyncHandler");
-const upload_1 = require("@utilities/upload");
-const settings_1 = require("@utilities/settings");
+const database_1 = require("../../config/database.js");
+const AppError_1 = require("../../errors/AppError.js");
+const errorCodes_1 = require("../../errors/errorCodes.js");
+const constants_1 = require("../../utilities/constants.js");
+const asyncHandler_1 = require("../../utilities/asyncHandler.js");
+const upload_1 = require("../../utilities/upload.js");
+const settings_1 = require("../../utilities/settings.js");
 const razorpay_1 = __importDefault(require("razorpay"));
 const crypto_1 = __importDefault(require("crypto"));
 // Initialize Razorpay

@@ -5,12 +5,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.restrictTo = exports.isLoggedIn = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const AppError_1 = require("@errors/AppError");
-const errorCodes_1 = require("@errors/errorCodes");
-const constants_1 = require("@utilities/constants");
-const database_1 = require("@config/database");
-const environment_1 = require("@config/environment");
-const asyncHandler_1 = require("@utilities/asyncHandler");
+const AppError_1 = require("../errors/AppError.js");
+const errorCodes_1 = require("../errors/errorCodes.js");
+const constants_1 = require("../utilities/constants.js");
+const database_1 = require("../config/database.js");
+const environment_1 = require("../config/environment.js");
+const asyncHandler_1 = require("../utilities/asyncHandler.js");
 /**
  * Middleware to verify that the incoming request has a valid JWT Access Token.
  * If valid, it fetches the user and attaches it to `req.user`.

@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.healthCheck = void 0;
-const asyncHandler_1 = require("@utilities/asyncHandler");
-const constants_1 = require("@utilities/constants");
-const environment_1 = require("@config/environment");
+const asyncHandler_1 = require("../../utilities/asyncHandler.js");
+const constants_1 = require("../../utilities/constants.js");
+const environment_1 = require("../../config/environment.js");
 /**
  * @controller healthCheck
  * @route   GET /api/v1/health

@@ -1,4 +1,4 @@
-import { ErrorCode } from '@errors/errorCodes';
+import { ErrorCode } from './errorCodes.js';
 /**
  * @class AppError
  * @extends Error

@@ -1,15 +1,15 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.resetPassword = exports.forgotPassword = exports.logout = exports.verifyPatientOTP = exports.sendPatientOTP = exports.verifyAdminOTP = exports.sendAdminOTP = exports.login = void 0;
-const database_1 = require("@config/database");
-const AppError_1 = require("@errors/AppError");
-const errorCodes_1 = require("@errors/errorCodes");
-const constants_1 = require("@utilities/constants");
-const asyncHandler_1 = require("@utilities/asyncHandler");
-const settings_1 = require("@utilities/settings");
-const auth_1 = require("@utilities/auth");
-const mailer_1 = require("@utilities/mailer");
-const emailTemplates_1 = require("@utilities/emailTemplates");
+const database_1 = require("../../config/database.js");
+const AppError_1 = require("../../errors/AppError.js");
+const errorCodes_1 = require("../../errors/errorCodes.js");
+const constants_1 = require("../../utilities/constants.js");
+const asyncHandler_1 = require("../../utilities/asyncHandler.js");
+const settings_1 = require("../../utilities/settings.js");
+const auth_1 = require("../../utilities/auth.js");
+const mailer_1 = require("../../utilities/mailer.js");
+const emailTemplates_1 = require("../../utilities/emailTemplates.js");
 // ─────────────────────────────────────────────
 // Admin / Doctor / Staff Login (Email + Password)
 // ─────────────────────────────────────────────

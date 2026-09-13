@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getCareServices = exports.getDoctors = exports.getSpecialties = exports.getBranches = void 0;
-const database_1 = require("@config/database");
-const constants_1 = require("@utilities/constants");
-const asyncHandler_1 = require("@utilities/asyncHandler");
+const database_1 = require("../../config/database.js");
+const constants_1 = require("../../utilities/constants.js");
+const asyncHandler_1 = require("../../utilities/asyncHandler.js");
 // ─────────────────────────────────────────────
 // Public Endpoints (No Auth Required)
 // ─────────────────────────────────────────────

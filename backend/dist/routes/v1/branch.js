@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const index_1 = require("@controllers/index");
-const auth_1 = require("@middlewares/auth");
-const constants_1 = require("@utilities/constants");
+const index_1 = require("../../controllers/index.js");
+const auth_1 = require("../../middlewares/auth.js");
+const constants_1 = require("../../utilities/constants.js");
 const router = (0, express_1.Router)();
 // Protect all branch routes (Only Admin can manage branches)
 router.use(auth_1.isLoggedIn);

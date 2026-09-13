@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const health_controller_1 = require("@controllers/v1/health.controller");
+const health_controller_1 = require("../../controllers/v1/health.controller.js");
 /**
  * @router healthRouter
  * @base   /api/v1/health

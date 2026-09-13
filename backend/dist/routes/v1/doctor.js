@@ -1,10 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const index_1 = require("@controllers/index");
-const patient_controller_1 = require("@controllers/v1/patient.controller");
-const auth_1 = require("@middlewares/auth");
-const constants_1 = require("@utilities/constants");
+const index_1 = require("../../controllers/index.js");
+const patient_controller_1 = require("../../controllers/v1/patient.controller.js");
+const auth_1 = require("../../middlewares/auth.js");
+const constants_1 = require("../../utilities/constants.js");
 const router = (0, express_1.Router)();
 // Protect all doctor routes
 router.use(auth_1.isLoggedIn);
