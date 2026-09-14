@@ -116,38 +116,40 @@ const MainContent: React.FC = () => {
     }
   };
 
-  // Synchronize role when initially loaded at /admin, /doctor, /support
+  // Synchronize role when initially loaded at /admin, /doctor, /support, /patient-dashboard
   useEffect(() => {
     const path = window.location.pathname.toLowerCase().replace(/\/$/, '');
-    const isDoc = currentUser?.role === 'DOCTOR' || activeRole === 'DOCTOR';
-    const isStaff = currentUser?.role === 'DESK_STAFF' || (currentUser?.role as string) === 'STAFF' || activeRole === 'DESK_STAFF';
+    const isDoc = currentUser?.role === 'DOCTOR';
+    const isStaff = currentUser?.role === 'DESK_STAFF' || (currentUser?.role as string) === 'STAFF';
 
     if (path === '/adminp' || path === '/admin') {
       if (!isAdminAuthenticated) {
         setCurrentTabState('home');
-        window.history.replaceState({}, '', '/');
-        openAdminAuthModal();
+        if (window.location.pathname !== '/') window.history.replaceState({}, '', '/');
       } else {
         switchRole('ADMIN');
       }
     } else if (path === '/doctor' || path === '/doctor-console') {
       if (!isDoc && !localStorage.getItem(AUTH_TOKEN_KEY)) {
         setCurrentTabState('home');
-        window.history.replaceState({}, '', '/');
-        openStaffAuthModal();
+        if (window.location.pathname !== '/') window.history.replaceState({}, '', '/');
       } else {
         setCurrentTabState('doctor-console');
       }
     } else if (path === '/support' || path === '/desk-staff') {
       if (!isStaff && !localStorage.getItem(AUTH_TOKEN_KEY)) {
         setCurrentTabState('home');
-        window.history.replaceState({}, '', '/');
-        openStaffAuthModal();
+        if (window.location.pathname !== '/') window.history.replaceState({}, '', '/');
       } else {
         setCurrentTabState('desk-staff-dashboard');
       }
+    } else if (path === '/patient-dashboard') {
+      if (!currentUser && !localStorage.getItem(AUTH_TOKEN_KEY)) {
+        setCurrentTabState('home');
+        if (window.location.pathname !== '/') window.history.replaceState({}, '', '/');
+      }
     }
-  }, [isAdminAuthenticated, currentUser?.role, activeRole]);
+  }, [isAdminAuthenticated, currentUser, activeRole]);
 
   useEffect(() => {
     document.documentElement.lang = language;

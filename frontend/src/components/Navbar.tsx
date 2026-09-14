@@ -16,7 +16,8 @@ import {
   Info,
   Award,
   Share2,
-  ArrowRight
+  ArrowRight,
+  Loader2
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
@@ -35,6 +36,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
     openAdminAuthModal,
     openStaffAuthModal,
     isAdminAuthenticated, 
+    isLoggingOut,
     logout,
     openBookingModal,
     setActiveBranchId,
@@ -52,11 +54,17 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
       currentUser.role === 'ADMIN' || 
       currentUser.role === 'DESK_STAFF'
     )) || (
-      activeRole === 'DOCTOR' || 
-      activeRole === 'ADMIN' || 
-      activeRole === 'DESK_STAFF'
+      isAdminAuthenticated
     )
   );
+
+  const handleLogout = async () => {
+    await logout();
+    setCurrentTab('home');
+    if (window.location.pathname !== '/') {
+      window.history.pushState({}, '', '/');
+    }
+  };
 
   // Prevent background scrolling (hero section bleed) when sidebar menu is open
   useEffect(() => {
@@ -144,11 +152,21 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
             </div>
 
             <button
-              onClick={logout}
-              className="bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 font-extrabold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 transition cursor-pointer shadow-xs"
+              onClick={handleLogout}
+              disabled={isLoggingOut}
+              className="bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 font-extrabold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 transition cursor-pointer shadow-xs disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              <LogOut className="w-4 h-4" />
-              <span>{language === 'en' ? 'Logout' : 'लॉग आउट'}</span>
+              {isLoggingOut ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin text-rose-600" />
+                  <span>{language === 'en' ? 'Logging out...' : 'लॉग आउट हो रहा है...'}</span>
+                </>
+              ) : (
+                <>
+                  <LogOut className="w-4 h-4" />
+                  <span>{language === 'en' ? 'Logout' : 'लॉग आउट'}</span>
+                </>
+              )}
             </button>
           </div>
         ) : (
@@ -334,11 +352,21 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
             {/* Desktop Auth Section (Direct Logout when logged in, or Login dropdown when guest) */}
             {(currentUser || isAdminAuthenticated) ? (
               <button
-                onClick={logout}
-                className="hidden lg:flex shrink-0 bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 font-extrabold px-4 py-2 rounded-xl text-xs items-center gap-1.5 transition cursor-pointer shadow-xs"
+                onClick={handleLogout}
+                disabled={isLoggingOut}
+                className="hidden lg:flex shrink-0 bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 font-extrabold px-4 py-2 rounded-xl text-xs items-center gap-1.5 transition cursor-pointer shadow-xs disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                <LogOut className="w-4 h-4" />
-                <span>{language === 'en' ? 'Logout' : 'लॉग आउट'}</span>
+                {isLoggingOut ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin text-rose-600" />
+                    <span>{language === 'en' ? 'Logging out...' : 'लॉग आउट हो रहा है...'}</span>
+                  </>
+                ) : (
+                  <>
+                    <LogOut className="w-4 h-4" />
+                    <span>{language === 'en' ? 'Logout' : 'लॉग आउट'}</span>
+                  </>
+                )}
               </button>
             ) : (
               <div className="hidden lg:relative lg:block shrink-0" onMouseEnter={() => setOpenDropdown('login')} onMouseLeave={() => setOpenDropdown(null)}>
@@ -629,16 +657,26 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
 
             {/* Bottom Actions & Footer Block */}
             <div className="p-5 border-t border-slate-200 bg-slate-50/80 space-y-3.5 shrink-0">
-              {currentUser ? (
+              {(currentUser || isAdminAuthenticated) ? (
                 <button
-                  onClick={() => {
-                    logout();
+                  onClick={async () => {
+                    await handleLogout();
                     setMobileMenuOpen(false);
                   }}
-                  className="w-full bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 py-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer"
+                  disabled={isLoggingOut}
+                  className="w-full bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 py-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  <LogOut className="w-4 h-4" />
-                  <span>{language === 'en' ? 'Logout' : 'लॉगआउट'}</span>
+                  {isLoggingOut ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin text-rose-600" />
+                      <span>{language === 'en' ? 'Logging out...' : 'लॉग आउट हो रहा है...'}</span>
+                    </>
+                  ) : (
+                    <>
+                      <LogOut className="w-4 h-4" />
+                      <span>{language === 'en' ? 'Logout' : 'लॉगआउट'}</span>
+                    </>
+                  )}
                 </button>
               ) : (
                 <button

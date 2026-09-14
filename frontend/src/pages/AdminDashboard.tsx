@@ -72,7 +72,7 @@ export const AdminDashboard: React.FC = () => {
     clinicsCovered: ['sarangpur', 'shujalpur', 'rajgarh'],
     languagesSpoken: ['Hindi', 'English'],
     opdScheduleSummary: 'Mon-Sat: 09:00 AM - 02:00 PM',
-    avatarUrl: '/hero-doctor.png'
+    avatarUrl: DEFAULT_DOCTOR_AVATAR
   });
 
   // Desk Staff Form Modal State
@@ -208,7 +208,7 @@ export const AdminDashboard: React.FC = () => {
         clinicsCovered: doc.clinicsCovered && doc.clinicsCovered.length > 0 ? doc.clinicsCovered : ['sarangpur'],
         languagesSpoken: doc.languagesSpoken || ['Hindi', 'English'],
         opdScheduleSummary: doc.opdScheduleSummary || 'Mon-Sat: 09:00 AM - 02:00 PM',
-        avatarUrl: doc.avatarUrl || '/images/default_profile.webp'
+        avatarUrl: doc.avatarUrl || DEFAULT_DOCTOR_AVATAR
       });
       setDoctorPhotoFile(null);
     } else {
@@ -227,7 +227,7 @@ export const AdminDashboard: React.FC = () => {
         clinicsCovered: ['sarangpur', 'shujalpur'],
         languagesSpoken: ['Hindi', 'English'],
         opdScheduleSummary: 'Mon-Sat: 09:00 AM - 02:00 PM',
-        avatarUrl: '/images/default_profile.webp'
+        avatarUrl: DEFAULT_DOCTOR_AVATAR
       });
       setDoctorPhotoFile(null);
     }

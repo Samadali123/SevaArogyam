@@ -26,6 +26,7 @@ import {
   SPECIALTIES_DATA
 } from '../data/mockData';
 import { api, getApiErrorMessage, saveAuthToken, AUTH_TOKEN_KEY } from '../services/api';
+import defaultProfilePhoto from '../assets/images/Default_profile.webp';
 
 interface AppContextType {
   currentUser: AppUser | null;
@@ -61,7 +62,8 @@ interface AppContextType {
   loginAdminWithEmail: (email: string, otpCode: string) => Promise<{ success: boolean; message?: string }>;
   sendPatientOtp: (email: string) => Promise<{ success: boolean; message?: string }>;
   loginWithPatientEmailOtp: (email: string, otp: string, role?: UserRole, name?: string) => Promise<{ user: AppUser; isNew: boolean }>;
-  logout: () => void;
+  isLoggingOut: boolean;
+  logout: () => Promise<void>;
   setSessionFromAuth: (user: any, token: string) => void;
   createArticle: (data: any) => Promise<any>;
   updateArticle: (id: string, data: any) => Promise<any>;
@@ -121,11 +123,11 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 const LOCAL_STORAGE_KEY = 'SEVASADAN_STATE_V1';
 
-export const DEFAULT_DOCTOR_AVATAR = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'><rect width='128' height='128' rx='32' fill='%23E2E8F0'/><circle cx='64' cy='46' r='22' fill='%230F4C81'/><path d='M28 104C28 84 44 68 64 68C84 68 100 84 100 104' stroke='%230F4C81' stroke-width='10' stroke-linecap='round' fill='none'/></svg>`;
+export const DEFAULT_DOCTOR_AVATAR = defaultProfilePhoto;
 
 const mapDoctor = (doctor: any): DoctorUser => {
   const customPhoto = doctor.profilePhoto || doctor.avatarUrl;
-  const hasValidCustomPhoto = customPhoto && typeof customPhoto === 'string' && customPhoto.trim() !== '' && customPhoto !== '/hero-doctor.png' && !customPhoto.includes('default-avatar');
+  const hasValidCustomPhoto = customPhoto && typeof customPhoto === 'string' && customPhoto.trim() !== '' && (customPhoto.startsWith('http') || customPhoto.startsWith('data:')) && !customPhoto.includes('hero-doctor') && !customPhoto.includes('default-avatar') && !customPhoto.includes('default_profile');
 
   let clinicsCovered: string[] = [];
   if (Array.isArray(doctor.clinicsCovered) && doctor.clinicsCovered.length > 0) {
@@ -293,6 +295,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(() => {
     return localStorage.getItem(`${LOCAL_STORAGE_KEY}_ADMIN_AUTH`) === 'true' && Boolean(localStorage.getItem(AUTH_TOKEN_KEY));
   });
+  const [isLoggingOut, setIsLoggingOut] = useState<boolean>(false);
   const [isBookingModalOpen, setIsBookingModalOpen] = useState<boolean>(false);
   const [isDoctorProfileModalOpen, setIsDoctorProfileModalOpen] = useState<boolean>(false);
   const [selectedDoctorForProfile, setSelectedDoctorForProfile] = useState<DoctorUser | null>(null);
@@ -701,16 +704,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const logout = async () => {
+    setIsLoggingOut(true);
     try {
       await api.post('/auth/logout', {});
     } catch(e) {
       console.warn('Logout API call failed', e);
+    } finally {
+      setCurrentUser(null);
+      setIsAdminAuthenticated(false);
+      setActiveRole('PATIENT');
+      localStorage.removeItem(AUTH_TOKEN_KEY);
+      localStorage.removeItem(`${LOCAL_STORAGE_KEY}_USER`);
+      localStorage.removeItem(`${LOCAL_STORAGE_KEY}_ADMIN_AUTH`);
+      setIsLoggingOut(false);
     }
-    setCurrentUser(null);
-    setIsAdminAuthenticated(false);
-    localStorage.removeItem(AUTH_TOKEN_KEY);
-    localStorage.removeItem(`${LOCAL_STORAGE_KEY}_USER`);
-    localStorage.removeItem(`${LOCAL_STORAGE_KEY}_ADMIN_AUTH`);
   };
 
   const switchRole = (role: UserRole) => {
@@ -1062,6 +1069,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         preselectedMode,
         sendPatientOtp,
         loginWithPatientEmailOtp,
+        isLoggingOut,
         logout,
         switchRole,
         setLanguage,

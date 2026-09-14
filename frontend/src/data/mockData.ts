@@ -1,4 +1,5 @@
 import type { Clinic, DoctorUser, PatientUser, Appointment, Prescription, PaymentRecord, HealthPackage, HealthBlog, SpecialtyDetail, FacilityItem, DeskStaffUser, CareService } from '../types';
+import defaultProfilePhoto from '../assets/images/Default_profile.webp';
 
 export const DEFAULT_BRANCH_IMAGES: Record<string, string> = {
   sarangpur: 'https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&q=80&w=800',
@@ -110,7 +111,7 @@ export const INITIAL_DOCTORS: DoctorUser[] = [
     specialization: 'Pediatric Surgeon | Neonatal Surgeon | General Surgeon',
     regNumber: 'MP-52140/2016',
     bio: 'Class-I Gazetted Surgical Specialist and 3× MPPSC selected surgeon with specialized expertise in newborn surgery, pediatric urology, congenital anomaly repair, and pediatric laparoscopic surgery.',
-    avatarUrl: '/hero-doctor.png',
+    avatarUrl: defaultProfilePhoto,
     clinicsCovered: ['sarangpur', 'rajgarh', 'shujalpur'],
     consultationFeeClinic: 400,
     consultationFeeOnline: 500,

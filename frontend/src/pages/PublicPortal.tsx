@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { DEFAULT_BRANCH_IMAGES } from '../data/mockData';
+import drAnkurImg from '../assets/images/Dr_Ankur.jpeg';
 
 interface PublicPortalProps {
   onNavigate?: (tab: string) => void;
@@ -242,7 +243,7 @@ export const PublicPortal: React.FC<PublicPortalProps> = ({ onNavigate }) => {
                 {/* Image Card Container */}
                 <div className="relative rounded-[2.5rem] overflow-hidden shadow-2xl border border-white/20 bg-slate-900/60 backdrop-blur-md">
                   <img
-                    src="/dr-samad.jpg"
+                    src={drAnkurImg}
                     alt="Dr. Ankur Deshwali - Pediatric & Neonatal Surgeon"
                     className="w-full h-120 object-cover object-top transform group-hover:scale-105 transition-transform duration-700 ease-out"
                   />
