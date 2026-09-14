@@ -24,21 +24,24 @@ const getIPv4Address = async (hostname: string): Promise<string> => {
 };
 
 /**
- * Sends an email using Nodemailer with explicit IPv4 IP binding
+ * Sends an email using Nodemailer with explicit IPv4 IP binding and sanitized credentials
  * @param to The recipient email address
  * @param subject The subject line
  * @param html The HTML body of the email
  */
 export const sendEmail = async (to: string, subject: string, html: string): Promise<boolean> => {
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS;
+  const user = (process.env.SMTP_USER || '').trim();
+  const rawPass = (process.env.SMTP_PASS || '').trim();
+  // Strip any spaces pasted into SMTP_PASS (e.g. "krxy hefs pwuh emtd" -> "krxyhefspwuhemtd")
+  const cleanPass = rawPass.replace(/\s+/g, '');
+  const pass = cleanPass || rawPass;
 
   if (!user || !pass) {
     console.warn(`[MAILER] SMTP_USER or SMTP_PASS environment variables are missing on server. Skipping email send to ${to}.`);
     return false;
   }
 
-  const rawHost = process.env.SMTP_HOST || 'smtp.gmail.com';
+  const rawHost = (process.env.SMTP_HOST || 'smtp.gmail.com').trim();
   const emailData = {
     from: process.env.EMAIL_FROM || `"${user}" <${user}>`,
     to,
@@ -51,7 +54,7 @@ export const sendEmail = async (to: string, subject: string, html: string): Prom
 
   // Attempt 1: Port 465 SSL via IPv4 IP address
   try {
-    console.log(`[MAILER] Attempt 1: Sending via Port 465 SSL (IP: ${targetIP})...`);
+    console.log(`[MAILER] Attempt 1: Sending via Port 465 SSL (IP: ${targetIP}, User: ${user})...`);
     const transporter = nodemailer.createTransport({
       host: targetIP,
       port: 465,
@@ -97,6 +100,30 @@ export const sendEmail = async (to: string, subject: string, html: string): Prom
     return true;
   } catch (error: any) {
     console.error('[MAILER] Port 587 STARTTLS attempt failed:', error?.message || error);
+  }
+
+  // Attempt 3: Retry with original rawPass if cleanPass differed
+  if (rawPass !== cleanPass) {
+    try {
+      console.log(`[MAILER] Attempt 3: Retrying with raw unstripped password format...`);
+      const transporterRaw = nodemailer.createTransport({
+        host: targetIP,
+        port: 465,
+        secure: true,
+        auth: { user, pass: rawPass },
+        connectionTimeout: 8000,
+        greetingTimeout: 8000,
+        socketTimeout: 8000,
+        localAddress: '0.0.0.0',
+        tls: { rejectUnauthorized: false, servername: rawHost },
+      } as any);
+
+      const info = await transporterRaw.sendMail(emailData);
+      console.log('[MAILER] Email sent successfully via Attempt 3 to %s: %s', to, info.messageId);
+      return true;
+    } catch (error: any) {
+      console.error('[MAILER] Attempt 3 failed:', error?.message || error);
+    }
   }
 
   return false;
