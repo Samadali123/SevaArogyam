@@ -1,4 +1,10 @@
 import nodemailer from 'nodemailer';
+import dns from 'dns';
+
+// Force Node.js DNS resolution to prefer IPv4 globally (prevents IPv6 connection drops on cloud hosts)
+if (dns.setDefaultResultOrder) {
+  dns.setDefaultResultOrder('ipv4first');
+}
 
 /**
  * Creates a clean SMTP transporter using environment configuration or standard Gmail service
@@ -14,7 +20,9 @@ const getTransporter = () => {
     return nodemailer.createTransport({
       service: 'gmail',
       auth: user && pass ? { user, pass } : undefined,
-    });
+      family: 4,
+      connectionTimeout: 15000,
+    } as any);
   }
 
   return nodemailer.createTransport({
@@ -22,10 +30,12 @@ const getTransporter = () => {
     port,
     secure: port === 465,
     auth: user && pass ? { user, pass } : undefined,
+    family: 4,
+    connectionTimeout: 15000,
     tls: {
       rejectUnauthorized: false,
     },
-  });
+  } as any);
 };
 
 /**
@@ -55,7 +65,7 @@ export const sendEmail = async (to: string, subject: string, html: string): Prom
     console.log('[MAILER] Email sent successfully to %s: %s', to, info.messageId);
     return true;
   } catch (error: any) {
-    console.error('[MAILER] Error sending email:', error?.message || error);
+    console.error('[MAILER] Error sending email to %s:', to, error?.message || error);
     return false;
   }
 };
