@@ -1,45 +1,30 @@
 import nodemailer from 'nodemailer';
 import dns from 'dns';
 
-// Force Node.js DNS resolution to prefer IPv4 globally (prevents IPv6 connection drops on cloud hosts)
+// Force Node.js DNS resolution order to prefer IPv4 globally
 if (dns.setDefaultResultOrder) {
   dns.setDefaultResultOrder('ipv4first');
 }
 
 /**
- * Creates a clean SMTP transporter using environment configuration or standard Gmail service
+ * Resolves a hostname (e.g. smtp.gmail.com) to an explicit IPv4 IP string
+ * to prevent Node.js net.connect from attempting IPv6 socket bindings (:::0)
  */
-const getTransporter = () => {
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS;
-  const host = process.env.SMTP_HOST || 'smtp.gmail.com';
-  const port = Number(process.env.SMTP_PORT) || 587;
-
-  // Use Nodemailer built-in Gmail service when host is Gmail
-  if (host.includes('gmail')) {
-    return nodemailer.createTransport({
-      service: 'gmail',
-      auth: user && pass ? { user, pass } : undefined,
-      family: 4,
-      connectionTimeout: 15000,
-    } as any);
+const getIPv4Address = async (hostname: string): Promise<string> => {
+  try {
+    const addresses = await dns.promises.resolve4(hostname);
+    if (addresses && addresses.length > 0) {
+      console.log(`[MAILER] Resolved ${hostname} to explicit IPv4 IP: ${addresses[0]}`);
+      return addresses[0];
+    }
+  } catch (e) {
+    console.warn(`[MAILER] DNS resolve4 failed for ${hostname}, using raw hostname.`, e);
   }
-
-  return nodemailer.createTransport({
-    host,
-    port,
-    secure: port === 465,
-    auth: user && pass ? { user, pass } : undefined,
-    family: 4,
-    connectionTimeout: 15000,
-    tls: {
-      rejectUnauthorized: false,
-    },
-  } as any);
+  return hostname;
 };
 
 /**
- * Sends an email directly at once using Nodemailer SMTP
+ * Sends an email using Nodemailer with explicit IPv4 IP binding
  * @param to The recipient email address
  * @param subject The subject line
  * @param html The HTML body of the email
@@ -53,19 +38,66 @@ export const sendEmail = async (to: string, subject: string, html: string): Prom
     return false;
   }
 
+  const rawHost = process.env.SMTP_HOST || 'smtp.gmail.com';
+  const emailData = {
+    from: process.env.EMAIL_FROM || `"${user}" <${user}>`,
+    to,
+    subject,
+    html,
+  };
+
+  // Resolve explicit IPv4 IP address (e.g. '142.250.141.108')
+  const targetIP = await getIPv4Address(rawHost);
+
+  // Attempt 1: Port 465 SSL via IPv4 IP address
   try {
-    const transporter = getTransporter();
-    const info = await transporter.sendMail({
-      from: process.env.EMAIL_FROM || `"${user}" <${user}>`,
-      to,
-      subject,
-      html,
-    });
-    
-    console.log('[MAILER] Email sent successfully to %s: %s', to, info.messageId);
+    console.log(`[MAILER] Attempt 1: Sending via Port 465 SSL (IP: ${targetIP})...`);
+    const transporter = nodemailer.createTransport({
+      host: targetIP,
+      port: 465,
+      secure: true,
+      auth: { user, pass },
+      connectionTimeout: 8000,
+      greetingTimeout: 8000,
+      socketTimeout: 8000,
+      localAddress: '0.0.0.0', // Forces IPv4 local socket binding
+      tls: {
+        rejectUnauthorized: false,
+        servername: rawHost, // SNI servername for TLS handshake
+      },
+    } as any);
+
+    const info = await transporter.sendMail(emailData);
+    console.log('[MAILER] Email sent successfully via Port 465 SSL to %s: %s', to, info.messageId);
     return true;
   } catch (error: any) {
-    console.error('[MAILER] Error sending email to %s:', to, error?.message || error);
-    return false;
+    console.warn('[MAILER] Port 465 SSL attempt failed:', error?.message || error);
   }
+
+  // Attempt 2: Port 587 STARTTLS via IPv4 IP address
+  try {
+    console.log(`[MAILER] Attempt 2: Sending via Port 587 STARTTLS (IP: ${targetIP})...`);
+    const transporter587 = nodemailer.createTransport({
+      host: targetIP,
+      port: 587,
+      secure: false, // STARTTLS
+      auth: { user, pass },
+      connectionTimeout: 8000,
+      greetingTimeout: 8000,
+      socketTimeout: 8000,
+      localAddress: '0.0.0.0', // Forces IPv4 local socket binding
+      tls: {
+        rejectUnauthorized: false,
+        servername: rawHost, // SNI servername for TLS handshake
+      },
+    } as any);
+
+    const info = await transporter587.sendMail(emailData);
+    console.log('[MAILER] Email sent successfully via Port 587 STARTTLS to %s: %s', to, info.messageId);
+    return true;
+  } catch (error: any) {
+    console.error('[MAILER] Port 587 STARTTLS attempt failed:', error?.message || error);
+  }
+
+  return false;
 };
