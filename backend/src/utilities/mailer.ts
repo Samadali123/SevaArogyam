@@ -1,25 +1,34 @@
 import nodemailer from 'nodemailer';
-import { env } from '@config/environment';
+import dns from 'dns';
+
+// Force Node.js DNS resolution order to prefer IPv4 globally (prevents ENETUNREACH IPv6 errors on cloud platforms like Render)
+if (dns.setDefaultResultOrder) {
+  dns.setDefaultResultOrder('ipv4first');
+}
 
 /**
- * Creates a reusable transporter object with short connection timeouts
+ * Creates a reusable transporter object with forced IPv4 resolution for cloud hosting (Render)
  */
 const getTransporter = () => {
   const host = process.env.SMTP_HOST || 'smtp.gmail.com';
-  // Default to port 465 (SSL) for Gmail on cloud hosting like Render to avoid port 587 block
-  const port = Number(process.env.SMTP_PORT) || (host.includes('gmail') ? 465 : 587);
+  const rawPort = Number(process.env.SMTP_PORT);
+  const port = rawPort || (host.includes('gmail') ? 465 : 587);
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
 
   const transporterOptions: any = {
     host,
     port,
-    secure: port === 465, // true for port 465, false for 587
+    secure: port === 465, // true for port 465 (SSL), false for 587 (STARTTLS)
     auth: user && pass ? { user, pass } : undefined,
-    connectionTimeout: 4000, // 4 seconds timeout
-    greetingTimeout: 4000,
-    socketTimeout: 5000,
-    family: 4, // Force IPv4 for cloud platforms
+    connectionTimeout: 10000, // 10s connection timeout
+    greetingTimeout: 10000,
+    socketTimeout: 10000,
+    family: 4, // Force IPv4
+    lookup: (hostname: string, _options: any, callback: any) => {
+      // Explicitly force IPv4 lookup to prevent ENETUNREACH IPv6 errors on Render
+      dns.lookup(hostname, { family: 4, all: false }, callback);
+    },
     tls: {
       rejectUnauthorized: false,
     },
@@ -29,7 +38,7 @@ const getTransporter = () => {
 };
 
 /**
- * Sends an email using Nodemailer
+ * Sends an email using Nodemailer with automatic port 587 fallback if primary port encounters transport issues
  * @param to The recipient email address
  * @param subject The subject line
  * @param html The HTML body of the email
@@ -52,13 +61,44 @@ export const sendEmail = async (to: string, subject: string, html: string): Prom
       html,
     });
     
-    if (env.isDevelopment) {
-      console.log('[MAILER] Message sent: %s', info.messageId);
-    }
+    console.log('[MAILER] Message sent successfully to %s: %s', to, info.messageId);
     return true;
-  } catch (error) {
-    console.error('[MAILER] Error sending email:', error);
-    return false;
+  } catch (error: any) {
+    console.error('[MAILER] Error sending email with primary transporter:', error?.message || error);
+
+    // Fallback: Attempt alternative transport on port 587 (STARTTLS)
+    try {
+      console.log('[MAILER] Attempting fallback transport (Port 587 STARTTLS with IPv4)...');
+      const fallbackOptions: any = {
+        host: process.env.SMTP_HOST || 'smtp.gmail.com',
+        port: 587,
+        secure: false, // STARTTLS
+        auth: { user, pass },
+        connectionTimeout: 10000,
+        greetingTimeout: 10000,
+        socketTimeout: 10000,
+        family: 4,
+        lookup: (hostname: string, _options: any, callback: any) => {
+          dns.lookup(hostname, { family: 4, all: false }, callback);
+        },
+        tls: {
+          rejectUnauthorized: false,
+        },
+      };
+      const fallbackTransporter = nodemailer.createTransport(fallbackOptions);
+
+      const fallbackInfo = await fallbackTransporter.sendMail({
+        from: process.env.EMAIL_FROM || `"${user}" <${user}>`,
+        to,
+        subject,
+        html,
+      });
+
+      console.log('[MAILER] Fallback email sent successfully to %s: %s', to, fallbackInfo.messageId);
+      return true;
+    } catch (fallbackError: any) {
+      console.error('[MAILER] Fallback transport also failed:', fallbackError?.message || fallbackError);
+      return false;
+    }
   }
 };
-
