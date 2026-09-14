@@ -7,28 +7,66 @@ if (dns.setDefaultResultOrder) {
 }
 
 /**
- * Creates a reusable transporter object with forced IPv4 resolution for cloud hosting (Render)
+ * Resolves a hostname (e.g. smtp.gmail.com) to an explicit IPv4 IP string
+ * to prevent Node.js net.connect from creating IPv6 socket bindings (:::0)
  */
-const getTransporter = () => {
-  const host = process.env.SMTP_HOST || 'smtp.gmail.com';
-  const rawPort = Number(process.env.SMTP_PORT);
-  const port = rawPort || (host.includes('gmail') ? 465 : 587);
+const resolveIPv4Address = async (hostname: string): Promise<string> => {
+  try {
+    const addresses = await dns.promises.resolve4(hostname);
+    if (addresses && addresses.length > 0) {
+      console.log(`[MAILER] Resolved ${hostname} to IPv4 address: ${addresses[0]}`);
+      return addresses[0];
+    }
+  } catch (e) {
+    console.warn(`[MAILER] DNS resolve4 failed for ${hostname}, using raw hostname.`, e);
+  }
+  return hostname;
+};
+
+/**
+ * Creates transporter using explicit IPv4 IP address and localAddress binding '0.0.0.0'
+ */
+const createIPv4Transporter = async (port: number, secure: boolean) => {
+  const rawHost = process.env.SMTP_HOST || 'smtp.gmail.com';
+  const user = process.env.SMTP_USER;
+  const pass = process.env.SMTP_PASS;
+
+  const ipHost = await resolveIPv4Address(rawHost);
+
+  const transporterOptions: any = {
+    host: ipHost,
+    port,
+    secure,
+    auth: user && pass ? { user, pass } : undefined,
+    connectionTimeout: 15000,
+    greetingTimeout: 15000,
+    socketTimeout: 15000,
+    family: 4,
+    localAddress: '0.0.0.0', // Forces IPv4 socket binding (eliminates Local :::0 ENETUNREACH)
+    tls: {
+      rejectUnauthorized: false,
+      servername: rawHost, // SNI servername for TLS certificate verification
+    },
+  };
+
+  return nodemailer.createTransport(transporterOptions);
+};
+
+/**
+ * Creates transporter using Nodemailer built-in 'gmail' service helper
+ */
+const createGmailServiceTransporter = () => {
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
 
   const transporterOptions: any = {
-    host,
-    port,
-    secure: port === 465, // true for port 465 (SSL), false for 587 (STARTTLS)
+    service: 'gmail',
     auth: user && pass ? { user, pass } : undefined,
-    connectionTimeout: 10000, // 10s connection timeout
-    greetingTimeout: 10000,
-    socketTimeout: 10000,
-    family: 4, // Force IPv4
-    lookup: (hostname: string, _options: any, callback: any) => {
-      // Explicitly force IPv4 lookup to prevent ENETUNREACH IPv6 errors on Render
-      dns.lookup(hostname, { family: 4, all: false }, callback);
-    },
+    connectionTimeout: 15000,
+    greetingTimeout: 15000,
+    socketTimeout: 15000,
+    family: 4,
+    localAddress: '0.0.0.0',
     tls: {
       rejectUnauthorized: false,
     },
@@ -38,7 +76,7 @@ const getTransporter = () => {
 };
 
 /**
- * Sends an email using Nodemailer with automatic port 587 fallback if primary port encounters transport issues
+ * Sends an email using Nodemailer with multi-strategy IPv4 connection fallbacks
  * @param to The recipient email address
  * @param subject The subject line
  * @param html The HTML body of the email
@@ -52,53 +90,45 @@ export const sendEmail = async (to: string, subject: string, html: string): Prom
     return false;
   }
 
+  const emailOptions = {
+    from: process.env.EMAIL_FROM || `"${user}" <${user}>`,
+    to,
+    subject,
+    html,
+  };
+
+  // Strategy 1: Direct IPv4 connection on Port 465 (SSL) with localAddress 0.0.0.0
   try {
-    const transporter = getTransporter();
-    const info = await transporter.sendMail({
-      from: process.env.EMAIL_FROM || `"${user}" <${user}>`,
-      to,
-      subject,
-      html,
-    });
-    
-    console.log('[MAILER] Message sent successfully to %s: %s', to, info.messageId);
+    console.log(`[MAILER] Attempting Strategy 1 (IPv4 Direct IP, Port 465 SSL) for ${to}...`);
+    const transporter = await createIPv4Transporter(465, true);
+    const info = await transporter.sendMail(emailOptions);
+    console.log('[MAILER] Strategy 1 succeeded. Message sent to %s: %s', to, info.messageId);
     return true;
   } catch (error: any) {
-    console.error('[MAILER] Error sending email with primary transporter:', error?.message || error);
-
-    // Fallback: Attempt alternative transport on port 587 (STARTTLS)
-    try {
-      console.log('[MAILER] Attempting fallback transport (Port 587 STARTTLS with IPv4)...');
-      const fallbackOptions: any = {
-        host: process.env.SMTP_HOST || 'smtp.gmail.com',
-        port: 587,
-        secure: false, // STARTTLS
-        auth: { user, pass },
-        connectionTimeout: 10000,
-        greetingTimeout: 10000,
-        socketTimeout: 10000,
-        family: 4,
-        lookup: (hostname: string, _options: any, callback: any) => {
-          dns.lookup(hostname, { family: 4, all: false }, callback);
-        },
-        tls: {
-          rejectUnauthorized: false,
-        },
-      };
-      const fallbackTransporter = nodemailer.createTransport(fallbackOptions);
-
-      const fallbackInfo = await fallbackTransporter.sendMail({
-        from: process.env.EMAIL_FROM || `"${user}" <${user}>`,
-        to,
-        subject,
-        html,
-      });
-
-      console.log('[MAILER] Fallback email sent successfully to %s: %s', to, fallbackInfo.messageId);
-      return true;
-    } catch (fallbackError: any) {
-      console.error('[MAILER] Fallback transport also failed:', fallbackError?.message || fallbackError);
-      return false;
-    }
+    console.warn('[MAILER] Strategy 1 failed:', error?.message || error);
   }
+
+  // Strategy 2: Nodemailer Built-in Gmail Service Transport
+  try {
+    console.log(`[MAILER] Attempting Strategy 2 (Gmail Service Helper) for ${to}...`);
+    const gmailTransporter = createGmailServiceTransporter();
+    const info = await gmailTransporter.sendMail(emailOptions);
+    console.log('[MAILER] Strategy 2 succeeded. Message sent to %s: %s', to, info.messageId);
+    return true;
+  } catch (error: any) {
+    console.warn('[MAILER] Strategy 2 failed:', error?.message || error);
+  }
+
+  // Strategy 3: Direct IPv4 connection on Port 587 (STARTTLS)
+  try {
+    console.log(`[MAILER] Attempting Strategy 3 (IPv4 Direct IP, Port 587 STARTTLS) for ${to}...`);
+    const fallbackTransporter = await createIPv4Transporter(587, false);
+    const info = await fallbackTransporter.sendMail(emailOptions);
+    console.log('[MAILER] Strategy 3 succeeded. Message sent to %s: %s', to, info.messageId);
+    return true;
+  } catch (error: any) {
+    console.error('[MAILER] Strategy 3 failed:', error?.message || error);
+  }
+
+  return false;
 };
