@@ -10,9 +10,17 @@ import {
   PhoneCall
 } from 'lucide-react';
 import { useApp, DEFAULT_DOCTOR_AVATAR } from '../context/AppContext';
+import { useSEO } from '../hooks/useSEO';
 import { FACILITIES_DATA, DEFAULT_BRANCH_IMAGES } from '../data/mockData';
 
 export const LocationsFacilities: React.FC = () => {
+  useSEO({
+    title: 'Clinic Locations & Facilities | JansevaArogyam - Sarangpur, Shujalpur, Rajgarh',
+    description: 'Explore JansevaArogyam hospital clinics in Sarangpur, Shujalpur & Rajgarh with NABH accredited OPD, modular OTs, 24x7 ICU emergency, and lab facilities.',
+    keywords: 'JansevaArogyam branches, Sarangpur hospital, Shujalpur clinic, Rajgarh hospital, 24x7 ICU emergency, lab test center',
+    canonical: 'https://jansevaarogyam.com/locations-facilities'
+  });
+
   const { clinics, doctors, openBookingModal, activeBranchId, setActiveBranchId, language } = useApp();
   
   const selectedBranchId = activeBranchId || 'sarangpur';

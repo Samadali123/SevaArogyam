@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Copy, Gift, Share2, Users, WalletCards, CheckCircle2, ShieldCheck } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { useSEO } from '../hooks/useSEO';
 import { api, getApiErrorMessage } from '../services/api';
 
 interface ReferralDashboard {
@@ -11,6 +12,13 @@ interface ReferralDashboard {
 }
 
 export const Referrals: React.FC = () => {
+  useSEO({
+    title: 'Join Healthcare Network & Referrals | JansevaArogyam',
+    description: 'Partner with JansevaArogyam healthcare network, invite patients and doctors, and earn rewards and care credits across Sarangpur, Shujalpur, and Rajgarh.',
+    keywords: 'JansevaArogyam referral, partner doctor network MP, join healthcare network, medical rewards',
+    canonical: 'https://jansevaarogyam.com/join-network'
+  });
+
   const { language, activeRole, currentUser } = useApp();
   const [dashboard, setDashboard] = useState<ReferralDashboard | null>(null);
   const [copied, setCopied] = useState(false);

@@ -21,6 +21,7 @@ import {
   ShieldCheck
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { useSEO } from '../hooks/useSEO';
 import { DEFAULT_BRANCH_IMAGES } from '../data/mockData';
 import drAnkurImg from '../assets/images/Dr_Ankur.jpeg';
 
@@ -29,6 +30,13 @@ interface PublicPortalProps {
 }
 
 export const PublicPortal: React.FC<PublicPortalProps> = ({ onNavigate }) => {
+  useSEO({
+    title: 'JansevaArogyam - Specialist OPD Hospital & Healthcare Network',
+    description: 'JansevaArogyam (जनसेवा आरोग्यम) provides specialist doctor OPD appointments, 24x7 ICU emergency, lab tests, pharmacy & regional healthcare across Sarangpur, Shujalpur, and Rajgarh, MP.',
+    keywords: 'jansevaarogyam, Janseva Arogyam, Janseva, Arogyam, Janseva Arogyam Clinic, Janseva Arogyam Hospital, जनसेवा आरोग्यम, Sarangpur hospital, Shujalpur clinic, Rajgarh doctor booking, OPD appointment online',
+    canonical: 'https://jansevaarogyam.com/'
+  });
+
   const { 
     clinics, 
     doctors, 

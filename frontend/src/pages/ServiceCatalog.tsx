@@ -50,11 +50,19 @@ const catalogMetadata = {
     descEn: 'Quality-controlled pathology, full body health packages, and automated digital PDF reports sent directly via WhatsApp.',
     descHi: 'क्वालिटी-कंट्रोल्ड पैथोलॉजी और डिजिटल रिपोर्ट के साथ प्रिवेंटिव स्क्रीनिंग।',
     actionEn: 'View Laboratory Tests',
-    actionHi: 'लैब टेस्ट देखें' 
   }
 } as const;
 
+import { useSEO } from '../hooks/useSEO';
+
 export const ServiceCatalog: React.FC<{ kind: Kind }> = ({ kind }) => {
+  useSEO({
+    title: `${kind.charAt(0).toUpperCase() + kind.slice(1)} Care Services | JansevaArogyam Diagnostics & Pharmacy`,
+    description: `Book online ${kind} services, diagnostic lab tests, pathology packages, and verified medicines with JansevaArogyam in Sarangpur, Shujalpur, and Rajgarh.`,
+    keywords: `JansevaArogyam ${kind}, lab test booking Sarangpur, diagnostic center Shujalpur, pharmacy Rajgarh, blood test online MP`,
+    canonical: `https://jansevaarogyam.com/services?kind=${kind}`
+  });
+
   const { language, openAuthModal, careServices, activeRole, currentUser } = useApp();
   const [selected, setSelected] = useState<CareService | null>(null);
   const [searchQuery, setSearchQuery] = useState('');

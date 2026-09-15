@@ -7,8 +7,16 @@ import {
   PhoneCall
 } from 'lucide-react';
 import { useApp, DEFAULT_DOCTOR_AVATAR } from '../context/AppContext';
+import { useSEO } from '../hooks/useSEO';
 
 export const Specialties: React.FC = () => {
+  useSEO({
+    title: 'Medical Specialties & Specialist OPD Doctors | JansevaArogyam',
+    description: 'Find top specialist doctors in Cardiology, Pediatrics, Gynecology, Orthopedics, General Medicine & ENT at JansevaArogyam clinics in Sarangpur, Shujalpur & Rajgarh.',
+    keywords: 'JansevaArogyam doctors, specialist doctor Sarangpur, cardiologist Shujalpur, gynecologist Rajgarh, pediatrician OPD, orthopedic doctor MP',
+    canonical: 'https://jansevaarogyam.com/specialties'
+  });
+
   const { doctors, specialties, openBookingModal, openDoctorProfileModal, language, selectedSpecialtyFilter } = useApp();
   
   const [selectedCategory, setSelectedCategory] = useState(selectedSpecialtyFilter || 'all');

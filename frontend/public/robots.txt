@@ -1,0 +1,13 @@
+# User-agent directives for search engine crawlers
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /doctor-dashboard
+Disallow: /patient-dashboard
+Disallow: /api/
+
+# Host
+Host: https://jansevaarogyam.com
+
+# XML Sitemap
+Sitemap: https://jansevaarogyam.com/sitemap.xml

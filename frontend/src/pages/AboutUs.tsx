@@ -14,6 +14,7 @@ import {
   Crosshair
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
+import { useSEO } from '../hooks/useSEO';
 import drAnkurImg from '../assets/images/Dr_Ankur.jpeg';
 
 interface AboutUsProps {
@@ -21,6 +22,13 @@ interface AboutUsProps {
 }
 
 export const AboutUs: React.FC<AboutUsProps> = () => {
+  useSEO({
+    title: 'About Us | JansevaArogyam - Vision, Mission & Specialist Network',
+    description: 'Learn about JansevaArogyam (जनसेवा आरोग्यम) - Madhya Pradesh’s premier regional healthcare network connecting specialist doctor OPDs, 24x7 emergency & modern hospitals.',
+    keywords: 'About JansevaArogyam, Janseva Arogyam mission, Janseva Arogyam founders, healthcare network MP, NABH accredited OPD Sarangpur Shujalpur Rajgarh',
+    canonical: 'https://jansevaarogyam.com/about'
+  });
+
   const { openBookingModal, language } = useApp();
   const hi = language === 'hi';
 
