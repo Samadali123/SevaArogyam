@@ -18,17 +18,6 @@ export const getBranches = asyncHandler(async (_req: Request, res: Response) => 
   res.status(HTTP_STATUS.OK).json({ status: 'success', data: { branches } });
 });
 
-/**
- * Fetch all available Specialties
- */
-export const getSpecialties = asyncHandler(async (_req: Request, res: Response) => {
-  const specialties = await prisma.specialty.findMany({
-    where: { isActive: true },
-    orderBy: { nameEn: 'asc' }
-  });
-
-  res.status(HTTP_STATUS.OK).json({ status: 'success', data: { specialties } });
-});
 
 /**
  * Fetch doctors available at a specific branch or globally
@@ -50,11 +39,16 @@ export const getDoctors = asyncHandler(async (req: Request, res: Response) => {
     select: {
       id: true,
       name: true,
+      email: true,
+      phone: true,
       profilePhoto: true,
       specialization: true,
       qualifications: true,
       regNumber: true,
       clinicalBio: true,
+      opdScheduleSummary: true,
+      languagesSpoken: true,
+      clinicsCovered: true,
       consultationFee: true,
       videoFee: true,
       experienceYears: true,

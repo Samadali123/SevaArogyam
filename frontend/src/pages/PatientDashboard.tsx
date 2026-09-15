@@ -305,7 +305,7 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ onNavigate }
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
           <div>
             <h3 className="font-sora font-extrabold text-xl text-slate-900">{language === 'en' ? 'Digital Prescriptions & EMR Vault' : 'डिजिटल नुस्खे और EMR'}</h3>
-            <p className="text-xs text-slate-500 font-medium mt-0.5">{language === 'en' ? 'Download verified PDF prescriptions issued by SevaArogyam doctors.' : 'डॉक्टरों द्वारा जारी सत्यापित पीडीएफ पर्चियां डाउनलोड करें।'}</p>
+            <p className="text-xs text-slate-500 font-medium mt-0.5">{language === 'en' ? 'Download verified PDF prescriptions issued by JansevaArogyam doctors.' : 'डॉक्टरों द्वारा जारी सत्यापित पीडीएफ पर्चियां डाउनलोड करें।'}</p>
           </div>
           <span className="bg-purple-50 text-purple-700 border border-purple-200 text-xs font-sora font-bold px-3 py-1.5 rounded-xl self-start sm:self-auto">
             {myPrescriptions.length} {language === 'en' ? 'Prescriptions' : 'पर्चियां'}
@@ -345,12 +345,12 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ onNavigate }
         )}
       </div>
 
-      {/* SevaArogyam Referral Wallet */}
+      {/* JansevaArogyam Referral Wallet */}
       <section className="overflow-hidden rounded-3xl border border-slate-200/90 bg-white shadow-xs">
         <div className="grid lg:grid-cols-[1.05fr_.95fr]">
           <div className="bg-linear-to-br from-[#0B2545] via-[#0F4C81] to-[#0A2540] p-6 text-white sm:p-8 space-y-4">
             <span className="text-xs font-sora font-extrabold uppercase tracking-widest text-emerald-300 block">
-              SevaArogyam Rewards
+              JansevaArogyam Rewards
             </span>
             <h3 className="text-2xl font-sora font-extrabold text-white">{language === 'en' ? 'Share care. Earn rewards.' : 'देखभाल साझा करें। रिवॉर्ड पाएं।'}</h3>
             <p className="max-w-md text-xs sm:text-sm leading-relaxed text-sky-100/90 font-medium">

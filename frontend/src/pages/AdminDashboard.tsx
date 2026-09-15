@@ -5,7 +5,6 @@ import {
   Search, 
   Plus, 
   UserPlus, 
-  Edit3, 
   Trash2, 
   DollarSign, 
   Stethoscope, 
@@ -25,6 +24,7 @@ import { useEffect } from 'react';
 import { api } from '../services/api';
 import type { DoctorUser, Clinic, CareService, DeskStaffUser } from '../types';
 import { ConfirmDialog } from '../components/ConfirmDialog';
+import { CustomSelect } from '../components/ui/CustomSelect';
 
 export const AdminDashboard: React.FC = () => {
   const { 
@@ -170,17 +170,23 @@ export const AdminDashboard: React.FC = () => {
   );
 
   const formatAssignedBranches = (clinicsCovered?: string[], clinicsList: Clinic[] = []): string => {
-    if (!clinicsCovered || clinicsCovered.length === 0) return 'No Assigned Branch';
-    const names = clinicsCovered.map(cId => {
-      if (!cId) return '';
-      const found = clinicsList.find(c => c.id.toLowerCase() === String(cId).toLowerCase() || c.name.toLowerCase() === String(cId).toLowerCase());
-      if (found) return found.name;
-      if (String(cId).toLowerCase() === 'sarangpur') return 'Sarangpur Branch';
-      if (String(cId).toLowerCase() === 'shujalpur') return 'Shujalpur Branch';
-      if (String(cId).toLowerCase() === 'rajgarh') return 'Rajgarh Branch';
-      const clean = String(cId).replace(/\s*Branch\s*/i, '').trim();
-      return clean ? (clean.charAt(0).toUpperCase() + clean.slice(1) + ' Branch') : '';
-    }).filter(Boolean);
+    if (!clinicsCovered || !Array.isArray(clinicsCovered) || clinicsCovered.length === 0) return 'No Assigned Branch';
+    const cleanIds = Array.from(new Set(
+      clinicsCovered.map(item => String(item || '').toLowerCase().replace(/\s*branch\s*/i, '').trim()).filter(Boolean)
+    ));
+    const names = cleanIds.map(cId => {
+      const found = clinicsList.find(c => {
+        const cIdClean = c.id.toLowerCase().replace(/\s*branch\s*/i, '').trim();
+        const cNameClean = c.name.toLowerCase().replace(/\s*branch\s*/i, '').trim();
+        const cCityClean = (c.city || '').toLowerCase().replace(/\s*branch\s*/i, '').trim();
+        return cIdClean === cId || cNameClean === cId || (cCityClean && cCityClean === cId);
+      });
+      if (found) return found.name.includes('Branch') ? found.name : `${found.name} Branch`;
+      if (cId === 'sarangpur') return 'Sarangpur Branch';
+      if (cId === 'shujalpur') return 'Shujalpur Branch';
+      if (cId === 'rajgarh') return 'Rajgarh Branch';
+      return cId.charAt(0).toUpperCase() + cId.slice(1) + ' Branch';
+    });
     const uniqueNames = Array.from(new Set(names));
     return uniqueNames.length > 0 ? uniqueNames.join(', ') : 'No Assigned Branch';
   };
@@ -214,19 +220,19 @@ export const AdminDashboard: React.FC = () => {
     } else {
       setEditingDoctor(null);
       setDoctorFormData({
-        name: 'Dr. ',
+        name: '',
         email: '',
         phone: '',
-        specialization: 'General Physician & Diabetologist',
-        qualification: 'MBBS, MD',
-        experienceYears: 8,
-        regNumber: `MPMC-${Math.floor(10000 + Math.random() * 90000)}`,
-        consultationFeeClinic: 300,
-        consultationFeeOnline: 400,
-        bio: 'Board-certified medical specialist dedicated to compassionate patient care.',
-        clinicsCovered: ['sarangpur', 'shujalpur'],
+        specialization: '',
+        qualification: '',
+        experienceYears: '' as any,
+        regNumber: '',
+        consultationFeeClinic: '' as any,
+        consultationFeeOnline: '' as any,
+        bio: '',
+        clinicsCovered: [],
         languagesSpoken: ['Hindi', 'English'],
-        opdScheduleSummary: 'Mon-Sat: 09:00 AM - 02:00 PM',
+        opdScheduleSummary: '',
         avatarUrl: DEFAULT_DOCTOR_AVATAR
       });
       setDoctorPhotoFile(null);
@@ -297,7 +303,7 @@ export const AdminDashboard: React.FC = () => {
         name: '',
         email: '',
         phone: '',
-        branchId: 'sarangpur'
+        branchId: ''
       });
     }
     setIsStaffModalOpen(true);
@@ -356,14 +362,14 @@ export const AdminDashboard: React.FC = () => {
     } else {
       setEditingBranch(null);
       setBranchFormData({
-        name: 'New Branch',
-        fullName: 'SEVASADAN Multi-Specialty Clinic',
-        city: 'Malwa Region',
-        address: 'Main Hospital Road',
-        phone: '+91 7382-723000',
-        emergencyPhone: '1800-7382-723',
-        operatingHours: 'Mon-Sat: 08:00 AM - 08:00 PM',
-        activeDoctorCount: 4,
+        name: '',
+        fullName: '',
+        city: '',
+        address: '',
+        phone: '',
+        emergencyPhone: '',
+        operatingHours: '',
+        activeDoctorCount: 0,
         slotDurationMinutes: 15
       });
     }
@@ -422,9 +428,9 @@ export const AdminDashboard: React.FC = () => {
       setCareServiceFormData({
         name: '',
         description: '',
-        category: 'PHARMACY',
-        price: 0,
-        doctorId: doctors.length > 0 ? doctors[0].id : '',
+        category: '' as any,
+        price: '' as any,
+        doctorId: '',
         isActive: true
       });
     }
@@ -746,7 +752,14 @@ export const AdminDashboard: React.FC = () => {
                       </p>
                       <p className="flex justify-between text-slate-600">
                         <span>{language === 'en' ? 'Doctors Assigned:' : 'आवंटित डॉक्टर:'}</span>
-                        <strong className="text-slate-900 font-bold">{doctors.filter(d => d.clinicsCovered.includes(c.id)).length}</strong>
+                        <strong className="text-slate-900 font-bold">{doctors.filter(d => {
+                          if (!d.clinicsCovered || !Array.isArray(d.clinicsCovered)) return false;
+                          const cKey = (c.city || c.name || c.id).toLowerCase().replace(/\s*branch\s*/i, '').trim();
+                          return d.clinicsCovered.some(item => {
+                            const clean = String(item).toLowerCase().replace(/\s*branch\s*/i, '').trim();
+                            return clean === cKey || clean === c.id.toLowerCase() || clean === c.name.toLowerCase() || (c.city && clean === c.city.toLowerCase());
+                          });
+                        }).length}</strong>
                       </p>
                       <p className="flex justify-between text-slate-600 pt-2 border-t border-slate-200/80">
                         <span>{language === 'en' ? 'OPD Slot Interval:' : 'ओपीडी स्लॉट समय:'}</span>
@@ -779,45 +792,41 @@ export const AdminDashboard: React.FC = () => {
             </button>
           </div>
 
-          <div className="grid grid-cols-1 gap-5">
+          <div className="grid grid-cols-1 gap-6">
             {clinics.map(c => (
-              <div key={c.id} className="bg-[#FAFCFF] p-6 rounded-2xl border border-slate-200/90 shadow-2xs hover:shadow-md transition-all duration-300 relative overflow-hidden group space-y-4">
-                {/* Accent Side Strip */}
-                <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#0F4C81] group-hover:bg-emerald-500 transition-colors" />
-
-                {/* Top Header Row */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/60 pb-4">
+              <div key={c.id} className="bg-white rounded-3xl border border-slate-200/80 shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden group">
+                {/* Top Deep Navy Hospital Header Banner */}
+                <div className="bg-gradient-to-r from-[#0B2545] via-[#0F4C81] to-[#0A2540] text-white p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="flex items-center gap-3.5">
-                    <div className="w-11 h-11 rounded-2xl bg-sky-50 text-[#0F4C81] border border-sky-100 flex items-center justify-center font-bold shrink-0 shadow-2xs">
-                      <Building2 className="w-5 h-5 text-[#0F4C81]" />
+                    <div className="w-12 h-12 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center text-emerald-400 shrink-0 shadow-sm backdrop-blur-md">
+                      <Building2 className="w-6 h-6 text-emerald-400" />
                     </div>
                     <div>
-                      <div className="flex flex-wrap items-center gap-2.5">
-                        <h4 className="font-heading font-extrabold text-slate-900 text-lg">{c.fullName}</h4>
-                        <span className="text-xs font-heading font-extrabold bg-sky-50 text-[#0F4C81] px-2.5 py-0.5 rounded-md border border-sky-200">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h4 className="font-heading font-extrabold text-white text-lg sm:text-xl tracking-tight">{c.fullName || c.name}</h4>
+                        <span className="text-[11px] font-heading font-extrabold bg-emerald-500/20 text-emerald-300 px-2.5 py-0.5 rounded-full border border-emerald-500/30">
                           {c.name}
                         </span>
-                        <span className="inline-flex items-center gap-1.5 text-[11px] font-heading font-extrabold bg-emerald-50 text-emerald-700 px-2.5 py-0.5 rounded-full border border-emerald-200">
-                          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span className="inline-flex items-center gap-1.5 text-[10px] font-heading font-extrabold bg-emerald-400/20 text-emerald-300 px-2.5 py-0.5 rounded-full border border-emerald-400/30">
+                          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                           <span>OPERATIONAL</span>
                         </span>
                       </div>
-                      <p className="text-xs font-sans text-slate-500 font-medium mt-0.5">Primary multi-specialty OPD clinic branch in {c.city}</p>
+                      <p className="text-xs font-sans text-sky-100/80 font-medium mt-0.5">Primary Multi-Specialty Hospital & OPD Clinic Branch in {c.city}, MP</p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-2.5 shrink-0 self-end sm:self-auto">
                     <button
                       onClick={() => openBranchModal(c)}
-                      className="bg-white hover:bg-slate-100 text-[#0F4C81] border border-[#0F4C81]/30 font-heading font-extrabold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 transition cursor-pointer shadow-2xs"
+                      className="bg-white/15 hover:bg-white text-white hover:text-[#0B2545] border border-white/30 font-heading font-extrabold px-4 py-2 rounded-xl text-xs flex items-center transition cursor-pointer shadow-sm"
                     >
-                      <Edit3 className="w-4 h-4" />
                       <span>Edit Branch</span>
                     </button>
                     {clinics.length > 1 && (
                       <button
                         onClick={() => setPendingDelete({ type: 'branch', id: c.id, label: c.name })}
-                        className="bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 font-heading font-bold px-3 py-2 rounded-xl text-xs transition cursor-pointer"
+                        className="bg-rose-500/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-400/30 font-heading font-bold px-3 py-2 rounded-xl text-xs transition cursor-pointer"
                         title="Delete Branch"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -827,39 +836,47 @@ export const AdminDashboard: React.FC = () => {
                 </div>
 
                 {/* Structured Metadata Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                  <div className="bg-white p-3.5 rounded-xl border border-slate-200/80 space-y-1 shadow-2xs">
-                    <div className="flex items-center gap-1.5 text-slate-500">
-                      <MapPin className="w-3.5 h-3.5 text-[#0F4C81]" />
-                      <span className="text-[10px] font-heading font-extrabold uppercase tracking-wider">{language === 'en' ? 'Clinic Address' : 'क्लिनिक का पता'}</span>
+                <div className="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 bg-slate-50/50">
+                  <div className="bg-white p-4 rounded-2xl border border-slate-200/80 space-y-1.5 shadow-2xs hover:border-sky-300 transition">
+                    <div className="flex items-center gap-2 text-slate-500">
+                      <div className="w-7 h-7 rounded-lg bg-sky-50 text-[#0F4C81] flex items-center justify-center border border-sky-100">
+                        <MapPin className="w-4 h-4" />
+                      </div>
+                      <span className="text-[10px] font-heading font-extrabold uppercase tracking-wider text-slate-500">{language === 'en' ? 'Clinic Address' : 'क्लिनिक का पता'}</span>
                     </div>
-                    <p className="text-xs font-sans font-bold text-slate-800 line-clamp-2">{language === 'en' ? `${c.address}, ${c.city}` : (c.addressHi || c.address)}</p>
+                    <p className="text-xs font-sans font-bold text-slate-800 line-clamp-2 leading-relaxed">{language === 'en' ? `${c.address}, ${c.city}` : (c.addressHi || c.address)}</p>
                   </div>
 
-                  <div className="bg-white p-3.5 rounded-xl border border-slate-200/80 space-y-1 shadow-2xs">
-                    <div className="flex items-center gap-1.5 text-slate-500">
-                      <Phone className="w-3.5 h-3.5 text-emerald-600" />
-                      <span className="text-[10px] font-heading font-extrabold uppercase tracking-wider">{language === 'en' ? 'Helpline & Desk' : 'हेल्पलाइन एवं पूछताछ'}</span>
+                  <div className="bg-white p-4 rounded-2xl border border-slate-200/80 space-y-1.5 shadow-2xs hover:border-emerald-300 transition">
+                    <div className="flex items-center gap-2 text-slate-500">
+                      <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
+                        <Phone className="w-4 h-4" />
+                      </div>
+                      <span className="text-[10px] font-heading font-extrabold uppercase tracking-wider text-slate-500">{language === 'en' ? 'Helpline & Desk' : 'हेल्पलाइन एवं पूछताछ'}</span>
                     </div>
-                    <p className="text-xs font-sans font-bold text-slate-800">Rec: {c.phone}</p>
-                    <p className="text-[10px] font-sans font-semibold text-rose-600">Emerg: {c.emergencyPhone}</p>
+                    <p className="text-xs font-sans font-extrabold text-slate-900">Rec: {c.phone || (c as any).receptionPhone || '+91 73827 23000'}</p>
+                    <p className="text-[10px] font-sans font-bold text-rose-600">24x7 Emerg: {c.emergencyPhone || '1800-7382-723'}</p>
                   </div>
 
-                  <div className="bg-white p-3.5 rounded-xl border border-slate-200/80 space-y-1 shadow-2xs">
-                    <div className="flex items-center gap-1.5 text-slate-500">
-                      <Clock className="w-3.5 h-3.5 text-amber-600" />
-                      <span className="text-[10px] font-heading font-extrabold uppercase tracking-wider">{language === 'en' ? 'OPD Timings' : 'ओपीडी समय'}</span>
+                  <div className="bg-white p-4 rounded-2xl border border-slate-200/80 space-y-1.5 shadow-2xs hover:border-amber-300 transition">
+                    <div className="flex items-center gap-2 text-slate-500">
+                      <div className="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-100">
+                        <Clock className="w-4 h-4" />
+                      </div>
+                      <span className="text-[10px] font-heading font-extrabold uppercase tracking-wider text-slate-500">{language === 'en' ? 'OPD Timings' : 'ओपीडी समय'}</span>
                     </div>
-                    <p className="text-xs font-sans font-bold text-slate-800">{c.operatingHours}</p>
+                    <p className="text-xs font-sans font-bold text-slate-800">{c.operatingHours || 'Mon-Sat: 08:00 AM - 08:00 PM'}</p>
                   </div>
 
-                  <div className="bg-white p-3.5 rounded-xl border border-slate-200/80 space-y-1 shadow-2xs">
-                    <div className="flex items-center gap-1.5 text-slate-500">
-                      <Settings className="w-3.5 h-3.5 text-purple-600" />
-                      <span className="text-[10px] font-heading font-extrabold uppercase tracking-wider">{language === 'en' ? 'Slot Interval' : 'स्लॉट समय'}</span>
+                  <div className="bg-white p-4 rounded-2xl border border-slate-200/80 space-y-1.5 shadow-2xs hover:border-purple-300 transition">
+                    <div className="flex items-center gap-2 text-slate-500">
+                      <div className="w-7 h-7 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center border border-purple-100">
+                        <Settings className="w-4 h-4" />
+                      </div>
+                      <span className="text-[10px] font-heading font-extrabold uppercase tracking-wider text-slate-500">{language === 'en' ? 'Slot Interval' : 'स्लॉट समय'}</span>
                     </div>
-                    <p className="text-xs font-mono font-bold text-purple-700 bg-purple-50 inline-block px-2 py-0.5 rounded-md border border-purple-100">
-                      {c.slotDurationMinutes} {language === 'en' ? 'mins / token' : 'मिनट / टोकन'}
+                    <p className="text-xs font-mono font-bold text-purple-700 bg-purple-50 inline-block px-2.5 py-1 rounded-lg border border-purple-200">
+                      {c.slotDurationMinutes ?? (c as any).opdSlotInterval ?? 15} {language === 'en' ? 'mins / token' : 'मिनट / टोकन'}
                     </p>
                   </div>
                 </div>
@@ -962,9 +979,8 @@ export const AdminDashboard: React.FC = () => {
                   <div className="flex items-center gap-2 pt-2 border-t border-slate-200/80">
                     <button
                       onClick={() => openDoctorModal(doc)}
-                      className="flex-1 bg-white hover:bg-slate-100 text-[#0F4C81] border border-[#0F4C81]/30 font-heading font-extrabold py-2 rounded-xl text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                      className="flex-1 bg-white hover:bg-slate-100 text-[#0F4C81] border border-[#0F4C81]/30 font-heading font-extrabold py-2 rounded-xl text-xs flex items-center justify-center transition cursor-pointer"
                     >
-                      <Edit3 className="w-3.5 h-3.5" />
                       <span>Edit Profile & Fees</span>
                     </button>
 
@@ -1036,9 +1052,8 @@ export const AdminDashboard: React.FC = () => {
                   <div className="flex items-center gap-2 pt-2 border-t border-slate-200/80">
                     <button
                       onClick={() => openCareServiceModal(service)}
-                      className="flex-1 bg-white hover:bg-slate-100 text-[#0F4C81] border border-[#0F4C81]/30 font-heading font-extrabold py-2 rounded-xl text-xs flex items-center justify-center gap-1.5 transition cursor-pointer"
+                      className="flex-1 bg-white hover:bg-slate-100 text-[#0F4C81] border border-[#0F4C81]/30 font-heading font-extrabold py-2 rounded-xl text-xs flex items-center justify-center transition cursor-pointer"
                     >
-                      <Edit3 className="w-3.5 h-3.5" />
                       <span>Edit Service</span>
                     </button>
 
@@ -1309,9 +1324,10 @@ export const AdminDashboard: React.FC = () => {
                   <input
                     type="number"
                     required
-                    value={doctorFormData.consultationFeeClinic}
-                    onChange={(e) => setDoctorFormData({ ...doctorFormData, consultationFeeClinic: Number(e.target.value) })}
+                    value={doctorFormData.consultationFeeClinic || ''}
+                    onChange={(e) => setDoctorFormData({ ...doctorFormData, consultationFeeClinic: e.target.value ? Number(e.target.value) : '' as any })}
                     className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:ring-2 focus:ring-[#0F4C81] outline-none"
+                    placeholder="e.g. 300"
                   />
                 </div>
 
@@ -1320,9 +1336,10 @@ export const AdminDashboard: React.FC = () => {
                   <input
                     type="number"
                     required
-                    value={doctorFormData.consultationFeeOnline}
-                    onChange={(e) => setDoctorFormData({ ...doctorFormData, consultationFeeOnline: Number(e.target.value) })}
+                    value={doctorFormData.consultationFeeOnline || ''}
+                    onChange={(e) => setDoctorFormData({ ...doctorFormData, consultationFeeOnline: e.target.value ? Number(e.target.value) : '' as any })}
                     className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:ring-2 focus:ring-[#0F4C81] outline-none"
+                    placeholder="e.g. 400"
                   />
                 </div>
               </div>
@@ -1334,7 +1351,11 @@ export const AdminDashboard: React.FC = () => {
                 </label>
                 <div className="flex flex-wrap gap-2 pt-1">
                   {clinics.map(c => {
-                    const isChecked = doctorFormData.clinicsCovered.includes(c.id);
+                    const branchKey = (c.city || c.name || c.id).toLowerCase().replace(/\s*branch\s*/i, '').trim();
+                    const isChecked = doctorFormData.clinicsCovered.some(item => {
+                      const clean = String(item).toLowerCase().replace(/\s*branch\s*/i, '').trim();
+                      return clean === branchKey || clean === c.id.toLowerCase() || clean === c.name.toLowerCase() || (c.city && clean === c.city.toLowerCase());
+                    });
                     return (
                       <label 
                         key={c.id} 
@@ -1349,8 +1370,14 @@ export const AdminDashboard: React.FC = () => {
                           checked={isChecked}
                           onChange={(e) => {
                             const updated = e.target.checked
-                              ? [...doctorFormData.clinicsCovered, c.id]
-                              : doctorFormData.clinicsCovered.filter(id => id !== c.id);
+                              ? Array.from(new Set([...doctorFormData.clinicsCovered.filter(item => {
+                                  const clean = String(item).toLowerCase().replace(/\s*branch\s*/i, '').trim();
+                                  return clean !== branchKey && clean !== c.id.toLowerCase() && clean !== c.name.toLowerCase() && (!c.city || clean !== c.city.toLowerCase());
+                                }), branchKey]))
+                              : doctorFormData.clinicsCovered.filter(item => {
+                                  const clean = String(item).toLowerCase().replace(/\s*branch\s*/i, '').trim();
+                                  return clean !== branchKey && clean !== c.id.toLowerCase() && clean !== c.name.toLowerCase() && (!c.city || clean !== c.city.toLowerCase());
+                                });
                             setDoctorFormData({ ...doctorFormData, clinicsCovered: updated });
                           }}
                           className="w-4 h-4 rounded text-[#0F4C81] focus:ring-[#0F4C81]"
@@ -1390,27 +1417,26 @@ export const AdminDashboard: React.FC = () => {
               <div className="space-y-1.5 pt-1">
                 <label className="block font-bold text-slate-700">Upload Doctor Profile Photo (Single Image)</label>
                 <div className="flex items-center gap-4 bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
-                  {doctorFormData.avatarUrl ? (
-                    <div className="relative group w-16 h-16 shrink-0 rounded-2xl overflow-hidden border-2 border-[#0F4C81] shadow-xs">
-                      <img 
-                        src={doctorFormData.avatarUrl || DEFAULT_DOCTOR_AVATAR} 
-                        alt="Doctor Avatar Preview" 
-                        onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_DOCTOR_AVATAR; }}
-                        className="w-full h-full object-cover" 
-                      />
+                  <div className="relative group w-16 h-16 shrink-0 rounded-2xl overflow-hidden border-2 border-[#0F4C81] shadow-xs">
+                    <img 
+                      src={doctorFormData.avatarUrl || DEFAULT_DOCTOR_AVATAR} 
+                      alt="Doctor Avatar Preview" 
+                      onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_DOCTOR_AVATAR; }}
+                      className="w-full h-full object-cover" 
+                    />
+                    {doctorPhotoFile && (
                       <button
                         type="button"
-                        onClick={() => setDoctorFormData({ ...doctorFormData, avatarUrl: '' })}
+                        onClick={() => {
+                          setDoctorPhotoFile(null);
+                          setDoctorFormData({ ...doctorFormData, avatarUrl: DEFAULT_DOCTOR_AVATAR });
+                        }}
                         className="absolute inset-0 bg-slate-950/70 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-[10px] font-heading font-extrabold cursor-pointer"
                       >
-                        Remove
+                        Reset Photo
                       </button>
-                    </div>
-                  ) : (
-                    <div className="w-16 h-16 rounded-2xl bg-slate-200 border-2 border-dashed border-slate-300 flex items-center justify-center text-slate-400 text-[11px] font-extrabold shrink-0">
-                      No Photo
-                    </div>
-                  )}
+                    )}
+                  </div>
 
                   <div className="space-y-1 grow">
                     <input
@@ -1429,7 +1455,7 @@ export const AdminDashboard: React.FC = () => {
                       }}
                       className="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-heading file:font-extrabold file:bg-[#0F4C81] file:text-white hover:file:bg-[#0B2545] cursor-pointer"
                     />
-                    <p className="text-[10px] text-slate-400 font-medium">Select a single JPG or PNG photo. Uploading a new image automatically replaces the current one.</p>
+                    <p className="text-[10px] text-slate-400 font-medium">Select a single JPG or PNG photo. If no custom image is selected, standard default doctor avatar is used.</p>
                   </div>
                 </div>
               </div>
@@ -1512,10 +1538,10 @@ export const AdminDashboard: React.FC = () => {
                       <td className="py-4 px-6 text-right flex items-center justify-end gap-2">
                         <button
                           onClick={() => openStaffModal(staff)}
-                          className="p-1.5 text-[#0F4C81] hover:bg-sky-50 rounded-lg transition cursor-pointer"
+                          className="px-2.5 py-1 text-[#0F4C81] hover:bg-sky-50 rounded-lg font-heading font-bold text-xs transition cursor-pointer"
                           title="Edit Staff Member"
                         >
-                          <Edit3 className="w-4 h-4" />
+                          <span>Edit</span>
                         </button>
                         <button
                           onClick={() => setPendingDelete({ type: 'staff', id: staff.id, label: staff.name })}
@@ -1598,22 +1624,21 @@ export const AdminDashboard: React.FC = () => {
 
               <div>
                 <label className="block font-bold text-slate-700 mb-1">Assigned Branch *</label>
-                <select
+                <CustomSelect
+                  required
                   value={staffFormData.branchId}
-                  onChange={(e) => setStaffFormData({ ...staffFormData, branchId: e.target.value })}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:ring-2 focus:ring-[#0F4C81] outline-none"
-                >
-                  {clinics.map(c => (
-                    <option key={c.id} value={c.id}>{c.name} Branch ({c.city})</option>
-                  ))}
-                  {clinics.length === 0 && (
-                    <>
-                      <option value="sarangpur">Sarangpur Branch</option>
-                      <option value="shujalpur">Shujalpur Branch</option>
-                      <option value="rajgarh">Rajgarh Branch</option>
-                    </>
-                  )}
-                </select>
+                  onChange={(val) => setStaffFormData({ ...staffFormData, branchId: val })}
+                  placeholder="Select Option"
+                  options={
+                    clinics.length > 0
+                      ? clinics.map(c => ({ value: c.id, label: `${c.name} Branch (${c.city})` }))
+                      : [
+                          { value: 'sarangpur', label: 'Sarangpur Branch' },
+                          { value: 'shujalpur', label: 'Shujalpur Branch' },
+                          { value: 'rajgarh', label: 'Rajgarh Branch' }
+                        ]
+                  }
+                />
               </div>
 
               <div className="pt-3 flex justify-end gap-3 border-t border-slate-100">
@@ -1742,13 +1767,19 @@ export const AdminDashboard: React.FC = () => {
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 mb-1">Operating Hours</label>
-                <input
-                  type="text"
+                <label className="block font-bold text-slate-700 mb-1">Operating Hours *</label>
+                <CustomSelect
                   required
                   value={branchFormData.operatingHours}
-                  onChange={(e) => setBranchFormData({ ...branchFormData, operatingHours: e.target.value })}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:ring-2 focus:ring-[#0F4C81] outline-none"
+                  onChange={(val) => setBranchFormData({ ...branchFormData, operatingHours: val })}
+                  placeholder="Select Option"
+                  options={[
+                    { value: 'Mon-Sat: 08:00 AM - 08:00 PM', label: 'Mon-Sat: 08:00 AM - 08:00 PM' },
+                    { value: 'Mon-Sat: 09:00 AM - 09:00 PM', label: 'Mon-Sat: 09:00 AM - 09:00 PM' },
+                    { value: 'Mon-Sat: 08:00 AM - 02:00 PM', label: 'Mon-Sat: 08:00 AM - 02:00 PM' },
+                    { value: 'Mon-Sat: 09:00 AM - 06:00 PM', label: 'Mon-Sat: 09:00 AM - 06:00 PM' },
+                    { value: 'Mon-Sun: 24 Hours Emergency', label: 'Mon-Sun: 24 Hours Emergency' }
+                  ]}
                 />
               </div>
 
@@ -1806,16 +1837,18 @@ export const AdminDashboard: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">Category</label>
-                  <select
+                  <label className="block font-bold text-slate-700 mb-1">Category *</label>
+                  <CustomSelect
+                    required
                     value={careServiceFormData.category}
-                    onChange={(e) => setCareServiceFormData({ ...careServiceFormData, category: e.target.value as any })}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:ring-2 focus:ring-[#0F4C81] outline-none"
-                  >
-                    <option value="PHARMACY">Pharmacy (Medicines)</option>
-                    <option value="DIAGNOSTICS">Diagnostics (X-Ray, Scans)</option>
-                    <option value="LABORATORY">Laboratory (Blood Tests)</option>
-                  </select>
+                    onChange={(val) => setCareServiceFormData({ ...careServiceFormData, category: val as any })}
+                    placeholder="Select Option"
+                    options={[
+                      { value: 'PHARMACY', label: 'Pharmacy (Medicines)' },
+                      { value: 'DIAGNOSTICS', label: 'Diagnostics (X-Ray, Scans)' },
+                      { value: 'LABORATORY', label: 'Laboratory (Blood Tests)' }
+                    ]}
+                  />
                 </div>
 
                 <div>
@@ -1824,25 +1857,25 @@ export const AdminDashboard: React.FC = () => {
                     type="number"
                     required
                     min="0"
-                    value={careServiceFormData.price}
-                    onChange={(e) => setCareServiceFormData({ ...careServiceFormData, price: Number(e.target.value) })}
+                    value={careServiceFormData.price || ''}
+                    onChange={(e) => setCareServiceFormData({ ...careServiceFormData, price: e.target.value ? Number(e.target.value) : '' as any })}
                     className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:ring-2 focus:ring-[#0F4C81] outline-none"
+                    placeholder="e.g. 250"
                   />
                 </div>
 
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">Assigned Doctor/Pathologist</label>
-                  <select
+                  <label className="block font-bold text-slate-700 mb-1">Assigned Doctor/Pathologist *</label>
+                  <CustomSelect
                     required
                     value={careServiceFormData.doctorId}
-                    onChange={(e) => setCareServiceFormData({ ...careServiceFormData, doctorId: e.target.value })}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:ring-2 focus:ring-[#0F4C81] outline-none"
-                  >
-                    <option value="" disabled>Select a doctor</option>
-                    {doctors.map(d => (
-                      <option key={d.id} value={d.id}>{d.name.startsWith('Dr.') ? d.name : `Dr. ${d.name}`} ({d.specialization})</option>
-                    ))}
-                  </select>
+                    onChange={(val) => setCareServiceFormData({ ...careServiceFormData, doctorId: val })}
+                    placeholder="Select Option"
+                    options={doctors.map(d => ({
+                      value: d.id,
+                      label: `${d.name.startsWith('Dr.') ? d.name : `Dr. ${d.name}`} (${d.specialization})`
+                    }))}
+                  />
                 </div>
               </div>
 

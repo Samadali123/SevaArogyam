@@ -43,7 +43,7 @@ export const Footer: React.FC<FooterProps> = ({ setCurrentTab }) => {
               {/* Google Play Store Badge */}
               <a
                 href="#download-android"
-                onClick={(e) => { e.preventDefault(); alert(language === 'en' ? 'SevaArogyam Android App link sent to your phone!' : 'सेवा आरोग्यम ऐप लिंक आपके फोन पर भेज दिया गया है!'); }}
+                onClick={(e) => { e.preventDefault(); alert(language === 'en' ? 'JansevaArogyam Android App link sent to your phone!' : 'जनसेवा आरोग्यम ऐप लिंक आपके फोन पर भेज दिया गया है!'); }}
                 className="bg-slate-950/80 hover:bg-slate-950 text-white px-4 py-2.5 rounded-xl flex items-center gap-3 transition border border-white/10 shadow-md group cursor-pointer"
               >
                 <svg className="w-6 h-6 fill-current text-emerald-400 group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
@@ -58,7 +58,7 @@ export const Footer: React.FC<FooterProps> = ({ setCurrentTab }) => {
               {/* Apple App Store Badge */}
               <a
                 href="#download-ios"
-                onClick={(e) => { e.preventDefault(); alert(language === 'en' ? 'SevaArogyam iOS App link sent to your phone!' : 'सेवा आरोग्यम ऐप लिंक आपके फोन पर भेज दिया गया है!'); }}
+                onClick={(e) => { e.preventDefault(); alert(language === 'en' ? 'JansevaArogyam iOS App link sent to your phone!' : 'जनसेवा आरोग्यम ऐप लिंक आपके फोन पर भेज दिया गया है!'); }}
                 className="bg-slate-950/80 hover:bg-slate-950 text-white px-4 py-2.5 rounded-xl flex items-center gap-3 transition border border-white/10 shadow-md group cursor-pointer"
               >
                 <svg className="w-6 h-6 fill-current text-slate-100 group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
@@ -120,7 +120,7 @@ export const Footer: React.FC<FooterProps> = ({ setCurrentTab }) => {
             <h4 className="font-heading font-extrabold text-white text-sm tracking-wide">{language === 'en' ? 'Overview' : 'अवलोकन'}</h4>
             <ul className="space-y-2 text-slate-400 font-medium">
               <li>
-                <button onClick={() => setCurrentTab('about')} className="hover:text-sky-300 transition cursor-pointer">{language === 'en' ? 'About SevaArogyam' : 'सेवा आरोग्यम के बारे में'}</button>
+                <button onClick={() => setCurrentTab('about')} className="hover:text-sky-300 transition cursor-pointer">{language === 'en' ? 'About JansevaArogyam' : 'जनसेवा आरोग्यम के बारे में'}</button>
               </li>
               <li>
                 <button onClick={() => setCurrentTab('locations')} className="hover:text-sky-300 transition cursor-pointer">{language === 'en' ? 'Hospital Branches' : 'अस्पताल शाखाएँ'}</button>
@@ -201,7 +201,7 @@ export const Footer: React.FC<FooterProps> = ({ setCurrentTab }) => {
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400 pt-2 font-sans">
           
           <p className="flex items-center gap-1.5">
-            <span>© 2026 SevaArogyam Health Care Network. {language === 'en' ? 'All rights reserved.' : 'सर्वाधिकार सुरक्षित।'}</span>
+            <span>© 2026 JansevaArogyam Health Care Network. {language === 'en' ? 'All rights reserved.' : 'सर्वाधिकार सुरक्षित।'}</span>
             <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500 inline" />
           </p>
 

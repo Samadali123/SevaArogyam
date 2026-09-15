@@ -120,7 +120,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
             <Stethoscope className="w-5.5 h-5.5 text-sky-300" />
           </div>
           <span className="font-outfit font-extrabold text-2xl bg-linear-to-r from-[#0A2540] via-[#0F2C59] to-[#0284C7] bg-clip-text text-transparent tracking-tight">
-            SevaArogyam
+            JansevaArogyam
           </span>
         </div>
 
@@ -261,7 +261,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
                 </div>
               </div>
 
-              {/* SevaArogyam Care Services */}
+              {/* JansevaArogyam Care Services */}
               <div className="relative" onMouseEnter={() => setOpenDropdown('services')} onMouseLeave={() => setOpenDropdown(null)}>
                 <button
                   onClick={() => setOpenDropdown(openDropdown === 'services' ? null : 'services')}
@@ -500,7 +500,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
                 </div>
                 <div>
                   <span className="font-black text-lg text-white tracking-tight block leading-tight">
-                    SevaArogyam
+                    JansevaArogyam
                   </span>
                   <span className="text-[10px] text-emerald-300 font-bold tracking-wider uppercase block">
                     Multi-Specialty Hospital

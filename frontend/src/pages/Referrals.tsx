@@ -27,7 +27,7 @@ export const Referrals: React.FC = () => {
   }, [currentUser]);
 
   const referralCode = dashboard?.referralCode || 'Loading...';
-  const shareUrl = `https://sevaarogyam.in/join/${referralCode}`;
+  const shareUrl = `https://jansevaarogyam.in/join/${referralCode}`;
 
   const copyText = async (value: string) => {
     await navigator.clipboard?.writeText(value);
@@ -69,15 +69,15 @@ export const Referrals: React.FC = () => {
         
         <div className="max-w-2xl space-y-5 relative z-10">
           <span className="text-xs font-sora font-extrabold text-emerald-300 uppercase tracking-widest block">
-            {text('SEVAAROGYAM REWARDS & REFERRALS', 'सेवाआरोग्यम रिवार्ड्स एवं रेफरल')}
+            {text('JANSEVAAROGYAM REWARDS & REFERRALS', 'जनसेवाआरोग्यम रिवार्ड्स एवं रेफरल')}
           </span>
           <h1 className="text-3xl sm:text-5xl font-sora font-extrabold tracking-tight text-white leading-tight">
             {text('Care Shared is Care Rewarded.', 'देखभाल साझा करें, रिवार्ड्स पाएं।')}
           </h1>
           <p className="text-sm sm:text-base text-sky-100/90 font-medium leading-relaxed">
             {text(
-              'Invite your family and friends to SevaArogyam. Earn wallet cashback and special consultation discounts for every successful booking.',
-              'अपने परिवार और दोस्तों को सेवाआरोग्यम पर आमंत्रित करें और हर सफल बुकिंग पर वॉलेट कैशबैक पाएं।'
+              'Invite your family and friends to JansevaArogyam. Earn wallet cashback and special consultation discounts for every successful booking.',
+              'अपने परिवार और दोस्तों को जनसेवाआरोग्यम पर आमंत्रित करें और हर सफल बुकिंग पर वॉलेट कैशबैक पाएं।'
             )}
           </p>
         </div>

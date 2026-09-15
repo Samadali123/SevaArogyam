@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useEffect } from 'react';
 import type { 
   AppUser, 
   UserRole, 
@@ -20,13 +20,74 @@ import type {
   SpecialtyDetail
 } from '../types';
 import { 
-  DEMO_PATIENTS,
-  INITIAL_HEALTH_PACKAGES,
-  INITIAL_HEALTH_BLOGS,
-  SPECIALTIES_DATA
+  DEMO_PATIENTS
 } from '../data/mockData';
 import { api, getApiErrorMessage, saveAuthToken, AUTH_TOKEN_KEY } from '../services/api';
 import defaultProfilePhoto from '../assets/images/Default_profile.webp';
+
+import { useAppDispatch, useAppSelector } from '../store';
+import {
+  setCurrentUser,
+  setActiveRole,
+  setIsAdminAuthenticated,
+  setIsLoggingOut,
+  setAuthModalOpen,
+  setAdminAuthModalOpen,
+  setStaffAuthModalOpen,
+} from '../store/slices/authSlice';
+import {
+  setLanguage as setReduxLanguage,
+  setActiveBranchId as setReduxActiveBranchId,
+  setBookingModalOpen,
+  setDoctorProfileModalOpen,
+  setSelectedDoctorForProfile,
+  setSelectedBlogId as setReduxSelectedBlogId,
+  setSelectedSpecialtyFilter as setReduxSelectedSpecialtyFilter,
+  setPreselectedBooking,
+} from '../store/slices/uiSlice';
+import {
+  setDoctors,
+  addDoctorLocal,
+  updateDoctorLocal,
+  deleteDoctorLocal,
+} from '../store/slices/doctorsSlice';
+import {
+  setClinics,
+  addClinicLocal,
+  updateClinicLocal,
+  deleteClinicLocal,
+} from '../store/slices/clinicsSlice';
+import {
+  setAppointments,
+  setPrescriptions,
+  setPayments,
+  addAppointmentLocal,
+  updateAppointmentStatusLocal,
+  addPrescriptionLocal,
+  addPaymentLocal,
+  rescheduleAppointmentLocal,
+} from '../store/slices/appointmentsSlice';
+import {
+  setDeskStaffMembers,
+  addStaffLocal,
+  updateStaffLocal,
+  deleteStaffLocal,
+} from '../store/slices/staffSlice';
+import {
+  setCareServices,
+  addCareServiceLocal,
+  updateCareServiceLocal,
+  deleteCareServiceLocal,
+  addSpecialtyLocal,
+  updateSpecialtyLocal,
+  deleteSpecialtyLocal,
+} from '../store/slices/servicesSlice';
+import {
+  setHealthBlogs,
+  addArticleLocal,
+  updateArticleLocal,
+  deleteArticleLocal,
+} from '../store/slices/articlesSlice';
 
 interface AppContextType {
   currentUser: AppUser | null;
@@ -144,18 +205,6 @@ const mapDoctor = (doctor: any): DoctorUser => {
     clinicsCovered = [doctor.branch];
   }
 
-  if (clinicsCovered.length === 0) {
-    const dName = String(doctor.name || '').toLowerCase();
-    if (dName.includes('rahul')) {
-      clinicsCovered = ['sarangpur', 'shujalpur', 'rajgarh'];
-    } else if (dName.includes('ankur')) {
-      clinicsCovered = ['rajgarh', 'sarangpur'];
-    } else if (dName.includes('test')) {
-      clinicsCovered = ['shujalpur', 'rajgarh'];
-    } else {
-      clinicsCovered = ['sarangpur', 'shujalpur'];
-    }
-  }
 
   return {
     ...doctor,
@@ -229,17 +278,26 @@ const mapAppointment = (appointment: any, doctors: DoctorUser[], clinics: Clinic
 };
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState<AppUser | null>(() => {
-    const saved = localStorage.getItem(`${LOCAL_STORAGE_KEY}_USER`);
-    return saved ? JSON.parse(saved) : null;
-  });
+  const dispatch = useAppDispatch();
 
-  const [activeRole, setActiveRole] = useState<UserRole>(() => currentUser?.role || 'PATIENT');
-  const [language, setLanguage] = useState<Language>(() => {
-    const saved = localStorage.getItem('SEVASADAN_LANGUAGE');
-    return (saved === 'en' || saved === 'hi') ? saved : 'hi';
-  });
-  const [activeBranchId, setActiveBranchId] = useState<string>('all');
+  // Select state from Redux
+  const authState = useAppSelector((state) => state.auth);
+  const uiState = useAppSelector((state) => state.ui);
+  const doctorsState = useAppSelector((state) => state.doctors);
+  const clinicsState = useAppSelector((state) => state.clinics);
+  const appointmentsState = useAppSelector((state) => state.appointments);
+  const staffState = useAppSelector((state) => state.staff);
+  const servicesState = useAppSelector((state) => state.services);
+  const articlesState = useAppSelector((state) => state.articles);
+
+  const { currentUser, activeRole, isAdminAuthenticated, isLoggingOut, isAuthModalOpen, isAdminAuthModalOpen, isStaffAuthModalOpen } = authState;
+  const { language, activeBranchId, isBookingModalOpen, isDoctorProfileModalOpen, selectedDoctorForProfile, selectedBlogId, selectedSpecialtyFilter, preselectedDoctorId, preselectedClinicId, preselectedMode } = uiState;
+  const { doctors } = doctorsState;
+  const { clinics } = clinicsState;
+  const { appointments, prescriptions, payments } = appointmentsState;
+  const { deskStaffMembers } = staffState;
+  const { careServices, specialties } = servicesState;
+  const { healthPackages, healthBlogs } = articlesState;
 
   useEffect(() => {
     localStorage.setItem('SEVASADAN_LANGUAGE', language);
@@ -252,91 +310,43 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       localStorage.removeItem(`${LOCAL_STORAGE_KEY}_USER`);
     }
   }, [currentUser]);
-  
-  const [clinics, setClinics] = useState<Clinic[]>(() => {
-    localStorage.removeItem(`${LOCAL_STORAGE_KEY}_CLINICS`);
-    return [];
-  });
 
-  const [doctors, setDoctors] = useState<DoctorUser[]>(() => {
-    localStorage.removeItem(`${LOCAL_STORAGE_KEY}_DOCTORS`);
-    return [];
-  });
-
-  const [deskStaffMembers, setDeskStaffMembers] = useState<DeskStaffUser[]>(() => {
-    localStorage.removeItem(`${LOCAL_STORAGE_KEY}_DESK_STAFF`);
-    return [];
-  });
-
-  const [appointments, setAppointments] = useState<Appointment[]>(() => {
-    localStorage.removeItem(`${LOCAL_STORAGE_KEY}_APPOINTMENTS`);
-    return [];
-  });
-
-  const [prescriptions, setPrescriptions] = useState<Prescription[]>(() => {
-    localStorage.removeItem(`${LOCAL_STORAGE_KEY}_PRESCRIPTIONS`);
-    return [];
-  });
-
-  const [careServices, setCareServices] = useState<CareService[]>([]);
-  const [specialties, setSpecialties] = useState<SpecialtyDetail[]>(SPECIALTIES_DATA);
-
-  const [payments, setPayments] = useState<PaymentRecord[]>(() => {
-    localStorage.removeItem(`${LOCAL_STORAGE_KEY}_PAYMENTS`);
-    return [];
-  });
-
-  const [healthPackages] = useState<HealthPackage[]>(INITIAL_HEALTH_PACKAGES);
-  const [healthBlogs, setHealthBlogs] = useState<HealthBlog[]>(INITIAL_HEALTH_BLOGS);
-
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
-  const [isAdminAuthModalOpen, setIsAdminAuthModalOpen] = useState<boolean>(false);
-  const [isStaffAuthModalOpen, setIsStaffAuthModalOpen] = useState<boolean>(false);
-  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(() => {
-    return localStorage.getItem(`${LOCAL_STORAGE_KEY}_ADMIN_AUTH`) === 'true' && Boolean(localStorage.getItem(AUTH_TOKEN_KEY));
-  });
-  const [isLoggingOut, setIsLoggingOut] = useState<boolean>(false);
-  const [isBookingModalOpen, setIsBookingModalOpen] = useState<boolean>(false);
-  const [isDoctorProfileModalOpen, setIsDoctorProfileModalOpen] = useState<boolean>(false);
-  const [selectedDoctorForProfile, setSelectedDoctorForProfile] = useState<DoctorUser | null>(null);
-
+  // Initial Public & Admin Data Fetching
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [clinicsRes, doctorsRes, staffRes, servicesRes, specialtiesRes, articlesRes] = await Promise.all([
+        const [clinicsRes, doctorsRes, staffRes, servicesRes, articlesRes] = await Promise.all([
           api.get('/public/branches').catch(() => ({ data: { branches: [] } })),
           (isAdminAuthenticated ? api.get('/admin/doctors') : api.get('/public/doctors')).catch(() => ({ data: { doctors: [] } })),
           isAdminAuthenticated ? api.get('/admin/staff').catch(() => ({ data: [] })) : Promise.resolve({ data: [] }),
           api.get('/public/care-services').catch(() => ({ data: { services: [] } })),
-          api.get('/public/specialties').catch(() => ({ data: { specialties: [] } })),
           api.get('/public/articles').catch(() => ({ data: { articles: [] } }))
         ]);
 
         const fetchedBranches = clinicsRes.data?.branches || (Array.isArray(clinicsRes.data) ? clinicsRes.data : []);
-        setClinics(fetchedBranches.map(mapClinic));
+        dispatch(setClinics(fetchedBranches.map(mapClinic)));
 
         const fetchedDoctors = doctorsRes.data?.doctors || (Array.isArray(doctorsRes.data) ? doctorsRes.data : []);
-        setDoctors(fetchedDoctors.map(mapDoctor));
+        dispatch(setDoctors(fetchedDoctors.map(mapDoctor)));
 
         const fetchedStaff = staffRes.data?.staff || (Array.isArray(staffRes.data) ? staffRes.data : []);
-        setDeskStaffMembers(fetchedStaff.map(mapStaff));
+        dispatch(setDeskStaffMembers(fetchedStaff.map(mapStaff)));
 
         const rawServices = servicesRes.data?.data?.services || servicesRes.data?.services || servicesRes.data?.data || servicesRes.data || [];
         const fetchedServices = Array.isArray(rawServices) ? rawServices : [];
-        setCareServices(fetchedServices);
+        dispatch(setCareServices(fetchedServices));
 
-        const fetchedSpecialties = specialtiesRes.data?.specialties || (Array.isArray(specialtiesRes.data) ? specialtiesRes.data : []);
-        setSpecialties(fetchedSpecialties.length > 0 ? fetchedSpecialties : SPECIALTIES_DATA);
 
         const fetchedArticles = articlesRes.data?.articles || (Array.isArray(articlesRes.data) ? articlesRes.data : []);
-        setHealthBlogs(fetchedArticles);
+        dispatch(setHealthBlogs(fetchedArticles));
       } catch (err) {
         console.error('Failed to load initial data:', err);
       }
     };
     fetchData();
-  }, [isAdminAuthenticated]);
+  }, [isAdminAuthenticated, dispatch]);
 
+  // Polling Patient Appointments
   useEffect(() => {
     const fetchAppointments = async () => {
       if (currentUser && currentUser.role === 'PATIENT' && localStorage.getItem(AUTH_TOKEN_KEY)) {
@@ -369,16 +379,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                   nextFollowUpDate: rx.nextFollowUpDate || '',
                   createdAt: rx.createdAt || appointment.createdAt || new Date().toISOString()
                 };
-                setPrescriptions(prev => {
-                  if (prev.some(p => p.appointmentId === appointment.id)) {
-                    return prev.map(p => p.appointmentId === appointment.id ? newRx : p);
-                  }
-                  return [...prev, newRx];
-                });
+                dispatch(addPrescriptionLocal(newRx));
               }
               return mAppt;
             });
-            setAppointments(mapped);
+            dispatch(setAppointments(mapped));
           }
         } catch (err) {
           console.error('Failed to load patient appointments:', err);
@@ -389,8 +394,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     fetchAppointments();
     const interval = setInterval(fetchAppointments, 5000);
     return () => clearInterval(interval);
-  }, [currentUser, doctors, clinics]);
+  }, [currentUser, doctors, clinics, dispatch]);
 
+  // Polling Operational Queue (Doctor / Staff)
   useEffect(() => {
     const fetchOperationalQueue = async () => {
       if (currentUser?.role === 'DOCTOR') {
@@ -423,16 +429,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                 nextFollowUpDate: rx.nextFollowUpDate || '',
                 createdAt: rx.createdAt || appointment.createdAt || new Date().toISOString()
               };
-              setPrescriptions(prev => {
-                if (prev.some(p => p.appointmentId === appointment.id)) {
-                  return prev.map(p => p.appointmentId === appointment.id ? newRx : p);
-                }
-                return [...prev, newRx];
-              });
+              dispatch(addPrescriptionLocal(newRx));
             }
             return mAppt;
           });
-          setAppointments(mapped);
+          dispatch(setAppointments(mapped));
         } catch (error) {
           console.error('Failed to load doctor queue:', error);
         }
@@ -440,7 +441,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         try {
           const response = await api.get('/staff/queue');
           const records = response.data?.queue || [];
-          setAppointments(records.map((appointment: any) => mapAppointment(appointment, doctors, clinics)));
+          dispatch(setAppointments(records.map((appointment: any) => mapAppointment(appointment, doctors, clinics))));
         } catch (error) {
           console.error('Failed to load desk queue:', error);
         }
@@ -450,25 +451,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     fetchOperationalQueue();
     const interval = setInterval(fetchOperationalQueue, 5000);
     return () => clearInterval(interval);
-  }, [currentUser, doctors, clinics]);
-
-  const [selectedBlogId, setSelectedBlogId] = useState<string | null>(null);
-  const [selectedSpecialtyFilter, setSelectedSpecialtyFilter] = useState<string>('all');
-  const [preselectedDoctorId, setPreselectedDoctorId] = useState<string | undefined>(undefined);
-  const [preselectedClinicId, setPreselectedClinicId] = useState<string | undefined>(undefined);
-  const [preselectedMode, setPreselectedMode] = useState<AppointmentMode | undefined>(undefined);
-
-  const openAdminAuthModal = () => setIsAdminAuthModalOpen(true);
-  const closeAdminAuthModal = () => setIsAdminAuthModalOpen(false);
-
-  const openStaffAuthModal = () => setIsStaffAuthModalOpen(true);
-  const closeStaffAuthModal = () => setIsStaffAuthModalOpen(false);
-
-  // Sync state to LocalStorage
-  useEffect(() => {
-    if (currentUser) localStorage.setItem(`${LOCAL_STORAGE_KEY}_USER`, JSON.stringify(currentUser));
-    else localStorage.removeItem(`${LOCAL_STORAGE_KEY}_USER`);
-  }, [currentUser]);
+  }, [currentUser, doctors, clinics, dispatch]);
 
   // Real-time multi-tab synchronization via BroadcastChannel
   useEffect(() => {
@@ -479,14 +462,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           const savedAppts = localStorage.getItem(`${LOCAL_STORAGE_KEY}_APPOINTMENTS`);
           const savedRxs = localStorage.getItem(`${LOCAL_STORAGE_KEY}_PRESCRIPTIONS`);
           const savedPays = localStorage.getItem(`${LOCAL_STORAGE_KEY}_PAYMENTS`);
-          if (savedAppts) setAppointments(JSON.parse(savedAppts));
-          if (savedRxs) setPrescriptions(JSON.parse(savedRxs));
-          if (savedPays) setPayments(JSON.parse(savedPays));
+          if (savedAppts) dispatch(setAppointments(JSON.parse(savedAppts)));
+          if (savedRxs) dispatch(setPrescriptions(JSON.parse(savedRxs)));
+          if (savedPays) dispatch(setPayments(JSON.parse(savedPays)));
         }
       };
       return () => channel.close();
     }
-  }, []);
+  }, [dispatch]);
 
   const notifyOtherTabs = () => {
     if (typeof BroadcastChannel !== 'undefined') {
@@ -495,6 +478,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       channel.close();
     }
   };
+
+  const openAdminAuthModal = () => dispatch(setAdminAuthModalOpen(true));
+  const closeAdminAuthModal = () => dispatch(setAdminAuthModalOpen(false));
+
+  const openStaffAuthModal = () => dispatch(setStaffAuthModalOpen(true));
+  const closeStaffAuthModal = () => dispatch(setStaffAuthModalOpen(false));
 
   const sendPatientOtp = async (email: string) => {
     try {
@@ -528,8 +517,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         role: 'PATIENT'
       };
 
-      setCurrentUser(mappedUser);
-      setActiveRole('PATIENT');
+      dispatch(setCurrentUser(mappedUser));
+      dispatch(setActiveRole('PATIENT'));
       return { user: mappedUser, isNew: !!isNew };
     } catch (error: any) {
       throw new Error(getApiErrorMessage(error, 'OTP is incorrect'));
@@ -560,9 +549,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         managedBranches: ['sarangpur', 'shujalpur', 'rajgarh']
       };
 
-      setCurrentUser(adminUser);
-      setActiveRole('ADMIN');
-      setIsAdminAuthenticated(true);
+      dispatch(setCurrentUser(adminUser));
+      dispatch(setActiveRole('ADMIN'));
+      dispatch(setIsAdminAuthenticated(true));
       localStorage.setItem(`${LOCAL_STORAGE_KEY}_ADMIN_AUTH`, 'true');
 
       return { success: true, message: 'Admin logged in successfully' };
@@ -582,9 +571,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         saveAuthToken(accessToken);
       }
 
-      const role: UserRole = (rawUser?.role === 'DOCTOR' || emailOrLoginId.toLowerCase().includes('dr')) 
-        ? 'DOCTOR' 
-        : (rawUser?.role === 'ADMIN' ? 'ADMIN' : 'DESK_STAFF');
+      const role: UserRole = rawUser?.role 
+        ? (rawUser.role === 'DOCTOR' ? 'DOCTOR' : rawUser.role === 'ADMIN' ? 'ADMIN' : 'DESK_STAFF')
+        : (emailOrLoginId.toLowerCase().includes('dr') ? 'DOCTOR' : 'DESK_STAFF');
       
       const mappedUser: AppUser = {
         ...rawUser,
@@ -594,8 +583,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         role: role
       };
 
-      setCurrentUser(mappedUser);
-      setActiveRole(role);
+      dispatch(setCurrentUser(mappedUser));
+      dispatch(setActiveRole(role));
+      if (role === 'ADMIN') {
+        dispatch(setIsAdminAuthenticated(true));
+        localStorage.setItem(`${LOCAL_STORAGE_KEY}_ADMIN_AUTH`, 'true');
+      }
       localStorage.setItem(`${LOCAL_STORAGE_KEY}_USER`, JSON.stringify(mappedUser));
       
       return { success: true, user: mappedUser };
@@ -618,11 +611,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       role: role
     };
 
-    setCurrentUser(mappedUser);
-    setActiveRole(role);
+    dispatch(setCurrentUser(mappedUser));
+    dispatch(setActiveRole(role));
     localStorage.setItem(`${LOCAL_STORAGE_KEY}_USER`, JSON.stringify(mappedUser));
     if (role === 'ADMIN') {
-      setIsAdminAuthenticated(true);
+      dispatch(setIsAdminAuthenticated(true));
       localStorage.setItem(`${LOCAL_STORAGE_KEY}_ADMIN_AUTH`, 'true');
     }
   };
@@ -633,7 +626,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const endpoint = isDoctor ? '/doctor/articles' : '/public/articles';
       const res = await api.get(endpoint);
       if (res.data?.articles) {
-        setHealthBlogs(res.data.articles);
+        dispatch(setHealthBlogs(res.data.articles));
       }
     } catch (err) {
       console.error('Failed to refresh articles:', err);
@@ -644,20 +637,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try {
       const res = await api.post('/doctor/articles', data);
       const newArt = res.data?.article || res.data;
-      setHealthBlogs(prev => [newArt, ...prev]);
+      dispatch(addArticleLocal(newArt));
       return newArt;
     } catch (err1: any) {
       try {
         const res2 = await api.post('/public/articles', data);
         const newArt2 = res2.data?.article || res2.data;
-        setHealthBlogs(prev => [newArt2, ...prev]);
+        dispatch(addArticleLocal(newArt2));
         return newArt2;
       } catch (err2: any) {
         const localArt = {
           id: `art-local-${Date.now()}`,
           title: data.title,
           category: data.category || 'General Medicine',
-          authorName: currentUser?.name || 'Dr. SevaArogyam Medical Team',
+          authorName: currentUser?.name || 'Dr. JansevaArogyam Medical Team',
           authorRole: (currentUser as any)?.specialization || 'Medical Specialist',
           readTimeMinutes: Number(data.readTimeMinutes) || 5,
           date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
@@ -666,7 +659,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           imageUrl: data.imageUrl || 'https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&q=80&w=600',
           published: true
         };
-        setHealthBlogs(prev => [localArt, ...prev]);
+        dispatch(addArticleLocal(localArt));
         return localArt;
       }
     }
@@ -676,16 +669,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try {
       const res = await api.put(`/doctor/articles/${id}`, data);
       const updated = res.data?.article || res.data;
-      setHealthBlogs(prev => prev.map(a => a.id === id ? { ...a, ...updated } : a));
+      dispatch(updateArticleLocal({ id, ...updated }));
       return updated;
     } catch (err1: any) {
       try {
         const res2 = await api.put(`/public/articles/${id}`, data);
         const updated2 = res2.data?.article || res2.data;
-        setHealthBlogs(prev => prev.map(a => a.id === id ? { ...a, ...updated2 } : a));
+        dispatch(updateArticleLocal({ id, ...updated2 }));
         return updated2;
       } catch {
-        setHealthBlogs(prev => prev.map(a => a.id === id ? { ...a, ...data } : a));
+        dispatch(updateArticleLocal({ id, ...data }));
       }
     }
   };
@@ -697,84 +690,81 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       try {
         await api.delete(`/public/articles/${id}`);
       } catch {
-        // Fallback to state update
+        // Fallback
       }
     }
-    setHealthBlogs(prev => prev.filter(a => a.id !== id));
+    dispatch(deleteArticleLocal(id));
   };
 
   const logout = async () => {
-    setIsLoggingOut(true);
+    dispatch(setIsLoggingOut(true));
     try {
       await api.post('/auth/logout', {});
     } catch(e) {
       console.warn('Logout API call failed', e);
     } finally {
-      setCurrentUser(null);
-      setIsAdminAuthenticated(false);
-      setActiveRole('PATIENT');
+      dispatch(setCurrentUser(null));
+      dispatch(setIsAdminAuthenticated(false));
+      dispatch(setActiveRole('PATIENT'));
       localStorage.removeItem(AUTH_TOKEN_KEY);
       localStorage.removeItem(`${LOCAL_STORAGE_KEY}_USER`);
       localStorage.removeItem(`${LOCAL_STORAGE_KEY}_ADMIN_AUTH`);
-      setIsLoggingOut(false);
+      dispatch(setIsLoggingOut(false));
     }
   };
 
   const switchRole = (role: UserRole) => {
-    setActiveRole(role);
+    dispatch(setActiveRole(role));
     if (role === 'DOCTOR' && currentUser?.role !== 'DOCTOR') {
-      setCurrentUser(doctors[0]);
+      dispatch(setCurrentUser(doctors[0]));
     } else if (role === 'ADMIN' && currentUser?.role !== 'ADMIN') {
-      setCurrentUser({
+      dispatch(setCurrentUser({
         id: 'admin-1',
         name: 'Central Admin',
         email: 'admin@sevasadanclinic.in',
         role: 'ADMIN',
         managedBranches: ['sarangpur', 'shujalpur', 'rajgarh']
-      });
+      }));
     } else if (role === 'PATIENT' && currentUser?.role !== 'PATIENT') {
-      setCurrentUser(DEMO_PATIENTS[0]);
+      dispatch(setCurrentUser(DEMO_PATIENTS[0]));
     }
   };
 
-  const openAuthModal = () => setIsAuthModalOpen(true);
-  const closeAuthModal = () => setIsAuthModalOpen(false);
+  const openAuthModal = () => dispatch(setAuthModalOpen(true));
+  const closeAuthModal = () => dispatch(setAuthModalOpen(false));
 
   const openBookingModal = (doctorId?: string, clinicId?: string, mode?: AppointmentMode) => {
     const isStaff = currentUser?.role === 'DESK_STAFF' || (currentUser?.role as string) === 'STAFF';
     if (!currentUser && !localStorage.getItem(AUTH_TOKEN_KEY)) {
-      setIsAuthModalOpen(true);
+      dispatch(setAuthModalOpen(true));
       return;
     }
     if (currentUser?.role !== 'PATIENT' && !isStaff && !isAdminAuthenticated) {
-      setIsAuthModalOpen(true);
+      dispatch(setAuthModalOpen(true));
       return;
     }
-    setPreselectedDoctorId(doctorId);
-    setPreselectedClinicId(clinicId);
-    setPreselectedMode(mode);
-    setIsBookingModalOpen(true);
+    dispatch(setPreselectedBooking({ doctorId, clinicId, mode }));
+    dispatch(setBookingModalOpen(true));
   };
+
   const closeBookingModal = () => {
-    setIsBookingModalOpen(false);
-    setPreselectedDoctorId(undefined);
-    setPreselectedClinicId(undefined);
-    setPreselectedMode(undefined);
+    dispatch(setBookingModalOpen(false));
+    dispatch(setPreselectedBooking({ doctorId: undefined, clinicId: undefined, mode: undefined }));
   };
 
   const openDoctorProfileModal = (doctorOrId: DoctorUser | string) => {
     if (typeof doctorOrId === 'string') {
       const doc = doctors.find(d => d.id === doctorOrId) || doctors[0];
-      setSelectedDoctorForProfile(doc);
+      dispatch(setSelectedDoctorForProfile(doc));
     } else {
-      setSelectedDoctorForProfile(doctorOrId);
+      dispatch(setSelectedDoctorForProfile(doctorOrId));
     }
-    setIsDoctorProfileModalOpen(true);
+    dispatch(setDoctorProfileModalOpen(true));
   };
 
   const closeDoctorProfileModal = () => {
-    setIsDoctorProfileModalOpen(false);
-    setSelectedDoctorForProfile(null);
+    dispatch(setDoctorProfileModalOpen(false));
+    dispatch(setSelectedDoctorForProfile(null));
   };
 
   const bookAppointment = async (data: {
@@ -812,7 +802,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const response = await api.post('/appointments/book', formData);
     
-    // The backend returns { status: 'success', data: { appointment, order } }
     const newAppointment = {
       ...mapAppointment(response.data.appointment, doctors, clinics),
       razorpayOrderId: response.data.razorpayOrderId,
@@ -843,8 +832,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       createdAt: new Date().toISOString()
     };
 
-    setAppointments(prev => [newAppointment, ...prev]);
-    setPayments(prev => [newPayment, ...prev]);
+    dispatch(addAppointmentLocal(newAppointment));
+    dispatch(addPaymentLocal(newPayment));
     notifyOtherTabs();
     return newAppointment;
   };
@@ -857,7 +846,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } else if (activeRole === 'DESK_STAFF' || activeRole === 'ADMIN') {
       await api.put(`/staff/appointments/${appointmentId}/status`, { status });
     }
-    setAppointments(prev => prev.map(a => a.id === appointmentId ? { ...a, status } : a));
+    dispatch(updateAppointmentStatusLocal({ appointmentId, status }));
     notifyOtherTabs();
   };
 
@@ -870,14 +859,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       digitalSignatureStamp: `${rxData.doctorName} [Digitally Verified ${rxData.doctorRegNumber}]`
     };
 
-    setPrescriptions(prev => [newRx, ...prev]);
-    
-    setAppointments(prev => prev.map(a => 
-      a.id === rxData.appointmentId 
-        ? { ...a, prescriptionId: newRx.id, status: 'COMPLETED' } 
-        : a
-    ));
-
+    dispatch(addPrescriptionLocal(newRx));
     notifyOtherTabs();
     return newRx;
   };
@@ -885,7 +867,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const updateDoctor = async (doctorId: string, updates: Partial<DoctorUser> | FormData) => {
     const response = await api.put(`/admin/doctors/${doctorId}`, updates);
     const updatedDoc = mapDoctor({ ...(response.data.doctor || response.data), id: response.data.doctor?._id || response.data.doctor?.id || response.data._id || response.data.id });
-    setDoctors(prev => prev.map(d => d.id === doctorId ? updatedDoc : d));
+    dispatch(updateDoctorLocal(updatedDoc));
     notifyOtherTabs();
   };
 
@@ -895,14 +877,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       ...(response.data.doctor || response.data),
       id: response.data.doctor?._id || response.data.doctor?.id || response.data._id || response.data.id
     });
-    setDoctors(prev => [newDoc, ...prev]);
+    dispatch(addDoctorLocal(newDoc));
     notifyOtherTabs();
     return newDoc;
   };
 
   const deleteDoctor = async (doctorId: string) => {
     await api.delete(`/admin/doctors/${doctorId}`);
-    setDoctors(prev => prev.filter(d => d.id !== doctorId));
+    dispatch(deleteDoctorLocal(doctorId));
     notifyOtherTabs();
   };
 
@@ -918,7 +900,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       operatingHours: updates.operatingHours,
     });
     const updatedClinic = { ...(response.data.branch || response.data), id: response.data.branch?._id || response.data.branch?.id || response.data._id || response.data.id };
-    setClinics(prev => prev.map(c => c.id === clinicId ? updatedClinic : c));
+    dispatch(updateClinicLocal(updatedClinic));
     notifyOtherTabs();
   };
 
@@ -934,21 +916,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       operatingHours: clinicData.operatingHours,
     });
     const newClinic = { ...(response.data.branch || response.data), id: response.data.branch?._id || response.data.branch?.id || response.data._id || response.data.id };
-    setClinics(prev => [newClinic, ...prev]);
+    dispatch(addClinicLocal(newClinic));
     notifyOtherTabs();
     return newClinic;
   };
 
   const deleteClinic = async (clinicId: string) => {
     await api.delete(`/branches/${clinicId}`);
-    setClinics(prev => prev.filter(c => c.id !== clinicId));
+    dispatch(deleteClinicLocal(clinicId));
     notifyOtherTabs();
   };
 
   const addDeskStaffMember = async (formData: FormData): Promise<DeskStaffUser> => {
     const response = await api.post('/admin/staff', formData);
     const newStaff = mapStaff(response.data?.staff || response.data);
-    setDeskStaffMembers(prev => [newStaff, ...prev]);
+    dispatch(addStaffLocal(newStaff));
     notifyOtherTabs();
     return newStaff;
   };
@@ -956,21 +938,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const updateDeskStaffMember = async (staffId: string, formData: FormData): Promise<DeskStaffUser> => {
     const response = await api.put(`/admin/staff/${staffId}`, formData);
     const updatedStaff = mapStaff(response.data?.staff || response.data);
-    setDeskStaffMembers(prev => prev.map(s => s.id === staffId ? updatedStaff : s));
+    dispatch(updateStaffLocal(updatedStaff));
     notifyOtherTabs();
     return updatedStaff;
   };
 
   const deleteDeskStaffMember = async (staffId: string) => {
     await api.delete(`/admin/staff/${staffId}`);
-    setDeskStaffMembers(prev => prev.filter(s => s.id !== staffId));
+    dispatch(deleteStaffLocal(staffId));
     notifyOtherTabs();
   };
 
   const addCareService = async (data: any): Promise<CareService> => {
     const res = await api.post('/admin/care-services', data);
     const serviceObj = res.data?.data || res.data;
-    setCareServices(prev => [serviceObj, ...prev]);
+    dispatch(addCareServiceLocal(serviceObj));
     notifyOtherTabs();
     return serviceObj;
   };
@@ -978,33 +960,33 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const updateCareService = async (id: string, updates: any) => {
     const res = await api.put(`/admin/care-services/${id}`, updates);
     const updatedObj = res.data?.data || res.data;
-    setCareServices(prev => prev.map(s => s.id === id ? { ...s, ...updatedObj } : s));
+    dispatch(updateCareServiceLocal({ id, ...updatedObj }));
     notifyOtherTabs();
   };
 
   const deleteCareService = async (id: string) => {
     await api.delete(`/admin/care-services/${id}`);
-    setCareServices(prev => prev.filter(s => s.id !== id));
+    dispatch(deleteCareServiceLocal(id));
     notifyOtherTabs();
   };
 
   const addSpecialty = async (data: any): Promise<SpecialtyDetail> => {
-    const res = await api.post('/admin/specialties', data);
-    const newSpec = res.data;
-    setSpecialties(prev => [newSpec, ...prev]);
+    const newSpec: SpecialtyDetail = {
+      ...data,
+      id: data.id || `spec-local-${Date.now()}`
+    };
+    dispatch(addSpecialtyLocal(newSpec));
     notifyOtherTabs();
     return newSpec;
   };
 
   const updateSpecialty = async (id: string, updates: any) => {
-    const res = await api.put(`/admin/specialties/${id}`, updates);
-    setSpecialties(prev => prev.map(s => s.id === id ? { ...s, ...res.data } : s));
+    dispatch(updateSpecialtyLocal({ id, ...updates }));
     notifyOtherTabs();
   };
 
   const deleteSpecialty = async (id: string) => {
-    await api.delete(`/admin/specialties/${id}`);
-    setSpecialties(prev => prev.filter(s => s.id !== id));
+    dispatch(deleteSpecialtyLocal(id));
     notifyOtherTabs();
   };
 
@@ -1014,7 +996,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } catch (e) {
       console.warn('Backend reschedule API error, updating local state', e);
     }
-    setAppointments(prev => prev.map(a => a.id === appointmentId ? { ...a, appointmentDate: newDate, timeSlot: newTimeSlot, isRescheduled: true } : a));
+    dispatch(rescheduleAppointmentLocal({ appointmentId, newDate, newTimeSlot }));
     notifyOtherTabs();
   };
 
@@ -1061,9 +1043,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         isDoctorProfileModalOpen,
         selectedDoctorForProfile,
         selectedBlogId,
-        setSelectedBlogId,
+        setSelectedBlogId: (id) => dispatch(setReduxSelectedBlogId(id)),
         selectedSpecialtyFilter,
-        setSelectedSpecialtyFilter,
+        setSelectedSpecialtyFilter: (spec) => dispatch(setReduxSelectedSpecialtyFilter(spec)),
         preselectedDoctorId,
         preselectedClinicId,
         preselectedMode,
@@ -1072,8 +1054,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         isLoggingOut,
         logout,
         switchRole,
-        setLanguage,
-        setActiveBranchId,
+        setLanguage: (lang) => dispatch(setReduxLanguage(lang)),
+        setActiveBranchId: (branchId) => dispatch(setReduxActiveBranchId(branchId)),
         openAuthModal,
         closeAuthModal,
         openBookingModal,

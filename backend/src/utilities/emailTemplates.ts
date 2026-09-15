@@ -150,8 +150,10 @@ export const getPatientOTPEmailHTML = (otp: string): string => {
  * 3. Doctor Creation Credentials Email
  */
 export const getDoctorCredentialsEmailHTML = (name: string, email: string, rawPassword: string): string => {
+  const cleanName = name.replace(/^dr\.?\s*/i, '').trim();
+  const displayName = `Dr. ${cleanName}`;
   const content = `
-    <h2 style="color: #0f172a; font-size: 22px; font-weight: 800; margin: 0 0 8px 0; text-align: left;">Welcome, Dr. ${name} 🧑‍⚕️</h2>
+    <h2 style="color: #0f172a; font-size: 22px; font-weight: 800; margin: 0 0 8px 0; text-align: left;">Welcome, ${displayName} 🧑‍⚕️</h2>
     <p style="color: #64748b; font-size: 14px; line-height: 1.6; margin: 0 0 24px 0; text-align: left;">
       An administrator has created your doctor account on the SevaArogyam Portal. Your login credentials are below.
     </p>

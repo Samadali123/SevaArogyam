@@ -5,7 +5,7 @@ const getApiBaseUrl = () => {
       return import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api/v1';
     }
   }
-  return import.meta.env.VITE_PROD_API_BASE_URL || 'https://sevaarogyam.onrender.com/api/v1';
+  return import.meta.env.VITE_PROD_API_BASE_URL || 'https://jansevaarogyam.onrender.com/api/v1';
 };
 
 export const API_BASE_URL = getApiBaseUrl();

@@ -230,6 +230,7 @@ export interface Appointment {
   razorpayOrderId?: string;
   razorpayAmount?: number;
   razorpayCurrency?: string;
+  isRescheduled?: boolean;
 }
 
 export interface PaymentRecord {

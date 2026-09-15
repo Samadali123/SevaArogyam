@@ -58,7 +58,16 @@ export class Server {
         origin: (requestOrigin, callback) => {
           if (!requestOrigin) return callback(null, true);
           const cleanOrigin = requestOrigin.replace(/\/$/, '');
-          const defaultAllowed = ['https://seva-arogyam.vercel.app', 'http://localhost:5173', 'http://localhost:3000'];
+          const defaultAllowed = [
+            'https://jansevaarogyam.com',
+            'https://www.jansevaarogyam.com',
+            'https://api.jansevaarogyam.com',
+            'https://jensevaarogyam.com',
+            'https://www.jensevaarogyam.com',
+            'https://seva-arogyam.vercel.app',
+            'http://localhost:5173',
+            'http://localhost:3000'
+          ];
 
           if (
             configuredOrigins.includes('*') ||

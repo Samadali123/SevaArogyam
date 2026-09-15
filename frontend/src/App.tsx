@@ -119,11 +119,18 @@ const MainContent: React.FC = () => {
   // Synchronize role when initially loaded at /admin, /doctor, /support, /patient-dashboard
   useEffect(() => {
     const path = window.location.pathname.toLowerCase().replace(/\/$/, '');
+    const isAdmin = currentUser?.role === 'ADMIN' || activeRole === 'ADMIN' || isAdminAuthenticated;
     const isDoc = currentUser?.role === 'DOCTOR';
     const isStaff = currentUser?.role === 'DESK_STAFF' || (currentUser?.role as string) === 'STAFF';
 
-    if (path === '/adminp' || path === '/admin') {
-      if (!isAdminAuthenticated) {
+    if (isAdmin) {
+      if (currentTab !== 'admin' && !path.startsWith('/reset-password')) {
+        setCurrentTabState('admin');
+        if (activeRole !== 'ADMIN') switchRole('ADMIN');
+        if (window.location.pathname !== '/admin') window.history.replaceState({}, '', '/admin');
+      }
+    } else if (path === '/adminp' || path === '/admin') {
+      if (!isAdmin) {
         setCurrentTabState('home');
         if (window.location.pathname !== '/') window.history.replaceState({}, '', '/');
       } else {
@@ -149,7 +156,7 @@ const MainContent: React.FC = () => {
         if (window.location.pathname !== '/') window.history.replaceState({}, '', '/');
       }
     }
-  }, [isAdminAuthenticated, currentUser, activeRole]);
+  }, [isAdminAuthenticated, currentUser, activeRole, currentTab]);
 
   useEffect(() => {
     document.documentElement.lang = language;
@@ -190,7 +197,12 @@ const MainContent: React.FC = () => {
         {currentTab === 'diagnostics' && <ServiceCatalog kind="diagnostics" />}
         {currentTab === 'laboratory' && <ServiceCatalog kind="laboratory" />}
         {currentTab === 'referrals' && <Referrals />}
-        {currentTab === 'reset-password' && <ResetPassword onNavigate={handleSetCurrentTab} />}
+        {currentTab === 'reset-password' && (
+          <>
+            <PublicPortal onNavigate={handleSetCurrentTab} />
+            <ResetPassword onNavigate={handleSetCurrentTab} />
+          </>
+        )}
       </main>
 
       {/* Footer */}

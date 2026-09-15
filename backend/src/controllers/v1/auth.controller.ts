@@ -2,18 +2,15 @@ import { Request, Response } from 'express';
 import { prisma } from '@config/database';
 import { AppError } from '@errors/AppError';
 import { ERROR_CODES } from '@errors/errorCodes';
-import { HTTP_STATUS, USER_ROLES, JWT } from '@utilities/constants';
+import { HTTP_STATUS, USER_ROLES } from '@utilities/constants';
 import { asyncHandler } from '@utilities/asyncHandler';
-import { getSystemSetting } from '@utilities/settings';
 import { comparePassword, generateTokens, generateOTP, generateResetToken, hashPassword } from '@utilities/auth';
 import { sendEmail } from '@utilities/mailer';
-import { getAdminOTPEmailHTML, getPatientOTPEmailHTML, getForgotPasswordEmailHTML } from '@utilities/emailTemplates';
+import { getPatientOTPEmailHTML, getForgotPasswordEmailHTML } from '@utilities/emailTemplates';
 
 // ─────────────────────────────────────────────
 // Admin / Doctor / Staff Login (Email + Password)
 // ─────────────────────────────────────────────
-
-
 export const login = asyncHandler(async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
@@ -25,10 +22,10 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
     where: { email },
   });
 
-  if (!user || user.role === USER_ROLES.PATIENT || user.role === USER_ROLES.ADMIN) {
+  if (!user || user.role === USER_ROLES.PATIENT) {
     throw new AppError(
-      user && (user.role === USER_ROLES.ADMIN || user.role === USER_ROLES.PATIENT)
-        ? 'Admins and Patients must log in using OTP'
+      user && user.role === USER_ROLES.PATIENT
+        ? 'Patients must log in using OTP'
         : 'Invalid credentials or unauthorized role',
       HTTP_STATUS.UNAUTHORIZED,
       ERROR_CODES.UNAUTHORIZED,
@@ -62,48 +59,54 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
 });
 
 // ─────────────────────────────────────────────
-// Admin & Patient Login/Registration (OTP via Email)
+// Single Admin Manual Creation (Developer / Setup API)
+// Route: POST /api/v1/auth/create-admin
 // ─────────────────────────────────────────────
-export const sendAdminOTP = asyncHandler(async (req: Request, res: Response) => {
-  const { email } = req.body;
-  if (!email) throw new AppError('Email is required', HTTP_STATUS.BAD_REQUEST, ERROR_CODES.VALIDATION_ERROR, true);
-  
-  const otp = generateOTP();
-  const otpExpiry = new Date(Date.now() + JWT.OTP_EXPIRES_MINS * 60 * 1000);
-  
-  const user = await prisma.user.upsert({
-    where: { email },
-    update: { otp, otpExpiry, role: USER_ROLES.ADMIN },
-    create: {
-      email,
-      name: 'Admin',
-      role: USER_ROLES.ADMIN,
-      otp,
-      otpExpiry,
-    }
+export const createAdmin = asyncHandler(async (req: Request, res: Response) => {
+  const { name, email, password } = req.body;
+
+  if (!name || !email || !password) {
+    throw new AppError('Name, email, and password are required', HTTP_STATUS.BAD_REQUEST, ERROR_CODES.VALIDATION_ERROR, true);
+  }
+
+  // Enforce Single Admin Constraint
+  const existingAdmin = await prisma.user.findFirst({
+    where: { role: USER_ROLES.ADMIN }
   });
 
-  if (!user.isActive) throw new AppError('Account is inactive', HTTP_STATUS.FORBIDDEN, ERROR_CODES.FORBIDDEN, true);
-  console.log(`[AUTH] Admin OTP generated for ${user.email}: ${otp}`);
-  await sendEmail(user.email!, 'SevaArogyam Admin Login Verification Code', getAdminOTPEmailHTML(otp));
-  
-  res.status(HTTP_STATUS.OK).json({ status: 'success', message: 'OTP sent to admin email.' });
+  if (existingAdmin) {
+    throw new AppError('An Admin account already exists. Only 1 Admin is allowed in the system.', HTTP_STATUS.FORBIDDEN, ERROR_CODES.FORBIDDEN, true);
+  }
+
+  const existingEmailUser = await prisma.user.findUnique({ where: { email } });
+  if (existingEmailUser) {
+    throw new AppError('User with this email already exists', HTTP_STATUS.CONFLICT, ERROR_CODES.VALIDATION_ERROR, true);
+  }
+
+  const hashedPassword = await hashPassword(password);
+
+  const admin = await prisma.user.create({
+    data: {
+      name,
+      email,
+      password: hashedPassword,
+      role: USER_ROLES.ADMIN,
+      isActive: true,
+    },
+  });
+
+  res.status(HTTP_STATUS.CREATED).json({
+    status: 'success',
+    message: 'Admin account created successfully.',
+    data: {
+      user: { id: admin.id, name: admin.name, email: admin.email, role: admin.role }
+    }
+  });
 });
 
-export const verifyAdminOTP = asyncHandler(async (req: Request, res: Response) => {
-  const { email, otp } = req.body;
-  if (!email || !otp) throw new AppError('Email and OTP are required', HTTP_STATUS.BAD_REQUEST, ERROR_CODES.VALIDATION_ERROR, true);
-  
-  const user = await prisma.user.findFirst({ where: { email, otp, role: USER_ROLES.ADMIN } });
-  if (!user) throw new AppError('Invalid OTP or Admin not found', HTTP_STATUS.UNAUTHORIZED, ERROR_CODES.UNAUTHORIZED, true);
-  if (user.otpExpiry && user.otpExpiry < new Date()) throw new AppError('OTP expired', HTTP_STATUS.UNAUTHORIZED, ERROR_CODES.UNAUTHORIZED, true);
-
-  await prisma.user.update({ where: { id: user.id }, data: { otp: null, otpExpiry: null } });
-  const tokens = generateTokens({ id: user.id, role: user.role });
-
-  res.status(HTTP_STATUS.OK).json({ status: 'success', data: { user: { id: user.id, name: user.name, email: user.email, role: user.role }, ...tokens } });
-});
-
+// ─────────────────────────────────────────────
+// Patient Login/Registration (OTP via Email)
+// ─────────────────────────────────────────────
 export const sendPatientOTP = asyncHandler(async (req: Request, res: Response) => {
   const { email } = req.body; 
   if (!email) throw new AppError('Email is required', HTTP_STATUS.BAD_REQUEST, ERROR_CODES.VALIDATION_ERROR, true);
@@ -114,7 +117,7 @@ export const sendPatientOTP = asyncHandler(async (req: Request, res: Response) =
   }
   
   const otp = generateOTP();
-  const otpExpiry = new Date(Date.now() + JWT.OTP_EXPIRES_MINS * 60 * 1000);
+  const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
   const patientIdGen = `PT-${Math.floor(10000 + Math.random() * 90000)}`;
 
   const user = await prisma.user.upsert({
@@ -142,11 +145,6 @@ export const verifyPatientOTP = asyncHandler(async (req: Request, res: Response)
     const referrer = await prisma.user.findUnique({ where: { referralCode } });
     if (referrer && referrer.id !== user.id) {
       user = await prisma.user.update({ where: { id: user.id }, data: { referredById: referrer.id } });
-      const referralBonusAmount = Number(await getSystemSetting('REFERRAL_BONUS_AMOUNT', 150));
-      await prisma.user.update({ where: { id: referrer.id }, data: { walletBalance: { increment: referralBonusAmount } } });
-      const referralDiscountPercent = Number(await getSystemSetting('REFERRAL_DISCOUNT_PERCENT', 5));
-      const expirationDate = new Date(); expirationDate.setDate(expirationDate.getDate() + 30);
-      await prisma.coupon.create({ data: { code: `WELCOME-${user.id.substring(0, 5).toUpperCase()}`, discountType: 'PERCENTAGE', discountValue: referralDiscountPercent, userId: user.id, expiresAt: expirationDate } });
     }
   }
 
@@ -154,15 +152,10 @@ export const verifyPatientOTP = asyncHandler(async (req: Request, res: Response)
   res.status(HTTP_STATUS.OK).json({ status: 'success', data: { user: { id: user.id, name: user.name, email: user.email, role: user.role }, ...tokens } });
 });
 
-
-
-
-
 // ─────────────────────────────────────────────
 // Logout
 // ─────────────────────────────────────────────
 export const logout = asyncHandler(async (_req: Request, res: Response) => {
-
   res.status(HTTP_STATUS.OK).json({
     status: 'success',
     message: 'Logged out successfully',
@@ -170,7 +163,7 @@ export const logout = asyncHandler(async (_req: Request, res: Response) => {
 });
 
 // ─────────────────────────────────────────────
-// Forgot Password (Doctor / Staff)
+// Forgot Password (Admin / Doctor / Staff)
 // ─────────────────────────────────────────────
 export const forgotPassword = asyncHandler(async (req: Request, res: Response) => {
   const { email } = req.body;

@@ -32,7 +32,7 @@ Role: ${credentials.role === 'DOCTOR' ? 'Doctor Specialist' : 'Desk Staff / Rece
 Recipient Email: ${credentials.email}
 Login ID / Username: ${credentials.loginId}
 Protected Password: ${credentials.password}
-Portal Access Link: https://sevaarogyam.in/login`;
+Portal Access Link: https://jansevaarogyam.in/login`;
 
     navigator.clipboard?.writeText(text);
     setCopied(true);

@@ -10,7 +10,7 @@ import {
   PhoneCall
 } from 'lucide-react';
 import { useApp, DEFAULT_DOCTOR_AVATAR } from '../context/AppContext';
-import { FACILITIES_DATA, DEFAULT_BRANCH_IMAGES, INITIAL_CLINICS } from '../data/mockData';
+import { FACILITIES_DATA, DEFAULT_BRANCH_IMAGES } from '../data/mockData';
 
 export const LocationsFacilities: React.FC = () => {
   const { clinics, doctors, openBookingModal, activeBranchId, setActiveBranchId, language } = useApp();
@@ -19,7 +19,7 @@ export const LocationsFacilities: React.FC = () => {
   const setSelectedBranchId = (id: string) => setActiveBranchId(id);
   const [facilityCategory, setFacilityCategory] = useState<string>('all');
 
-  const selectedClinic = clinics.find(c => c.id === selectedBranchId) || clinics[0] || INITIAL_CLINICS[0];
+  const selectedClinic = clinics.find(c => c.id === selectedBranchId) || clinics[0];
 
   const facilityCategories = [
     { id: 'all', label: language === 'en' ? 'All Facilities' : 'सभी सुविधाएं' },
@@ -108,7 +108,7 @@ export const LocationsFacilities: React.FC = () => {
 
         {/* Branch Buttons Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {(clinics && clinics.length > 0 ? clinics : INITIAL_CLINICS).map(c => {
+          {clinics.map(c => {
             const isSelected = selectedBranchId === c.id;
             return (
               <button

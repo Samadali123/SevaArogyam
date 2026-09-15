@@ -5,8 +5,7 @@ import {
   getPatients,
   getDashboardStats, getRevenueAudit, getTransactionRecords, getEMRLogs,
   getSystemSettings, updateSystemSettings,
-  createCareService, getAdminCareServices, updateCareService, deleteCareService,
-  createSpecialty, getAdminSpecialties, updateSpecialty, deleteSpecialty
+  createCareService, getAdminCareServices, updateCareService, deleteCareService
 } from '@controllers/v1/admin.controller';
 import { isLoggedIn, restrictTo } from '@middlewares/auth';
 import { USER_ROLES } from '@utilities/constants';
@@ -60,12 +59,5 @@ router.get('/care-services', getAdminCareServices);
 router.put('/care-services/:id', updateCareService);
 router.delete('/care-services/:id', deleteCareService);
 
-// ─────────────────────────────────────────────
-// Specialty Routes
-// ─────────────────────────────────────────────
-router.post('/specialties', createSpecialty);
-router.get('/specialties', getAdminSpecialties);
-router.put('/specialties/:id', updateSpecialty);
-router.delete('/specialties/:id', deleteSpecialty);
 
 export default router;

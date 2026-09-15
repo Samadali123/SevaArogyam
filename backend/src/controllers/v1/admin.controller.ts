@@ -25,9 +25,19 @@ export const createDoctor = asyncHandler(async (req: Request, res: Response) => 
     throw new AppError('A valid 10-digit Indian mobile number is required (starting with 6-9)', HTTP_STATUS.BAD_REQUEST, ERROR_CODES.VALIDATION_ERROR, true);
   }
 
-  const existingUser = await prisma.user.findUnique({ where: { email } });
+  const existingUser = await prisma.user.findFirst({
+    where: {
+      OR: [
+        { email },
+        { phone: cleanPhone }
+      ]
+    }
+  });
   if (existingUser) {
-    throw new AppError('A user with this email already exists', HTTP_STATUS.CONFLICT, ERROR_CODES.VALIDATION_ERROR, true);
+    if (existingUser.email === email) {
+      throw new AppError('A user with this email address already exists', HTTP_STATUS.CONFLICT, ERROR_CODES.VALIDATION_ERROR, true);
+    }
+    throw new AppError('A user with this phone number already exists', HTTP_STATUS.CONFLICT, ERROR_CODES.VALIDATION_ERROR, true);
   }
 
   const rawPassword = generateRandomPassword();
@@ -200,9 +210,19 @@ export const createStaff = asyncHandler(async (req: Request, res: Response) => {
     throw new AppError('A valid 10-digit Indian mobile number is required (starting with 6-9)', HTTP_STATUS.BAD_REQUEST, ERROR_CODES.VALIDATION_ERROR, true);
   }
 
-  const existingUser = await prisma.user.findUnique({ where: { email } });
+  const existingUser = await prisma.user.findFirst({
+    where: {
+      OR: [
+        { email },
+        { phone: cleanPhone }
+      ]
+    }
+  });
   if (existingUser) {
-    throw new AppError('A user with this email already exists', HTTP_STATUS.CONFLICT, ERROR_CODES.VALIDATION_ERROR, true);
+    if (existingUser.email === email) {
+      throw new AppError('A user with this email address already exists', HTTP_STATUS.CONFLICT, ERROR_CODES.VALIDATION_ERROR, true);
+    }
+    throw new AppError('A user with this phone number already exists', HTTP_STATUS.CONFLICT, ERROR_CODES.VALIDATION_ERROR, true);
   }
 
   const rawPassword = generateRandomPassword();
@@ -644,66 +664,4 @@ export const deleteCareService = asyncHandler(async (req: Request, res: Response
   res.status(HTTP_STATUS.NO_CONTENT).send();
 });
 
-// ─────────────────────────────────────────────
-// Specialty Management
-// ─────────────────────────────────────────────
-
-export const createSpecialty = asyncHandler(async (req: Request, res: Response) => {
-  const { nameEn, nameHi, category, tagline, description, conditionsTreated, proceduresAndTech, bannerUrl, isActive } = req.body;
-  
-  if (!nameEn || !category) {
-    throw new AppError('English name and category are required', HTTP_STATUS.BAD_REQUEST, ERROR_CODES.VALIDATION_ERROR, true);
-  }
-
-  const specialty = await prisma.specialty.create({
-    data: {
-      nameEn,
-      nameHi: nameHi || '',
-      category,
-      tagline: tagline || '',
-      description: description || '',
-      conditionsTreated: Array.isArray(conditionsTreated) ? conditionsTreated : [],
-      proceduresAndTech: Array.isArray(proceduresAndTech) ? proceduresAndTech : [],
-      bannerUrl: bannerUrl || '',
-      isActive: isActive !== undefined ? isActive : true
-    }
-  });
-
-  res.status(HTTP_STATUS.CREATED).json({ status: 'success', data: specialty });
-});
-
-export const getAdminSpecialties = asyncHandler(async (_req: Request, res: Response) => {
-  const specialties = await prisma.specialty.findMany({
-    orderBy: { createdAt: 'desc' }
-  });
-  res.status(HTTP_STATUS.OK).json({ status: 'success', data: specialties });
-});
-
-export const updateSpecialty = asyncHandler(async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const { nameEn, nameHi, category, tagline, description, conditionsTreated, proceduresAndTech, bannerUrl, isActive } = req.body;
-
-  const specialty = await prisma.specialty.update({
-    where: { id },
-    data: {
-      ...(nameEn && { nameEn }),
-      ...(nameHi !== undefined && { nameHi }),
-      ...(category && { category }),
-      ...(tagline !== undefined && { tagline }),
-      ...(description !== undefined && { description }),
-      ...(conditionsTreated && { conditionsTreated }),
-      ...(proceduresAndTech && { proceduresAndTech }),
-      ...(bannerUrl !== undefined && { bannerUrl }),
-      ...(isActive !== undefined && { isActive }),
-    }
-  });
-
-  res.status(HTTP_STATUS.OK).json({ status: 'success', data: specialty });
-});
-
-export const deleteSpecialty = asyncHandler(async (req: Request, res: Response) => {
-  const { id } = req.params;
-  await prisma.specialty.delete({ where: { id } });
-  res.status(HTTP_STATUS.NO_CONTENT).send();
-});
 
