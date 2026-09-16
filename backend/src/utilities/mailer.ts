@@ -1,24 +1,20 @@
 import nodemailer from 'nodemailer';
 
 /**
- * Sends an email via HTTPS REST API (Port 443 - Never blocked on Render free tier)
- * or via standard Nodemailer SMTP for local development.
- * 
- * Recommended for Render Free Instance: Set RESEND_API_KEY or BREVO_API_KEY in Render Environment Variables.
+ * Sends an email via Resend HTTPS REST API (Port 443 - Never blocked on Render)
+ * or via standard Nodemailer SMTP for local fallback.
  */
 export const sendEmail = async (to: string, subject: string, html: string): Promise<boolean> => {
   const user = (process.env.SMTP_USER || '').trim();
   const pass = (process.env.SMTP_PASS || '').trim();
   const resendApiKey = process.env.RESEND_API_KEY;
-  const brevoApiKey = process.env.BREVO_API_KEY;
 
-  const fromEmail = process.env.EMAIL_FROM || `"${user || 'SevaArogyam'}" <${user || 'noreply@sevasadanclinic.in'}>`;
+  const resendFrom = process.env.RESEND_FROM || process.env.EMAIL_FROM || 'JansevaArogyam <otp@jansevaarogyam.com>';
 
-  // 1. Resend API (HTTPS Port 443 - Never blocked on Render free tier)
+  // 1. Primary: Resend API (HTTPS Port 443 - Works reliably in production & Render)
   if (resendApiKey && resendApiKey.trim()) {
     try {
-      const resendFrom = process.env.RESEND_FROM || 'JansevaArogyam <otp@jansevaarogyam.com>';
-      console.log(`[MAILER] Sending email to ${to} via Resend HTTPS API (Port 443) from ${resendFrom}...`);
+      console.log(`[MAILER] Sending email to ${to} via Resend HTTPS API from ${resendFrom}...`);
       const response = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
@@ -45,40 +41,9 @@ export const sendEmail = async (to: string, subject: string, html: string): Prom
     }
   }
 
-  // 2. Brevo API (HTTPS Port 443 - Never blocked on Render free tier)
-  if (brevoApiKey && brevoApiKey.trim()) {
-    try {
-      console.log(`[MAILER] Sending email to ${to} via Brevo HTTPS API (Port 443)...`);
-      const response = await fetch('https://api.brevo.com/v3/smtp/email', {
-        method: 'POST',
-        headers: {
-          'accept': 'application/json',
-          'api-key': brevoApiKey.trim(),
-          'content-type': 'application/json',
-        },
-        body: JSON.stringify({
-          sender: { name: 'SevaArogyam', email: user || 'samadali0125@gmail.com' },
-          to: [{ email: to }],
-          subject: subject,
-          htmlContent: html,
-        }),
-      });
-
-      const data: any = await response.json();
-      if (response.ok) {
-        console.log('[MAILER] Brevo HTTPS API succeeded. Message ID:', data.messageId);
-        return true;
-      } else {
-        console.warn('[MAILER] Brevo API error:', data);
-      }
-    } catch (err: any) {
-      console.error('[MAILER] Brevo HTTPS request failed:', err?.message || err);
-    }
-  }
-
-  // 3. Fallback: Standard Nodemailer SMTP (For local dev / non-blocked servers)
+  // 2. Fallback: Standard Nodemailer SMTP (For local dev / non-blocked servers)
   if (!user || !pass) {
-    console.warn(`[MAILER] No API keys or SMTP credentials available. Skipping email send to ${to}.`);
+    console.warn(`[MAILER] No RESEND_API_KEY or SMTP credentials available. Skipping email send to ${to}.`);
     return false;
   }
 
@@ -99,7 +64,7 @@ export const sendEmail = async (to: string, subject: string, html: string): Prom
     } as any);
 
     const info = await transporter.sendMail({
-      from: fromEmail,
+      from: resendFrom,
       to,
       subject,
       html,
