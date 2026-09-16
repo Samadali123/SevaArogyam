@@ -17,7 +17,8 @@ export const sendEmail = async (to: string, subject: string, html: string): Prom
   // 1. Resend API (HTTPS Port 443 - Never blocked on Render free tier)
   if (resendApiKey && resendApiKey.trim()) {
     try {
-      console.log(`[MAILER] Sending email to ${to} via Resend HTTPS API (Port 443)...`);
+      const resendFrom = process.env.RESEND_FROM || 'JansevaArogyam <otp@jansevaarogyam.com>';
+      console.log(`[MAILER] Sending email to ${to} via Resend HTTPS API (Port 443) from ${resendFrom}...`);
       const response = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
@@ -25,7 +26,7 @@ export const sendEmail = async (to: string, subject: string, html: string): Prom
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          from: 'SevaArogyam <onboarding@resend.dev>',
+          from: resendFrom,
           to: [to],
           subject: subject,
           html: html,
