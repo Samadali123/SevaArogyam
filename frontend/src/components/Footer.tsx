@@ -13,26 +13,26 @@ interface FooterProps {
 }
 
 export const Footer: React.FC<FooterProps> = ({ setCurrentTab }) => {
-  const { openBookingModal, setSelectedSpecialtyFilter, language } = useApp();
+  const { openBookingModal, setSelectedSpecialtyFilter, language, openAppDownloadModal } = useApp();
 
   return (
     <footer className="bg-slate-900 text-slate-300 pt-14 pb-8 border-t border-slate-800 shadow-2xl font-sans">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         
         {/* 1. TOP SECTION: MOBILE APP DOWNLOAD & EMERGENCY HELPLINE BANNER */}
-        <div className="bg-linear-to-r from-[#0A2540] via-[#0F2C59] to-[#0284C7] rounded-3xl p-6 sm:p-8 border border-white/10 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-8">
+        <div className="bg-linear-to-r from-[#0B1F3A] via-[#0D2B4E] to-[#132D4D] rounded-3xl p-6 sm:p-8 border border-white/10 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-8">
           
           {/* Left: App Tagline & Store Badges */}
-          <div className="space-y-4 text-center md:text-left max-w-md">
-            <div className="inline-flex items-center gap-2 bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 text-[11px] font-heading font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
-              <Smartphone className="w-3.5 h-3.5 text-emerald-400" />
-              <span>{language === 'en' ? 'Mobile OPD & Live Token Tracking' : 'मोबाइल ओपीडी एवं लाइव टोकन ट्रैकिंग'}</span>
+          <div className="space-y-4 max-w-xl text-center md:text-left">
+            <div className="inline-flex items-center gap-2 bg-[#0D9488]/20 text-[#2DD4BF] border border-[#0D9488]/40 px-3 py-1 rounded-full text-[11px] font-heading font-extrabold uppercase tracking-widest">
+              <Smartphone className="w-3.5 h-3.5 text-[#2DD4BF]" />
+              <span>{language === 'en' ? 'Official Health App' : 'आधिकारिक मोबाइल ऐप'}</span>
             </div>
             
             <h3 className="text-2xl sm:text-3xl font-heading font-extrabold text-white tracking-tight">
               {language === 'en' ? 'Download Our Healthcare App' : 'हमारा हेल्थकेयर ऐप डाउनलोड करें'}
             </h3>
-            <p className="text-xs text-sky-100/80 font-medium leading-relaxed">
+            <p className="text-xs text-[#CBD5E1] font-medium leading-relaxed">
               {language === 'en'
                 ? 'Book OPD tokens, consult senior doctors on video, track live queues, and download instant digital prescriptions on iOS & Android.'
                 : 'ओपीडी टोकन बुक करें, वीडियो पर डॉक्टरों से सलाह लें, लाइव लाइन देखें और तुरंत डिजिटल पर्ची डाउनलोड करें।'}
@@ -41,24 +41,24 @@ export const Footer: React.FC<FooterProps> = ({ setCurrentTab }) => {
             {/* App Store Buttons */}
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 pt-1 font-sans">
               {/* Google Play Store Badge */}
-              <a
-                href="#download-android"
-                onClick={(e) => { e.preventDefault(); alert(language === 'en' ? 'JansevaArogyam Android App link sent to your phone!' : 'जनसेवा आरोग्यम ऐप लिंक आपके फोन पर भेज दिया गया है!'); }}
+              <button
+                type="button"
+                onClick={() => openAppDownloadModal('android')}
                 className="bg-slate-950/80 hover:bg-slate-950 text-white px-4 py-2.5 rounded-xl flex items-center gap-3 transition border border-white/10 shadow-md group cursor-pointer"
               >
-                <svg className="w-6 h-6 fill-current text-emerald-400 group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
+                <svg className="w-6 h-6 fill-current text-[#2DD4BF] group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
                   <path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.6 3,21.09 3,20.5M16.81,15.12L18.81,17.12L6.15,22.84C5.78,23 5.38,22.95 5.07,22.7L15.12,12.65L16.81,15.12M16.81,8.88L15.12,11.35L5.07,1.3C5.38,1.05 5.78,1 6.15,1.16L18.81,6.88L16.81,8.88M19.97,12L17.75,9.78L15.75,11.78L17.75,13.78L19.97,12Z"/>
                 </svg>
                 <div className="text-left">
                   <p className="text-[9px] text-slate-400 uppercase font-extrabold leading-none">GET IT ON</p>
                   <p className="text-xs font-black text-white leading-tight">Google Play</p>
                 </div>
-              </a>
+              </button>
 
               {/* Apple App Store Badge */}
-              <a
-                href="#download-ios"
-                onClick={(e) => { e.preventDefault(); alert(language === 'en' ? 'JansevaArogyam iOS App link sent to your phone!' : 'जनसेवा आरोग्यम ऐप लिंक आपके फोन पर भेज दिया गया है!'); }}
+              <button
+                type="button"
+                onClick={() => openAppDownloadModal('ios')}
                 className="bg-slate-950/80 hover:bg-slate-950 text-white px-4 py-2.5 rounded-xl flex items-center gap-3 transition border border-white/10 shadow-md group cursor-pointer"
               >
                 <svg className="w-6 h-6 fill-current text-slate-100 group-hover:scale-110 transition-transform" viewBox="0 0 24 24">
@@ -68,26 +68,26 @@ export const Footer: React.FC<FooterProps> = ({ setCurrentTab }) => {
                   <p className="text-[9px] text-slate-400 uppercase font-extrabold leading-none">Download on the</p>
                   <p className="text-xs font-black text-white leading-tight">App Store</p>
                 </div>
-              </a>
+              </button>
             </div>
           </div>
 
           {/* Right: 24x7 Emergency & NABH Support Card */}
-          <div className="bg-slate-900/90 text-white p-5 rounded-2xl border border-white/10 shadow-xl space-y-3 shrink-0 max-w-sm font-sans">
+          <div className="bg-[#132D4D]/90 text-white p-5 rounded-2xl border border-white/10 shadow-xl space-y-3 shrink-0 max-w-sm font-sans">
             <div className="flex items-center justify-between gap-3">
-              <span className="bg-rose-500/20 text-rose-300 border border-rose-400/30 text-[10px] font-heading font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1">
-                <ShieldAlert className="w-3.5 h-3.5 text-rose-300 animate-pulse" />
+              <span className="bg-[#C2410C]/20 text-orange-200 border border-[#C2410C]/40 text-[10px] font-heading font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1">
+                <ShieldAlert className="w-3.5 h-3.5 text-orange-300 animate-pulse" />
                 <span>{language === 'en' ? '24x7 Emergency' : '24x7 एमर्जेंसी'}</span>
               </span>
-              <span className="text-[10px] text-emerald-300 font-heading font-bold bg-emerald-400/10 px-2 py-0.5 rounded-full border border-emerald-400/20 flex items-center gap-1">
-                <ShieldCheck className="w-3 h-3 text-emerald-400" />
+              <span className="text-[10px] text-[#2DD4BF] font-heading font-bold bg-[#0D9488]/20 px-2 py-0.5 rounded-full border border-[#0D9488]/30 flex items-center gap-1">
+                <ShieldCheck className="w-3 h-3 text-[#2DD4BF]" />
                 <span>NABH Accredited</span>
               </span>
             </div>
 
             <div>
               <p className="text-[11px] text-slate-300 font-medium">{language === 'en' ? 'Toll-Free Emergency & Ambulance Desk:' : 'टोल-फ्री एमर्जेंसी एवं एम्बुलेंस सहायता:'}</p>
-              <a href="tel:1800-7382-723" className="text-xl font-heading font-extrabold text-sky-300 hover:text-white transition block mt-0.5">
+              <a href="tel:1800-7382-723" className="text-xl font-heading font-extrabold text-[#5EAAF0] hover:text-white transition block mt-0.5">
                 1800-SEVA-CLINIC
               </a>
               <p className="text-[10px] text-slate-400 font-normal">Sarangpur • Shujalpur • Rajgarh Network</p>
@@ -96,14 +96,14 @@ export const Footer: React.FC<FooterProps> = ({ setCurrentTab }) => {
             <div className="pt-2 flex items-center gap-2 border-t border-white/10 font-sans">
               <a
                 href="tel:1800-7382-723"
-                className="bg-emerald-600 hover:bg-emerald-700 text-white font-heading font-extrabold px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5 transition shadow-sm"
+                className="bg-linear-to-r from-[#10B981] to-[#0D9488] hover:opacity-95 text-white font-heading font-extrabold px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5 transition shadow-sm"
               >
                 <Phone className="w-3.5 h-3.5" />
                 <span>{language === 'en' ? 'Call Helpline' : 'कॉल करें'}</span>
               </a>
               <button
                 onClick={() => openBookingModal()}
-                className="bg-white/10 hover:bg-white/20 text-white font-heading font-bold px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5 transition border border-white/10 cursor-pointer"
+                className="bg-[#1E3A5F] hover:bg-[#1E3A5F]/80 text-white font-heading font-bold px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5 transition border border-white/10 cursor-pointer"
               >
                 <span>{language === 'en' ? 'Book Slot' : 'स्लॉट बुक करें'}</span>
               </button>
@@ -190,7 +190,7 @@ export const Footer: React.FC<FooterProps> = ({ setCurrentTab }) => {
 
             <div className="pt-3 space-y-1 border-t border-slate-800">
               <p className="font-heading font-extrabold text-white text-xs">{language === 'en' ? 'Helpdesk Helpline' : 'हेल्पडेस्क हेल्पलाइन'}</p>
-              <p className="text-xs font-mono text-sky-400 font-bold">1800-SEVA-CLINIC (7382-723)</p>
+              <p className="text-xs font-mono text-[#5EAAF0] font-bold">1800-SEVA-CLINIC (7382-723)</p>
               <p className="text-[11px] text-slate-400">support@sevasadanclinic.in</p>
             </div>
           </div>

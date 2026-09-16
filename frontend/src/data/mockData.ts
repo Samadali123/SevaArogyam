@@ -377,7 +377,7 @@ export const SPECIALTIES_DATA: SpecialtyDetail[] = [
     conditionsTreated: ['Acne, Pimples & Pigmentation', 'Eczema, Psoriasis & Dermatitis', 'Alopecia & Hair Loss', 'Fungal & Bacterial Skin Infections', 'Urticaria & Skin Allergies', 'Warts & Skin Tag Removal'],
     proceduresAndTech: ['Platelet-Rich Plasma (PRP) Hair Therapy', 'Dermatoscopy Skin Examination', 'Electrocautery & Radiofrequency Removal', 'Chemical Peels & Skin Rejuvenation', 'Tele-Dermatology Photo Review'],
     doctorIds: ['doc-meenakshi'],
-    bannerUrl: 'https://images.unsplash.com/photo-1512290900676-26c2816695ae?auto=format&fit=crop&q=80&w=1200'
+    bannerUrl: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&q=80&w=1200'
   },
   {
     id: 'cardiology',

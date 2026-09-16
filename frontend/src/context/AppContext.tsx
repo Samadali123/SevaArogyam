@@ -20,7 +20,8 @@ import type {
   SpecialtyDetail
 } from '../types';
 import { 
-  DEMO_PATIENTS
+  DEMO_PATIENTS,
+  SPECIALTIES_DATA
 } from '../data/mockData';
 import { api, getApiErrorMessage, saveAuthToken, AUTH_TOKEN_KEY } from '../services/api';
 import defaultProfilePhoto from '../assets/images/Default_profile.webp';
@@ -44,6 +45,8 @@ import {
   setSelectedBlogId as setReduxSelectedBlogId,
   setSelectedSpecialtyFilter as setReduxSelectedSpecialtyFilter,
   setPreselectedBooking,
+  openAppDownloadModal as reduxOpenAppDownloadModal,
+  closeAppDownloadModal as reduxCloseAppDownloadModal,
 } from '../store/slices/uiSlice';
 import {
   setDoctors,
@@ -178,6 +181,10 @@ interface AppContextType {
   deleteSpecialty: (id: string) => Promise<void>;
   rescheduleAppointment: (appointmentId: string, newDate: string, newTimeSlot: string) => Promise<void>;
   findPatientById: (patientId: string) => Promise<Partial<PatientUser>>;
+  isAppDownloadModalOpen: boolean;
+  appPlatform: 'android' | 'ios' | 'both';
+  openAppDownloadModal: (platform?: 'android' | 'ios' | 'both') => void;
+  closeAppDownloadModal: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -291,12 +298,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const articlesState = useAppSelector((state) => state.articles);
 
   const { currentUser, activeRole, isAdminAuthenticated, isLoggingOut, isAuthModalOpen, isAdminAuthModalOpen, isStaffAuthModalOpen } = authState;
-  const { language, activeBranchId, isBookingModalOpen, isDoctorProfileModalOpen, selectedDoctorForProfile, selectedBlogId, selectedSpecialtyFilter, preselectedDoctorId, preselectedClinicId, preselectedMode } = uiState;
+  const { language, activeBranchId, isBookingModalOpen, isDoctorProfileModalOpen, selectedDoctorForProfile, selectedBlogId, selectedSpecialtyFilter, preselectedDoctorId, preselectedClinicId, preselectedMode, isAppDownloadModalOpen, appPlatform } = uiState;
   const { doctors } = doctorsState;
   const { clinics } = clinicsState;
   const { appointments, prescriptions, payments } = appointmentsState;
   const { deskStaffMembers } = staffState;
-  const { careServices, specialties } = servicesState;
+  const { careServices, specialties: reduxSpecialties } = servicesState;
+  const specialties = (reduxSpecialties && reduxSpecialties.length > 0) ? reduxSpecialties : SPECIALTIES_DATA;
   const { healthPackages, healthBlogs } = articlesState;
 
   useEffect(() => {
@@ -1080,7 +1088,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         createArticle,
         updateArticle,
         deleteArticle,
-        refreshArticles
+        refreshArticles,
+        isAppDownloadModalOpen,
+        appPlatform,
+        openAppDownloadModal: (platform) => dispatch(reduxOpenAppDownloadModal(platform)),
+        closeAppDownloadModal: () => dispatch(reduxCloseAppDownloadModal())
       }}
     >
       {children}

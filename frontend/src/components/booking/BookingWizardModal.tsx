@@ -26,6 +26,7 @@ import { useApp, DEFAULT_DOCTOR_AVATAR } from '../../context/AppContext';
 import type { AppointmentMode, PatientType, Appointment } from '../../types';
 import { api, getApiErrorMessage } from '../../services/api';
 import { loadRazorpay } from '../../services/razorpay';
+import { CustomSelect } from '../ui/CustomSelect';
 
 export interface UploadedDoc {
   id: string;
@@ -510,10 +511,10 @@ export const BookingWizardModal: React.FC = () => {
       <div className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden border border-slate-100 flex flex-col max-h-[90vh] relative">
         
         {/* Header with Stepper Progress */}
-        <div className="bg-linear-to-r from-[#0B2545] via-[#0F4C81] to-[#0A365C] text-white p-6 shrink-0">
+        <div className="bg-linear-to-r from-[#0B1F3A] via-[#0D2B4E] to-[#132D4D] text-white p-6 shrink-0">
           <div className="flex items-center justify-between mb-3">
             <div>
-              <span className="text-emerald-300 text-[10px] font-black px-2.5 py-0.5 rounded bg-emerald-400/20 uppercase tracking-wider">
+              <span className="text-[#2DD4BF] text-[10px] font-black px-2.5 py-0.5 rounded bg-[#2DD4BF]/20 uppercase tracking-wider">
                 {language === 'en' ? `Step ${step} of 6` : `चरण ${step} / 6`}
               </span>
               <h3 className="font-black text-xl tracking-tight mt-1">
@@ -539,7 +540,7 @@ export const BookingWizardModal: React.FC = () => {
               <div 
                 key={i} 
                 className={`h-1.5 flex-1 rounded-full transition-all ${
-                  i <= step ? 'bg-[#10B981]' : 'bg-white/20'
+                  i <= step ? 'bg-linear-to-r from-[#10B981] to-[#0D9488]' : 'bg-white/20'
                 }`}
               />
             ))}
@@ -764,14 +765,15 @@ export const BookingWizardModal: React.FC = () => {
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
                     Patient Classification
                   </label>
-                  <select
+                  <CustomSelect
                     value={patientType}
-                    onChange={(e) => setPatientType(e.target.value as PatientType)}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0F4C81]"
-                  >
-                    <option value="NEW">New Patient (First Visit)</option>
-                    <option value="EXISTING">Existing Patient (Registered)</option>
-                  </select>
+                    onChange={(val) => setPatientType(val as PatientType)}
+                    themeColor="teal"
+                    options={[
+                      { value: 'NEW', label: 'New Patient (First Visit)' },
+                      { value: 'EXISTING', label: 'Existing Patient (Registered)' },
+                    ]}
+                  />
                 </div>
               </div>
 
@@ -781,9 +783,9 @@ export const BookingWizardModal: React.FC = () => {
                   <label className="block text-xs font-bold text-[#0F4C81]">
                     Select Registered Patient ({selectedDoctorId ? 'Doctor\'s Registered Patients' : 'All Patient Records'})
                   </label>
-                  <select
-                    onChange={(e) => {
-                      const selectedVal = e.target.value;
+                  <CustomSelect
+                    value={patientId || ''}
+                    onChange={(selectedVal) => {
                       const p = existingPatientsList.find(item => item.id === selectedVal || item.name === selectedVal);
                       if (p) {
                         setPatientId(p.id);
@@ -792,15 +794,14 @@ export const BookingWizardModal: React.FC = () => {
                         setPatientGender(p.gender);
                       }
                     }}
-                    className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0F4C81]"
-                  >
-                    <option value="">-- Choose Patient from Registered Patients List --</option>
-                    {existingPatientsList.map(p => (
-                      <option key={p.id} value={p.id}>
-                        {p.name} ({p.age} Yrs, {p.gender} {p.phone ? `• +91 ${p.phone}` : ''})
-                      </option>
-                    ))}
-                  </select>
+                    placeholder="-- Choose Patient from Registered Patients List --"
+                    showPlaceholderOption={true}
+                    themeColor="teal"
+                    options={existingPatientsList.map(p => ({
+                      value: p.id,
+                      label: `${p.name} (${p.age} Yrs, ${p.gender}${p.phone ? ` • +91 ${p.phone}` : ''})`
+                    }))}
+                  />
                 </div>
               )}
               {patientType === 'NEW' ? (
@@ -826,15 +827,16 @@ export const BookingWizardModal: React.FC = () => {
                   </div>
                   <div>
                     <label className="block text-[11px] font-bold text-slate-600 mb-1">Gender *</label>
-                    <select
+                    <CustomSelect
                       value={patientGender}
-                      onChange={(e) => setPatientGender(e.target.value)}
-                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold"
-                    >
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                      <option value="Other">Other</option>
-                    </select>
+                      onChange={(val) => setPatientGender(val)}
+                      themeColor="teal"
+                      options={[
+                        { value: 'Male', label: 'Male' },
+                        { value: 'Female', label: 'Female' },
+                        { value: 'Other', label: 'Other' },
+                      ]}
+                    />
                   </div>
                 </div>
               ) : (
@@ -859,7 +861,7 @@ export const BookingWizardModal: React.FC = () => {
                       onClick={() => setTimeSlot(slot)}
                       className={`py-2.5 px-3 rounded-xl text-xs font-bold border transition cursor-pointer ${
                         timeSlot === slot 
-                          ? 'border-[#10B981] bg-[#10B981] text-slate-950 font-black shadow-sm' 
+                          ? 'border-[#2DD4BF] bg-[#2DD4BF]/15 text-[#0D9488] font-black shadow-xs ring-2 ring-[#2DD4BF]/30' 
                           : 'border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700'
                       }`}
                     >
@@ -1067,15 +1069,15 @@ export const BookingWizardModal: React.FC = () => {
             <div className="space-y-5">
               
               {/* Fee Summary Header */}
-              <div className="bg-linear-to-r from-[#0C2340] via-[#0A2E5C] to-[#0D1F38] text-white p-5 rounded-3xl shadow-lg border border-blue-900/50 space-y-4">
+              <div className="bg-linear-to-r from-[#0B1F3A] via-[#0D2B4E] to-[#132D4D] text-white p-5 rounded-3xl shadow-lg border border-blue-900/50 space-y-4">
                 <div className="flex items-center justify-between border-b border-white/10 pb-3">
                   <div className="flex items-center gap-2">
-                    <div className="bg-sky-500 text-slate-950 font-black px-2.5 py-1 rounded-md text-xs tracking-wider uppercase">
+                    <div className="bg-[#2DD4BF] text-slate-950 font-black px-2.5 py-1 rounded-md text-xs tracking-wider uppercase">
                       RAZORPAY
                     </div>
                     <span className="text-xs text-slate-300 font-bold">Payment Gateway</span>
                   </div>
-                  <span className="bg-emerald-500/20 text-emerald-300 text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-emerald-500/30 flex items-center gap-1">
+                  <span className="bg-[#0D9488]/20 text-[#2DD4BF] text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-[#0D9488]/30 flex items-center gap-1">
                     <Lock className="w-3 h-3" />
                     <span>256-Bit SSL Secured</span>
                   </span>
@@ -1085,11 +1087,11 @@ export const BookingWizardModal: React.FC = () => {
                   <div>
                     <p className="text-[11px] text-slate-300 uppercase tracking-wider font-bold">Merchant Name</p>
                     <h4 className="text-base font-black text-white">SEVASADAN Super Specialty OPD</h4>
-                    <p className="text-xs text-sky-300">{appointmentMode === 'VIDEO' ? 'Virtual Video OPD Token' : `${currentClinic?.name}`}</p>
+                    <p className="text-xs text-[#2DD4BF]">{appointmentMode === 'VIDEO' ? 'Virtual Video OPD Token' : `${currentClinic?.name}`}</p>
                   </div>
                   <div className="text-right">
                     <p className="text-[11px] text-slate-300 uppercase tracking-wider font-bold">Amount Payable</p>
-                    <p className="text-3xl font-black text-emerald-400">₹{feeAmount}</p>
+                    <p className="text-3xl font-black text-[#2DD4BF]">₹{feeAmount}</p>
                   </div>
                 </div>
               </div>
@@ -1106,17 +1108,17 @@ export const BookingWizardModal: React.FC = () => {
                     onClick={() => setPaymentModeChoice('RAZORPAY')}
                     className={`cursor-pointer p-5 rounded-3xl border-2 transition-all relative flex flex-col justify-between ${
                       paymentModeChoice === 'RAZORPAY' 
-                        ? 'border-[#0F4C81] bg-sky-50/70 shadow-md ring-2 ring-[#0F4C81]/20' 
+                        ? 'border-[#0D9488] bg-teal-50/70 shadow-md ring-2 ring-[#0D9488]/20' 
                         : 'border-slate-200 hover:border-slate-300 bg-white'
                     }`}
                   >
                     {paymentModeChoice === 'RAZORPAY' && (
-                      <span className="absolute top-4 right-4 bg-[#0F4C81] text-white p-1 rounded-full">
+                      <span className="absolute top-4 right-4 bg-[#0D9488] text-white p-1 rounded-full">
                         <CheckCircle2 className="w-4 h-4" />
                       </span>
                     )}
                     <div className="space-y-3">
-                      <div className="w-10 h-10 bg-[#0C2340] text-[#38BDF8] font-black text-xs px-2.5 rounded-xl flex items-center justify-center tracking-wider">
+                      <div className="w-10 h-10 bg-[#0B1F3A] text-[#2DD4BF] font-black text-xs px-2.5 rounded-xl flex items-center justify-center tracking-wider">
                         RAZORPAY
                       </div>
                       <div>
@@ -1126,7 +1128,7 @@ export const BookingWizardModal: React.FC = () => {
                         </p>
                       </div>
                     </div>
-                    <div className="mt-4 pt-3 border-t border-slate-200/80 flex items-center justify-between text-xs font-bold text-[#0F4C81]">
+                    <div className="mt-4 pt-3 border-t border-slate-200/80 flex items-center justify-between text-xs font-bold text-[#0D9488]">
                       <span>Instant Digital Token</span>
                       <span>₹{feeAmount}</span>
                     </div>
@@ -1138,17 +1140,17 @@ export const BookingWizardModal: React.FC = () => {
                     className={`p-5 rounded-3xl border-2 transition-all relative flex flex-col justify-between ${
                       appointmentMode === 'VIDEO' ? 'opacity-40 cursor-not-allowed border-slate-200 bg-slate-50' :
                       paymentModeChoice === 'CASH' 
-                        ? 'border-emerald-600 bg-emerald-50/70 shadow-md ring-2 ring-emerald-600/20 cursor-pointer' 
+                        ? 'border-[#0D9488] bg-teal-50/70 shadow-md ring-2 ring-[#0D9488]/20 cursor-pointer' 
                         : 'border-slate-200 hover:border-slate-300 bg-white cursor-pointer'
                     }`}
                   >
                     {paymentModeChoice === 'CASH' && (
-                      <span className="absolute top-4 right-4 bg-emerald-600 text-white p-1 rounded-full">
+                      <span className="absolute top-4 right-4 bg-[#0D9488] text-white p-1 rounded-full">
                         <CheckCircle2 className="w-4 h-4" />
                       </span>
                     )}
                     <div className="space-y-3">
-                      <div className="w-10 h-10 bg-emerald-100 text-emerald-700 rounded-xl flex items-center justify-center">
+                      <div className="w-10 h-10 bg-teal-100 text-[#0D9488] rounded-xl flex items-center justify-center">
                         <Building2 className="w-5 h-5" />
                       </div>
                       <div>
@@ -1158,7 +1160,7 @@ export const BookingWizardModal: React.FC = () => {
                         </p>
                       </div>
                     </div>
-                    <div className="mt-4 pt-3 border-t border-slate-200/80 flex items-center justify-between text-xs font-bold text-emerald-700">
+                    <div className="mt-4 pt-3 border-t border-slate-200/80 flex items-center justify-between text-xs font-bold text-[#0D9488]">
                       <span>Counter Verification</span>
                       <span>Pay at Visit</span>
                     </div>
@@ -1178,7 +1180,7 @@ export const BookingWizardModal: React.FC = () => {
           {/* STEP 6: Confirmation Receipt */}
           {step === 6 && createdAppointment && (
             <div className="space-y-6 text-center py-2">
-              <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto shadow-md animate-bounce">
+              <div className="w-16 h-16 bg-teal-100 text-[#0D9488] rounded-full flex items-center justify-center mx-auto shadow-md animate-bounce">
                 <CheckCircle2 className="w-10 h-10" />
               </div>
 
@@ -1192,10 +1194,10 @@ export const BookingWizardModal: React.FC = () => {
               </div>
 
               {/* Token Ticket Card */}
-              <div className="bg-linear-to-br from-[#0B2545] to-[#0F4C81] text-white p-6 rounded-3xl shadow-xl text-left space-y-4 relative overflow-hidden border border-white/10">
+              <div className="bg-linear-to-br from-[#0B1F3A] via-[#0D2B4E] to-[#132D4D] text-white p-6 rounded-3xl shadow-xl text-left space-y-4 relative overflow-hidden border border-white/10">
                 <div className="flex items-center justify-between border-b border-white/10 pb-3">
                   <div>
-                    <span className="text-[10px] uppercase font-black text-emerald-400 tracking-wider">
+                    <span className="text-[10px] uppercase font-black text-[#2DD4BF] tracking-wider">
                       {createdAppointment.appointmentMode === 'IN_CLINIC' ? 'Physical Token Pass' : 'Video Room Pass'}
                     </span>
                     <p className="text-3xl font-black text-amber-300 tracking-wider font-mono">
@@ -1203,7 +1205,7 @@ export const BookingWizardModal: React.FC = () => {
                     </p>
                   </div>
                   <div className="text-right">
-                    <span className="text-xs bg-emerald-500/20 text-emerald-200 px-3 py-1 rounded-full font-extrabold border border-emerald-500/30">
+                    <span className="text-xs bg-[#0D9488]/20 text-[#2DD4BF] px-3 py-1 rounded-full font-extrabold border border-[#0D9488]/30">
                       {createdAppointment.status}
                     </span>
                   </div>
@@ -1211,20 +1213,20 @@ export const BookingWizardModal: React.FC = () => {
 
                 <div className="grid grid-cols-2 gap-4 text-xs">
                   <div>
-                    <span className="text-slate-300 text-[11px]">Doctor</span>
+                    <span className="text-[#CBD5E1] text-[11px]">Doctor</span>
                     <p className="font-black text-white text-sm">{createdAppointment.doctorName}</p>
-                    <p className="text-[10px] text-slate-300">{createdAppointment.doctorSpecialization}</p>
+                    <p className="text-[10px] text-[#CBD5E1]">{createdAppointment.doctorSpecialization}</p>
                   </div>
                   <div>
-                    <span className="text-slate-300 text-[11px]">Branch / Venue</span>
+                    <span className="text-[#CBD5E1] text-[11px]">Branch / Venue</span>
                     <p className="font-black text-white text-sm">{createdAppointment.clinicName}</p>
-                    <p className="text-[10px] text-slate-300">{createdAppointment.appointmentDate} at {createdAppointment.timeSlot}</p>
+                    <p className="text-[10px] text-[#CBD5E1]">{createdAppointment.appointmentDate} at {createdAppointment.timeSlot}</p>
                   </div>
                 </div>
 
                 {/* Uploaded Files Summary on Ticket if any */}
                 {uploadedFiles.length > 0 && (
-                  <div className="pt-2 border-t border-white/10 text-xs text-sky-200 font-semibold">
+                  <div className="pt-2 border-t border-white/10 text-xs text-[#2DD4BF] font-semibold">
                     <span>Attached Reports: {uploadedFiles.map(f => f.name).join(', ')}</span>
                   </div>
                 )}
@@ -1232,13 +1234,13 @@ export const BookingWizardModal: React.FC = () => {
                 {/* Direct Video Join Button if Video mode */}
                 {createdAppointment.appointmentMode === 'VIDEO' && (
                   <div className="pt-3 border-t border-white/10 flex items-center justify-between">
-                    <div className="text-xs text-emerald-300 font-bold">
+                    <div className="text-xs text-[#2DD4BF] font-bold">
                       <span>30-Min Pre-call Magic Room Link Ready</span>
                     </div>
                     <a
                       href={`#/telemedicine?room=${createdAppointment.id}&token=${createdAppointment.roomJoinToken}`}
                       onClick={resetAndClose}
-                      className="bg-[#10B981] hover:bg-emerald-500 text-slate-950 font-black px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 transition cursor-pointer"
+                      className="bg-linear-to-r from-[#10B981] to-[#0D9488] hover:opacity-95 text-white font-black px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 transition cursor-pointer"
                     >
                       <Video className="w-4 h-4" />
                       <span>Enter Video Room</span>
@@ -1252,7 +1254,7 @@ export const BookingWizardModal: React.FC = () => {
                 <button
                   type="button"
                   onClick={downloadTokenPass}
-                  className="w-full sm:w-auto bg-linear-to-r from-emerald-600 to-teal-600 hover:opacity-95 text-white font-black px-6 py-3 rounded-2xl text-xs shadow-lg transition flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full sm:w-auto bg-linear-to-r from-[#10B981] to-[#0D9488] hover:opacity-95 text-white font-black px-6 py-3 rounded-2xl text-xs shadow-lg transition flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Download className="w-4 h-4" />
                   <span>Download Token Pass</span>
@@ -1289,7 +1291,7 @@ export const BookingWizardModal: React.FC = () => {
               <button
                 type="button"
                 onClick={handleNextStep}
-                className="flex items-center gap-1 bg-[#0F4C81] hover:bg-[#0A365C] text-white px-5 py-2.5 rounded-xl text-xs font-extrabold shadow-md transition cursor-pointer"
+                className="flex items-center gap-1 bg-linear-to-r from-[#10B981] to-[#0D9488] hover:opacity-95 text-white px-5 py-2.5 rounded-xl text-xs font-extrabold shadow-md transition cursor-pointer"
               >
                 <span>Continue</span>
                 <ArrowRight className="w-4 h-4" />
@@ -1299,11 +1301,7 @@ export const BookingWizardModal: React.FC = () => {
                 type="button"
                 disabled={isProcessingPayment}
                 onClick={handleConfirmBooking}
-                className={`flex items-center gap-1.5 px-6 py-2.5 rounded-xl text-xs font-black shadow-md transition cursor-pointer ${
-                  paymentModeChoice === 'CASH' 
-                    ? 'bg-emerald-600 hover:bg-emerald-700 text-white' 
-                    : 'bg-[#10B981] hover:bg-emerald-600 text-slate-950'
-                }`}
+                className="flex items-center gap-1.5 px-6 py-2.5 rounded-xl text-xs font-black shadow-md transition cursor-pointer bg-linear-to-r from-[#10B981] to-[#0D9488] hover:opacity-95 text-white"
               >
                 {isProcessingPayment ? (
                   <span className="flex items-center gap-2">

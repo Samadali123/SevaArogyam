@@ -69,13 +69,21 @@ export const StaffAuthModal: React.FC = () => {
     : (language === 'en' ? 'Staff Portal' : 'स्टाफ पोर्टल');
   const headerTitle = isDoctor ? 'SEVASADAN Doctor Login' : 'SEVASADAN Staff Login';
 
+  const themePrimaryBg = isDoctor ? 'bg-gradient-to-r from-[#0B7A56] to-[#0F9D6D] hover:opacity-95' : 'bg-gradient-to-r from-[#5B5588] to-[#6E6B9E] hover:opacity-95';
+  const themeRing = isDoctor ? 'focus:ring-[#0F9D6D] focus:border-[#0F9D6D]' : 'focus:ring-[#6E6B9E] focus:border-[#6E6B9E]';
+  const themeLink = isDoctor ? 'text-[#0F9D6D] hover:text-[#0B7A56]' : 'text-[#5B5588] hover:text-[#6E6B9E]';
+  const headerGradient = isDoctor 
+    ? 'bg-gradient-to-r from-[#0B3D2E] via-[#0A2E22] to-[#0B3D2E]' 
+    : 'bg-gradient-to-r from-[#5B5588] via-[#6E6B9E] to-[#5B5588]';
+  const badgeColor = 'bg-[rgba(255,255,255,0.15)] text-white border border-white/20';
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-fade-in font-sans">
       <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden border border-slate-100/80">
-        {/* Header - Unified Deep Navy Brand Gradient */}
-        <div className="bg-gradient-to-r from-[#0B2545] via-[#0F4C81] to-[#0A2540] text-white p-6 flex items-center justify-between relative">
+        {/* Header - Role Dynamic Brand Gradient */}
+        <div className={`${headerGradient} text-white p-6 flex items-center justify-between relative transition-colors duration-300`}>
           <div>
-            <span className="bg-white/15 text-emerald-300 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+            <span className={`${badgeColor} text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider backdrop-blur-md`}>
               {headerLabel}
             </span>
             <h3 className="font-heading font-extrabold text-xl tracking-tight text-white mt-1.5">{headerTitle}</h3>
@@ -96,7 +104,7 @@ export const StaffAuthModal: React.FC = () => {
               onClick={() => { setLoginType('DOCTOR'); setError(''); setMessage(''); }}
               className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-heading font-bold transition-all cursor-pointer ${
                 isDoctor
-                  ? 'bg-emerald-600 text-white shadow-md'
+                  ? 'bg-gradient-to-r from-[#0B7A56] to-[#0F9D6D] text-white shadow-md shadow-emerald-600/20'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
               }`}
             >
@@ -108,7 +116,7 @@ export const StaffAuthModal: React.FC = () => {
               onClick={() => { setLoginType('STAFF'); setError(''); setMessage(''); }}
               className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-heading font-bold transition-all cursor-pointer ${
                 !isDoctor
-                  ? 'bg-[#0F4C81] text-white shadow-md'
+                  ? 'bg-gradient-to-r from-[#5B5588] to-[#6E6B9E] text-white shadow-md shadow-purple-600/20'
                   : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
               }`}
             >
@@ -149,7 +157,7 @@ export const StaffAuthModal: React.FC = () => {
                     value={emailOrLoginId}
                     onChange={(e) => setEmailOrLoginId(e.target.value)}
                     placeholder={isDoctor ? "dr.name@sevasadanclinic.in" : "staff-login-id or email"}
-                    className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition"
+                    className={`w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-900 focus:outline-none focus:ring-2 ${themeRing} transition`}
                     required
                   />
                 </div>
@@ -168,7 +176,7 @@ export const StaffAuthModal: React.FC = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••••••"
-                    className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition"
+                    className={`w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-900 focus:outline-none focus:ring-2 ${themeRing} transition`}
                     required
                   />
                 </div>
@@ -178,7 +186,7 @@ export const StaffAuthModal: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => { setView('FORGOT_PASSWORD'); setError(''); setMessage(''); }}
-                  className="text-xs font-bold text-emerald-600 hover:text-emerald-700 hover:underline cursor-pointer transition"
+                  className={`text-xs font-bold ${themeLink} hover:underline cursor-pointer transition`}
                 >
                   {language === 'en' ? 'Forgot Password?' : 'पासवर्ड भूल गए?'}
                 </button>
@@ -187,7 +195,7 @@ export const StaffAuthModal: React.FC = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className={`w-full ${isDoctor ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-[#0F4C81] hover:bg-[#0B2545]'} text-white font-heading font-extrabold py-3.5 rounded-xl text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-75`}
+                className={`w-full ${themePrimaryBg} text-white font-heading font-extrabold py-3.5 rounded-xl text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-75`}
               >
                 {loading ? (
                   <>
@@ -221,7 +229,7 @@ export const StaffAuthModal: React.FC = () => {
                     value={forgotEmail}
                     onChange={(e) => setForgotEmail(e.target.value)}
                     placeholder="your-email@example.com"
-                    className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition"
+                    className={`w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-900 focus:outline-none focus:ring-2 ${themeRing} transition`}
                     required
                   />
                 </div>
@@ -230,7 +238,7 @@ export const StaffAuthModal: React.FC = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className={`w-full ${isDoctor ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-[#0F4C81] hover:bg-[#0B2545]'} text-white font-heading font-extrabold py-3.5 rounded-xl text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-75`}
+                className={`w-full ${themePrimaryBg} text-white font-heading font-extrabold py-3.5 rounded-xl text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-75`}
               >
                 {loading ? (
                   <>

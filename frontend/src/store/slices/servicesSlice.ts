@@ -1,6 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import type { CareService, SpecialtyDetail } from '../../types';
+import { SPECIALTIES_DATA } from '../../data/mockData';
 
 export interface ServicesState {
   careServices: CareService[];
@@ -9,7 +10,7 @@ export interface ServicesState {
 
 const initialState: ServicesState = {
   careServices: [],
-  specialties: [],
+  specialties: SPECIALTIES_DATA,
 };
 
 export const servicesSlice = createSlice({

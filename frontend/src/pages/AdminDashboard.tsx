@@ -200,6 +200,28 @@ export const AdminDashboard: React.FC = () => {
   const openDoctorModal = (doc?: DoctorUser) => {
     if (doc) {
       setEditingDoctor(doc);
+
+      let initialClinics: string[] = [];
+      if (Array.isArray(doc.clinicsCovered) && doc.clinicsCovered.length > 0) {
+        initialClinics = [...doc.clinicsCovered];
+      } else if (typeof (doc as any).clinicsCovered === 'string' && ((doc as any).clinicsCovered as string).trim()) {
+        try {
+          const parsed = JSON.parse((doc as any).clinicsCovered);
+          if (Array.isArray(parsed) && parsed.length > 0) initialClinics = parsed;
+          else initialClinics = ((doc as any).clinicsCovered as string).split(',').map((s: string) => s.trim()).filter(Boolean);
+        } catch {
+          initialClinics = ((doc as any).clinicsCovered as string).split(',').map((s: string) => s.trim()).filter(Boolean);
+        }
+      } else if ((doc as any).clinicId) {
+        initialClinics = [(doc as any).clinicId];
+      } else if ((doc as any).branch) {
+        initialClinics = [(doc as any).branch];
+      }
+
+      if (initialClinics.length === 0) {
+        initialClinics = ['sarangpur'];
+      }
+
       setDoctorFormData({
         name: doc.name || '',
         email: doc.email || '',
@@ -211,7 +233,7 @@ export const AdminDashboard: React.FC = () => {
         consultationFeeClinic: doc.consultationFeeClinic || 0,
         consultationFeeOnline: doc.consultationFeeOnline || 0,
         bio: doc.bio || '',
-        clinicsCovered: doc.clinicsCovered && doc.clinicsCovered.length > 0 ? doc.clinicsCovered : ['sarangpur'],
+        clinicsCovered: initialClinics,
         languagesSpoken: doc.languagesSpoken || ['Hindi', 'English'],
         opdScheduleSummary: doc.opdScheduleSummary || 'Mon-Sat: 09:00 AM - 02:00 PM',
         avatarUrl: doc.avatarUrl || DEFAULT_DOCTOR_AVATAR
@@ -501,21 +523,21 @@ export const AdminDashboard: React.FC = () => {
       {adminSuccessMessage && <div role="status" className="fixed right-6 top-24 z-99999 max-w-md rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm font-bold text-emerald-800 shadow-2xl">{adminSuccessMessage}<button onClick={() => setAdminSuccessMessage('')} className="ml-4 text-emerald-600 underline">Close</button></div>}
       {adminErrorMessage && <div role="alert" className="fixed right-6 top-24 z-99999 max-w-md rounded-2xl border border-rose-200 bg-rose-50 px-5 py-4 text-sm font-bold text-rose-800 shadow-2xl">{adminErrorMessage}<button onClick={() => setAdminErrorMessage('')} className="ml-4 text-rose-600 underline">Close</button></div>}
       
-      {/* Admin Header Banner - Unified Deep Navy Brand Gradient */}
-      <div className="bg-gradient-to-r from-[#0B2545] via-[#0F4C81] to-[#0A2540] text-white p-6 sm:p-8 rounded-3xl shadow-xl flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 border border-white/10 font-sans">
+      {/* Admin Header Banner - Dusty Terracotta (#9A5B3C -> #B37046) */}
+      <div className="bg-gradient-to-r from-[#9A5B3C] via-[#B37046] to-[#9A5B3C] text-white p-6 sm:p-8 rounded-3xl shadow-xl flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 border border-white/20 font-sans">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="bg-white/15 text-emerald-300 font-bold text-[10px] px-3 py-1 rounded-full uppercase tracking-wider">
+          <div className="flex items-center gap-2.5">
+            <span className="bg-[rgba(255,255,255,0.15)] text-white font-bold text-[10px] px-3.5 py-1 rounded-full uppercase tracking-wider border border-white/30 backdrop-blur-md">
               {language === 'en' ? 'Central Control Console' : 'सेंट्रल कंट्रोल कंसोल'}
             </span>
-            <span className="text-xs text-sky-200 font-medium">
+            <span className="text-xs text-white/90 font-medium">
               {language === 'en' ? 'SEVASADAN Multi-Branch Network Admin' : 'सेवासदन मल्टी-ब्रांच नेटवर्क एडमिन'}
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-heading font-extrabold tracking-tight text-white mt-2">
             {language === 'en' ? 'Administrative Management Hub' : 'प्रशासनिक प्रबंधन हब'}
           </h1>
-          <p className="text-xs text-sky-100/80 mt-1 max-w-xl font-medium">
+          <p className="text-xs text-white/85 mt-1 max-w-xl font-medium">
             {language === 'en'
               ? 'Manage hospital branches, doctor profiles, consultation fee structures, live OPD tokens, and financial revenue.'
               : 'अस्पताल शाखाओं, डॉक्टर प्रोफाइल, ओपीडी टोकन, और वित्तीय राजस्व का प्रबंधन करें।'}
@@ -523,13 +545,15 @@ export const AdminDashboard: React.FC = () => {
         </div>
 
         {/* Tab Navigation Segment - Segmented Pill Control */}
-        <div className="flex flex-wrap items-center gap-1.5 bg-white/10 backdrop-blur-md p-1.5 rounded-2xl border border-white/15 text-xs font-heading font-bold w-full lg:w-auto">
+        <div className="flex flex-wrap items-center gap-1.5 bg-[rgba(255,255,255,0.15)] backdrop-blur-md p-1.5 rounded-2xl border border-white/25 text-xs font-heading font-bold w-full lg:w-auto">
           {(['OVERVIEW', 'BRANCHES', 'DOCTORS', 'STAFF', 'CARE_SERVICES', 'REVENUE', 'EMR'] as const).map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`px-3.5 py-2 rounded-xl transition-all cursor-pointer ${
-                activeTab === tab ? 'bg-white text-[#0B2545] shadow-md font-extrabold' : 'text-slate-200 hover:text-white hover:bg-white/10'
+                activeTab === tab 
+                  ? 'bg-[#7E452B] text-white font-extrabold border border-white/20 shadow-sm' 
+                  : 'text-white/85 hover:text-white hover:bg-[rgba(255,255,255,0.12)] font-semibold'
               }`}
             >
               {tab === 'OVERVIEW' && (language === 'en' ? 'Overview' : 'अवलोकन')}
@@ -612,14 +636,14 @@ export const AdminDashboard: React.FC = () => {
               <div className="space-y-3.5">
                 <div className="flex items-center justify-between gap-3 border-b border-slate-100/80 pb-3">
                   <div className="flex items-center gap-2.5 min-w-0 pr-1">
-                    <div className="w-9 h-9 rounded-xl bg-sky-50 text-[#0F4C81] border border-sky-100 flex items-center justify-center font-bold shrink-0">
+                    <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 border border-amber-100 flex items-center justify-center font-bold shrink-0">
                       <Stethoscope className="w-4.5 h-4.5" />
                     </div>
                     <h3 className="font-heading font-extrabold text-sm lg:text-base text-slate-900 leading-snug">{language === 'en' ? 'Doctors Management' : 'डॉक्टर प्रबंधन'}</h3>
                   </div>
                   <button
                     onClick={() => openDoctorModal()}
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-heading font-extrabold px-3 py-2 rounded-xl transition flex items-center gap-1.5 shadow-md cursor-pointer shrink-0 whitespace-nowrap"
+                    className="bg-amber-500 hover:bg-amber-600 text-white text-xs font-heading font-extrabold px-3 py-2 rounded-xl transition flex items-center gap-1.5 shadow-md shadow-amber-500/20 cursor-pointer shrink-0 whitespace-nowrap"
                   >
                     <UserPlus className="w-4 h-4" />
                     <span>{language === 'en' ? 'Add Doctor' : 'डॉक्टर जोड़ें'}</span>
@@ -634,7 +658,7 @@ export const AdminDashboard: React.FC = () => {
               <div className="pt-2">
                 <button
                   onClick={() => setActiveTab('DOCTORS')}
-                  className="w-full bg-slate-100 hover:bg-slate-200 text-[#0F4C81] font-heading font-extrabold py-2.5 rounded-xl transition cursor-pointer text-xs flex items-center justify-center gap-1"
+                  className="w-full bg-amber-50/80 hover:bg-amber-100/80 text-amber-800 border border-amber-200/60 font-heading font-extrabold py-2.5 rounded-xl transition cursor-pointer text-xs flex items-center justify-center gap-1"
                 >
                   <span>{language === 'en' ? `Manage All ${totalDoctors} Doctors & Roster` : `सभी ${totalDoctors} डॉक्टर एवं रोस्टर प्रबंधित करें`}</span>
                   <span>→</span>
@@ -653,7 +677,7 @@ export const AdminDashboard: React.FC = () => {
                   </div>
                   <button
                     onClick={() => openBranchModal()}
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-heading font-extrabold px-3 py-2 rounded-xl transition flex items-center gap-1.5 shadow-md cursor-pointer shrink-0 whitespace-nowrap"
+                    className="bg-amber-500 hover:bg-amber-600 text-white text-xs font-heading font-extrabold px-3 py-2 rounded-xl transition flex items-center gap-1.5 shadow-md shadow-amber-500/20 cursor-pointer shrink-0 whitespace-nowrap"
                   >
                     <Plus className="w-4 h-4" />
                     <span>{language === 'en' ? 'Add Branch' : 'शाखा जोड़ें'}</span>
@@ -668,7 +692,7 @@ export const AdminDashboard: React.FC = () => {
               <div className="pt-2">
                 <button
                   onClick={() => setActiveTab('BRANCHES')}
-                  className="w-full bg-slate-100 hover:bg-slate-200 text-[#0F4C81] font-heading font-extrabold py-2.5 rounded-xl transition cursor-pointer text-xs flex items-center justify-center gap-1"
+                  className="w-full bg-amber-50/80 hover:bg-amber-100/80 text-amber-800 border border-amber-200/60 font-heading font-extrabold py-2.5 rounded-xl transition cursor-pointer text-xs flex items-center justify-center gap-1"
                 >
                   <span>{language === 'en' ? `Manage All ${clinics.length} Branches & Timings` : `सभी ${clinics.length} शाखाएं एवं समय प्रबंधित करें`}</span>
                   <span>→</span>
@@ -680,14 +704,14 @@ export const AdminDashboard: React.FC = () => {
               <div className="space-y-3.5">
                 <div className="flex items-center justify-between gap-3 border-b border-slate-100/80 pb-3">
                   <div className="flex items-center gap-2.5 min-w-0 pr-1">
-                    <div className="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 border border-purple-100 flex items-center justify-center font-bold shrink-0">
+                    <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 border border-amber-100 flex items-center justify-center font-bold shrink-0">
                       <Plus className="w-4 h-4" />
                     </div>
                     <h3 className="font-heading font-extrabold text-sm lg:text-base text-slate-900 leading-snug">{language === 'en' ? 'Care Services & Lab' : 'देखभाल सेवाएं एवं लैब'}</h3>
                   </div>
                   <button
                     onClick={() => openCareServiceModal()}
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-heading font-extrabold px-3 py-2 rounded-xl transition flex items-center gap-1.5 shadow-md cursor-pointer shrink-0 whitespace-nowrap"
+                    className="bg-amber-500 hover:bg-amber-600 text-white text-xs font-heading font-extrabold px-3 py-2 rounded-xl transition flex items-center gap-1.5 shadow-md shadow-amber-500/20 cursor-pointer shrink-0 whitespace-nowrap"
                   >
                     <Plus className="w-4 h-4" />
                     <span>{language === 'en' ? 'Add Service' : 'सेवा जोड़ें'}</span>
@@ -702,7 +726,7 @@ export const AdminDashboard: React.FC = () => {
               <div className="pt-2">
                 <button
                   onClick={() => setActiveTab('CARE_SERVICES')}
-                  className="w-full bg-slate-100 hover:bg-slate-200 text-[#0F4C81] font-heading font-extrabold py-2.5 rounded-xl transition cursor-pointer text-xs flex items-center justify-center gap-1"
+                  className="w-full bg-amber-50/80 hover:bg-amber-100/80 text-amber-800 border border-amber-200/60 font-heading font-extrabold py-2.5 rounded-xl transition cursor-pointer text-xs flex items-center justify-center gap-1"
                 >
                   <span>{language === 'en' ? `Manage All ${careServices.length} Lab & Care Services` : `सभी ${careServices.length} लैब एवं सेवाएं प्रबंधित करें`}</span>
                   <span>→</span>
@@ -785,7 +809,7 @@ export const AdminDashboard: React.FC = () => {
             </div>
             <button
               onClick={() => openBranchModal()}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white font-heading font-extrabold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 transition cursor-pointer shadow-md shrink-0"
+              className="bg-amber-500 hover:bg-amber-600 text-white font-heading font-extrabold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 transition cursor-pointer shadow-md shadow-amber-500/20 shrink-0"
             >
               <Plus className="w-4 h-4" />
               <span>Add New Branch</span>
@@ -903,13 +927,13 @@ export const AdminDashboard: React.FC = () => {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   placeholder="Filter doctor name or specialty..."
-                  className="pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-sans font-medium focus:outline-none focus:ring-2 focus:ring-[#0F4C81]"
+                  className="pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-sans font-medium focus:outline-none focus:ring-2 focus:ring-amber-500"
                 />
               </div>
 
               <button
                 onClick={() => openDoctorModal()}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white font-heading font-extrabold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 transition cursor-pointer shadow-md shrink-0"
+                className="bg-amber-500 hover:bg-amber-600 text-white font-heading font-extrabold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 transition cursor-pointer shadow-md shadow-amber-500/20 shrink-0"
               >
                 <UserPlus className="w-4 h-4" />
                 <span>Add Doctor</span>
@@ -943,7 +967,7 @@ export const AdminDashboard: React.FC = () => {
                         />
                         <div>
                           <h4 className="font-heading font-extrabold text-slate-900 text-base">{doc.name.startsWith('Dr.') ? doc.name : `Dr. ${doc.name}`}</h4>
-                          <p className="text-xs font-heading font-extrabold text-[#0F4C81]">{doc.specialization}</p>
+                          <p className="text-xs font-heading font-extrabold text-amber-700">{doc.specialization}</p>
                           <p className="text-[10px] text-slate-500 font-mono mt-0.5">{doc.regNumber}</p>
                         </div>
                       </div>
@@ -970,7 +994,7 @@ export const AdminDashboard: React.FC = () => {
 
                     <div className="text-xs font-sans text-slate-600">
                       <strong className="text-slate-800 font-bold">Assigned OPD Branches: </strong>
-                      <span className="font-semibold text-[#0F4C81]">
+                      <span className="font-semibold text-amber-800">
                         {formatAssignedBranches(doc.clinicsCovered, clinics)}
                       </span>
                     </div>
@@ -979,9 +1003,9 @@ export const AdminDashboard: React.FC = () => {
                   <div className="flex items-center gap-2 pt-2 border-t border-slate-200/80">
                     <button
                       onClick={() => openDoctorModal(doc)}
-                      className="flex-1 bg-white hover:bg-slate-100 text-[#0F4C81] border border-[#0F4C81]/30 font-heading font-extrabold py-2 rounded-xl text-xs flex items-center justify-center transition cursor-pointer"
+                      className="flex-1 bg-white hover:bg-slate-100 text-amber-800 border border-amber-300 font-heading font-extrabold py-2 rounded-xl text-xs flex items-center justify-center transition cursor-pointer"
                     >
-                      <span>Edit Profile & Fees</span>
+                      <span>Edit Details</span>
                     </button>
 
                     <button
@@ -1005,7 +1029,7 @@ export const AdminDashboard: React.FC = () => {
         <div className="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-8 shadow-xs space-y-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
             <div>
-              <span className="bg-purple-50 text-purple-700 text-[10px] font-heading font-extrabold px-2.5 py-0.5 rounded-full border border-purple-200 uppercase tracking-wider">
+              <span className="bg-amber-50 text-amber-800 text-[10px] font-heading font-extrabold px-2.5 py-0.5 rounded-full border border-amber-200 uppercase tracking-wider">
                 Laboratory & Hospital Services Catalog
               </span>
               <h3 className="text-2xl font-heading font-extrabold text-slate-900 mt-1">Care Services & Lab Tests Management</h3>
@@ -1016,7 +1040,7 @@ export const AdminDashboard: React.FC = () => {
 
             <button
               onClick={() => openCareServiceModal()}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white font-heading font-extrabold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 transition cursor-pointer shadow-md shrink-0"
+              className="bg-amber-500 hover:bg-amber-600 text-white font-heading font-extrabold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 transition cursor-pointer shadow-md shadow-amber-500/20 shrink-0"
             >
               <Plus className="w-4 h-4" />
               <span>Add New Test / Service</span>
@@ -1240,7 +1264,7 @@ export const AdminDashboard: React.FC = () => {
                     min="0"
                     value={doctorFormData.experienceYears}
                     onChange={(e) => setDoctorFormData({ ...doctorFormData, experienceYears: Number(e.target.value) })}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:ring-2 focus:ring-[#0F4C81] outline-none"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:ring-2 focus:ring-[#9A5B3C] focus:border-[#9A5B3C] outline-none"
                   />
                 </div>
 
@@ -1251,7 +1275,7 @@ export const AdminDashboard: React.FC = () => {
                     required
                     value={doctorFormData.name}
                     onChange={(e) => setDoctorFormData({ ...doctorFormData, name: e.target.value })}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:ring-2 focus:ring-[#0F4C81] outline-none"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:ring-2 focus:ring-[#9A5B3C] focus:border-[#9A5B3C] outline-none"
                     placeholder="Dr. Full Name"
                   />
                 </div>
@@ -1263,7 +1287,7 @@ export const AdminDashboard: React.FC = () => {
                     required
                     value={doctorFormData.email}
                     onChange={(e) => setDoctorFormData({ ...doctorFormData, email: e.target.value })}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-emerald-700 focus:ring-2 focus:ring-[#0F4C81] outline-none"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-[#9A5B3C] focus:ring-2 focus:ring-[#9A5B3C] focus:border-[#9A5B3C] outline-none"
                     placeholder="dr.name@sevasadanclinic.in"
                   />
                   <span className="text-[10px] text-slate-400 font-medium mt-0.5 block">Protected login credentials will be emailed to this address.</span>
@@ -1277,7 +1301,7 @@ export const AdminDashboard: React.FC = () => {
                     maxLength={10}
                     value={doctorFormData.phone}
                     onChange={(e) => setDoctorFormData({ ...doctorFormData, phone: e.target.value.replace(/\D/g, '') })}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:ring-2 focus:ring-[#0F4C81] outline-none"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:ring-2 focus:ring-[#9A5B3C] focus:border-[#9A5B3C] outline-none"
                     placeholder="98260XXXXX"
                   />
                   <span className="text-[10px] text-slate-400 font-medium mt-0.5 block">Mandatory 10-digit number starting with 6-9.</span>
@@ -1290,7 +1314,7 @@ export const AdminDashboard: React.FC = () => {
                     required
                     value={doctorFormData.specialization}
                     onChange={(e) => setDoctorFormData({ ...doctorFormData, specialization: e.target.value })}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:ring-2 focus:ring-[#0F4C81] outline-none"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:ring-2 focus:ring-[#9A5B3C] focus:border-[#9A5B3C] outline-none"
                     placeholder="e.g. Pediatrics & Child Specialist"
                   />
                 </div>
@@ -1302,7 +1326,7 @@ export const AdminDashboard: React.FC = () => {
                     required
                     value={doctorFormData.qualification}
                     onChange={(e) => setDoctorFormData({ ...doctorFormData, qualification: e.target.value })}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:ring-2 focus:ring-[#0F4C81] outline-none"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:ring-2 focus:ring-[#9A5B3C] focus:border-[#9A5B3C] outline-none"
                     placeholder="e.g. MBBS, MD, DNB"
                   />
                 </div>
@@ -1314,7 +1338,7 @@ export const AdminDashboard: React.FC = () => {
                     required
                     value={doctorFormData.regNumber}
                     onChange={(e) => setDoctorFormData({ ...doctorFormData, regNumber: e.target.value })}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:ring-2 focus:ring-[#0F4C81] outline-none"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:ring-2 focus:ring-[#9A5B3C] focus:border-[#9A5B3C] outline-none"
                     placeholder="MPMC-XXXXXX"
                   />
                 </div>
@@ -1326,7 +1350,7 @@ export const AdminDashboard: React.FC = () => {
                     required
                     value={doctorFormData.consultationFeeClinic || ''}
                     onChange={(e) => setDoctorFormData({ ...doctorFormData, consultationFeeClinic: e.target.value ? Number(e.target.value) : '' as any })}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:ring-2 focus:ring-[#0F4C81] outline-none"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:ring-2 focus:ring-[#9A5B3C] focus:border-[#9A5B3C] outline-none"
                     placeholder="e.g. 300"
                   />
                 </div>
@@ -1338,30 +1362,38 @@ export const AdminDashboard: React.FC = () => {
                     required
                     value={doctorFormData.consultationFeeOnline || ''}
                     onChange={(e) => setDoctorFormData({ ...doctorFormData, consultationFeeOnline: e.target.value ? Number(e.target.value) : '' as any })}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:ring-2 focus:ring-[#0F4C81] outline-none"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:ring-2 focus:ring-[#9A5B3C] focus:border-[#9A5B3C] outline-none"
                     placeholder="e.g. 400"
                   />
                 </div>
               </div>
 
               {/* Assigned Branch / Clinics Covered Selector */}
-              <div className="space-y-1.5 bg-sky-50/70 p-4 rounded-2xl border border-sky-100">
+              <div className="space-y-1.5 bg-[#9A5B3C]/10 p-4 rounded-2xl border border-[#9A5B3C]/20">
                 <label className="block font-heading font-extrabold text-slate-800 text-xs">
                   Assigned Clinic Branches * (Select hospital branches assigned to this doctor)
                 </label>
                 <div className="flex flex-wrap gap-2 pt-1">
                   {clinics.map(c => {
-                    const branchKey = (c.city || c.name || c.id).toLowerCase().replace(/\s*branch\s*/i, '').trim();
+                    const cIdClean = c.id.toLowerCase().replace(/\s*branch\s*/i, '').trim();
+                    const cNameClean = c.name.toLowerCase().replace(/\s*branch\s*/i, '').trim();
+                    const cCityClean = (c.city || '').toLowerCase().replace(/\s*branch\s*/i, '').trim();
+
                     const isChecked = doctorFormData.clinicsCovered.some(item => {
-                      const clean = String(item).toLowerCase().replace(/\s*branch\s*/i, '').trim();
-                      return clean === branchKey || clean === c.id.toLowerCase() || clean === c.name.toLowerCase() || (c.city && clean === c.city.toLowerCase());
+                      if (!item) return false;
+                      const itemClean = String(item).toLowerCase().replace(/\s*branch\s*/i, '').trim();
+                      return itemClean === cIdClean || 
+                             itemClean === cNameClean || 
+                             itemClean === cCityClean ||
+                             cIdClean.includes(itemClean) ||
+                             itemClean.includes(cIdClean);
                     });
                     return (
                       <label 
                         key={c.id} 
-                        className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-bold cursor-pointer transition ${
+                        className={`flex items-center gap-2 px-3.5 py-2.5 rounded-xl border text-xs font-bold cursor-pointer transition ${
                           isChecked 
-                            ? 'bg-[#0F4C81] text-white border-[#0F4C81] shadow-xs' 
+                            ? 'bg-[#9A5B3C] text-white border-[#9A5B3C] shadow-xs ring-2 ring-[#9A5B3C]/20' 
                             : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300'
                         }`}
                       >
@@ -1369,18 +1401,19 @@ export const AdminDashboard: React.FC = () => {
                           type="checkbox"
                           checked={isChecked}
                           onChange={(e) => {
-                            const updated = e.target.checked
-                              ? Array.from(new Set([...doctorFormData.clinicsCovered.filter(item => {
-                                  const clean = String(item).toLowerCase().replace(/\s*branch\s*/i, '').trim();
-                                  return clean !== branchKey && clean !== c.id.toLowerCase() && clean !== c.name.toLowerCase() && (!c.city || clean !== c.city.toLowerCase());
-                                }), branchKey]))
-                              : doctorFormData.clinicsCovered.filter(item => {
-                                  const clean = String(item).toLowerCase().replace(/\s*branch\s*/i, '').trim();
-                                  return clean !== branchKey && clean !== c.id.toLowerCase() && clean !== c.name.toLowerCase() && (!c.city || clean !== c.city.toLowerCase());
-                                });
+                            let updated: string[];
+                            if (e.target.checked) {
+                              updated = Array.from(new Set([...doctorFormData.clinicsCovered, c.id]));
+                            } else {
+                              updated = doctorFormData.clinicsCovered.filter(item => {
+                                if (!item) return false;
+                                const itemClean = String(item).toLowerCase().replace(/\s*branch\s*/i, '').trim();
+                                return itemClean !== cIdClean && itemClean !== cNameClean && itemClean !== cCityClean && !cIdClean.includes(itemClean) && !itemClean.includes(cIdClean);
+                              });
+                            }
                             setDoctorFormData({ ...doctorFormData, clinicsCovered: updated });
                           }}
-                          className="w-4 h-4 rounded text-[#0F4C81] focus:ring-[#0F4C81]"
+                          className="w-4 h-4 rounded text-[#9A5B3C] focus:ring-[#9A5B3C] cursor-pointer"
                         />
                         <span>{c.name} ({c.city})</span>
                       </label>
@@ -1398,7 +1431,7 @@ export const AdminDashboard: React.FC = () => {
                   rows={3}
                   value={doctorFormData.bio}
                   onChange={(e) => setDoctorFormData({ ...doctorFormData, bio: e.target.value })}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-normal focus:ring-2 focus:ring-[#0F4C81] outline-none"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-normal focus:ring-2 focus:ring-[#9A5B3C] focus:border-[#9A5B3C] outline-none"
                 />
               </div>
 
@@ -1408,7 +1441,7 @@ export const AdminDashboard: React.FC = () => {
                   type="text"
                   value={doctorFormData.opdScheduleSummary}
                   onChange={(e) => setDoctorFormData({ ...doctorFormData, opdScheduleSummary: e.target.value })}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:ring-2 focus:ring-[#0F4C81] outline-none"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:ring-2 focus:ring-[#9A5B3C] focus:border-[#9A5B3C] outline-none"
                   placeholder="Mon-Sat: 09:00 AM - 02:00 PM"
                 />
               </div>
@@ -1417,7 +1450,7 @@ export const AdminDashboard: React.FC = () => {
               <div className="space-y-1.5 pt-1">
                 <label className="block font-bold text-slate-700">Upload Doctor Profile Photo (Single Image)</label>
                 <div className="flex items-center gap-4 bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
-                  <div className="relative group w-16 h-16 shrink-0 rounded-2xl overflow-hidden border-2 border-[#0F4C81] shadow-xs">
+                  <div className="relative group w-16 h-16 shrink-0 rounded-2xl overflow-hidden border-2 border-[#9A5B3C] shadow-xs">
                     <img 
                       src={doctorFormData.avatarUrl || DEFAULT_DOCTOR_AVATAR} 
                       alt="Doctor Avatar Preview" 
@@ -1425,15 +1458,15 @@ export const AdminDashboard: React.FC = () => {
                       className="w-full h-full object-cover" 
                     />
                     {doctorPhotoFile && (
-                      <button
+                      <button 
                         type="button"
                         onClick={() => {
                           setDoctorPhotoFile(null);
-                          setDoctorFormData({ ...doctorFormData, avatarUrl: DEFAULT_DOCTOR_AVATAR });
+                          setDoctorFormData({ ...doctorFormData, avatarUrl: '' });
                         }}
-                        className="absolute inset-0 bg-slate-950/70 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-[10px] font-heading font-extrabold cursor-pointer"
+                        className="absolute inset-0 bg-slate-900/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition cursor-pointer text-xs font-bold"
                       >
-                        Reset Photo
+                        Remove
                       </button>
                     )}
                   </div>
@@ -1453,7 +1486,7 @@ export const AdminDashboard: React.FC = () => {
                           reader.readAsDataURL(file);
                         }
                       }}
-                      className="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-heading file:font-extrabold file:bg-[#0F4C81] file:text-white hover:file:bg-[#0B2545] cursor-pointer"
+                      className="block w-full text-xs text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-heading file:font-extrabold file:bg-[#9A5B3C] file:text-white hover:file:opacity-90 cursor-pointer"
                     />
                     <p className="text-[10px] text-slate-400 font-medium">Select a single JPG or PNG photo. If no custom image is selected, standard default doctor avatar is used.</p>
                   </div>
@@ -1471,7 +1504,7 @@ export const AdminDashboard: React.FC = () => {
                 <button
                   type="submit"
                   disabled={isFormSubmitting}
-                  className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-heading font-extrabold shadow-md flex items-center gap-2 cursor-pointer disabled:opacity-50 transition"
+                  className="px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-heading font-extrabold shadow-md shadow-amber-600/20 flex items-center gap-2 cursor-pointer disabled:opacity-50 transition"
                 >
                   {isFormSubmitting ? (
                     <Loader2 className="w-4 h-4 animate-spin text-white" />
@@ -1498,7 +1531,7 @@ export const AdminDashboard: React.FC = () => {
             </div>
             <button
               onClick={() => openStaffModal()}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl text-xs font-heading font-extrabold shadow-md flex items-center gap-2 cursor-pointer transition shrink-0"
+              className="bg-amber-600 hover:bg-amber-700 text-white px-4 py-2.5 rounded-xl text-xs font-heading font-extrabold shadow-md shadow-amber-600/20 flex items-center gap-2 cursor-pointer transition shrink-0"
             >
               <Plus className="w-4 h-4" />
               <span>Register New Desk Staff</span>
@@ -1522,15 +1555,15 @@ export const AdminDashboard: React.FC = () => {
                   {deskStaffMembers.map(staff => (
                     <tr key={staff.id} className="hover:bg-slate-50/80 transition">
                       <td className="py-4 px-6 font-bold text-slate-900 flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-full bg-purple-50 text-purple-700 font-heading font-extrabold flex items-center justify-center text-xs border border-purple-200 shrink-0">
+                        <div className="w-8 h-8 rounded-full bg-amber-50 text-amber-800 font-heading font-extrabold flex items-center justify-center text-xs border border-amber-200 shrink-0">
                           {staff.name ? staff.name.charAt(0).toUpperCase() : 'S'}
                         </div>
                         <span className="font-heading font-extrabold">{staff.name}</span>
                       </td>
-                      <td className="py-4 px-6 font-mono text-emerald-700">{staff.email}</td>
-                      <td className="py-4 px-6 font-mono font-bold text-[#0F4C81]">{staff.loginId || staff.email}</td>
+                      <td className="py-4 px-6 font-mono text-amber-700">{staff.email}</td>
+                      <td className="py-4 px-6 font-mono font-bold text-amber-900">{staff.loginId || staff.email}</td>
                       <td className="py-4 px-6">
-                        <span className="bg-sky-50 text-[#0F4C81] border border-sky-200 px-2.5 py-0.5 rounded-full font-heading font-extrabold uppercase text-[10px]">
+                        <span className="bg-amber-50 text-amber-800 border border-amber-200 px-2.5 py-0.5 rounded-full font-heading font-extrabold uppercase text-[10px]">
                           {clinics.find(c => c.id === staff.branchId)?.name || staff.branchId || 'Sarangpur'} Branch
                         </span>
                       </td>
@@ -1538,7 +1571,7 @@ export const AdminDashboard: React.FC = () => {
                       <td className="py-4 px-6 text-right flex items-center justify-end gap-2">
                         <button
                           onClick={() => openStaffModal(staff)}
-                          className="px-2.5 py-1 text-[#0F4C81] hover:bg-sky-50 rounded-lg font-heading font-bold text-xs transition cursor-pointer"
+                          className="px-2.5 py-1 text-amber-700 hover:bg-amber-50 rounded-lg font-heading font-bold text-xs transition cursor-pointer"
                           title="Edit Staff Member"
                         >
                           <span>Edit</span>
@@ -1573,7 +1606,7 @@ export const AdminDashboard: React.FC = () => {
           <div className="bg-white w-full max-w-lg rounded-3xl p-6 sm:p-7 shadow-2xl space-y-6">
             <div className="flex items-center justify-between border-b border-slate-100 pb-4">
               <h3 className="text-lg font-heading font-extrabold text-slate-900 flex items-center gap-2">
-                <UserPlus className="w-5 h-5 text-emerald-600" />
+                <UserPlus className="w-5 h-5 text-amber-600" />
                 <span>{editingStaff ? `Edit Desk Staff: ${editingStaff.name}` : 'Register New Desk Staff'}</span>
               </h3>
               <button onClick={() => setIsStaffModalOpen(false)} className="p-1 text-slate-400 hover:text-slate-700 transition cursor-pointer">
@@ -1590,7 +1623,7 @@ export const AdminDashboard: React.FC = () => {
                   value={staffFormData.name}
                   onChange={(e) => setStaffFormData({ ...staffFormData, name: e.target.value })}
                   placeholder="e.g. Anjali Sharma"
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:ring-2 focus:ring-[#0F4C81] outline-none"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:ring-2 focus:ring-[#9A5B3C] focus:border-[#9A5B3C] outline-none"
                 />
               </div>
 
@@ -1603,7 +1636,7 @@ export const AdminDashboard: React.FC = () => {
                   value={staffFormData.email}
                   onChange={(e) => setStaffFormData({ ...staffFormData, email: e.target.value })}
                   placeholder="staff.name@sevasadanclinic.in"
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-emerald-700 focus:ring-2 focus:ring-[#0F4C81] outline-none disabled:opacity-60"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold text-[#9A5B3C] focus:ring-2 focus:ring-[#9A5B3C] focus:border-[#9A5B3C] outline-none disabled:opacity-60"
                 />
                 <span className="text-[10px] text-slate-400 font-medium mt-0.5 block">Protected login credentials will be emailed to this inbox.</span>
               </div>
@@ -1617,7 +1650,7 @@ export const AdminDashboard: React.FC = () => {
                   value={staffFormData.phone}
                   onChange={(e) => setStaffFormData({ ...staffFormData, phone: e.target.value.replace(/\D/g, '') })}
                   placeholder="98261XXXXX"
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:ring-2 focus:ring-[#0F4C81] outline-none"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:ring-2 focus:ring-[#9A5B3C] focus:border-[#9A5B3C] outline-none"
                 />
                 <span className="text-[10px] text-slate-400 font-medium mt-0.5 block">Mandatory 10-digit number starting with 6-9.</span>
               </div>
@@ -1626,6 +1659,7 @@ export const AdminDashboard: React.FC = () => {
                 <label className="block font-bold text-slate-700 mb-1">Assigned Branch *</label>
                 <CustomSelect
                   required
+                  themeColor="orange"
                   value={staffFormData.branchId}
                   onChange={(val) => setStaffFormData({ ...staffFormData, branchId: val })}
                   placeholder="Select Option"
@@ -1652,7 +1686,7 @@ export const AdminDashboard: React.FC = () => {
                 <button
                   type="submit"
                   disabled={isFormSubmitting}
-                  className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-heading font-extrabold shadow-md flex items-center gap-2 cursor-pointer disabled:opacity-50 transition"
+                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#9A5B3C] to-[#B37046] hover:opacity-95 text-white font-heading font-extrabold shadow-md shadow-[#9A5B3C]/20 flex items-center gap-2 cursor-pointer disabled:opacity-50 transition"
                 >
                   {isFormSubmitting ? (
                     <Loader2 className="w-4 h-4 animate-spin text-white" />
@@ -1692,7 +1726,7 @@ export const AdminDashboard: React.FC = () => {
                     required
                     value={branchFormData.name}
                     onChange={(e) => setBranchFormData({ ...branchFormData, name: e.target.value })}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:ring-2 focus:ring-[#0F4C81] outline-none"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:ring-2 focus:ring-[#9A5B3C] focus:border-[#9A5B3C] outline-none"
                     placeholder="e.g. Sarangpur Branch"
                   />
                 </div>
@@ -1704,7 +1738,7 @@ export const AdminDashboard: React.FC = () => {
                     required
                     value={branchFormData.fullName}
                     onChange={(e) => setBranchFormData({ ...branchFormData, fullName: e.target.value })}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:ring-2 focus:ring-[#0F4C81] outline-none"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:ring-2 focus:ring-[#9A5B3C] focus:border-[#9A5B3C] outline-none"
                     placeholder="SEVASADAN Multi-Specialty Clinic"
                   />
                 </div>
@@ -1716,7 +1750,7 @@ export const AdminDashboard: React.FC = () => {
                     required
                     value={branchFormData.city}
                     onChange={(e) => setBranchFormData({ ...branchFormData, city: e.target.value })}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:ring-2 focus:ring-[#0F4C81] outline-none"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:ring-2 focus:ring-[#9A5B3C] focus:border-[#9A5B3C] outline-none"
                     placeholder="e.g. Sarangpur"
                   />
                 </div>
@@ -1728,7 +1762,7 @@ export const AdminDashboard: React.FC = () => {
                     required
                     value={branchFormData.phone}
                     onChange={(e) => setBranchFormData({ ...branchFormData, phone: e.target.value })}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:ring-2 focus:ring-[#0F4C81] outline-none"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:ring-2 focus:ring-[#9A5B3C] focus:border-[#9A5B3C] outline-none"
                   />
                 </div>
 
@@ -1739,7 +1773,7 @@ export const AdminDashboard: React.FC = () => {
                     required
                     value={branchFormData.emergencyPhone}
                     onChange={(e) => setBranchFormData({ ...branchFormData, emergencyPhone: e.target.value })}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:ring-2 focus:ring-[#0F4C81] outline-none"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:ring-2 focus:ring-[#9A5B3C] focus:border-[#9A5B3C] outline-none"
                   />
                 </div>
 
@@ -1750,7 +1784,7 @@ export const AdminDashboard: React.FC = () => {
                     required
                     value={branchFormData.slotDurationMinutes}
                     onChange={(e) => setBranchFormData({ ...branchFormData, slotDurationMinutes: Number(e.target.value) })}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:ring-2 focus:ring-[#0F4C81] outline-none"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:ring-2 focus:ring-[#9A5B3C] focus:border-[#9A5B3C] outline-none"
                   />
                 </div>
               </div>
@@ -1762,7 +1796,7 @@ export const AdminDashboard: React.FC = () => {
                   required
                   value={branchFormData.address}
                   onChange={(e) => setBranchFormData({ ...branchFormData, address: e.target.value })}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-normal focus:ring-2 focus:ring-[#0F4C81] outline-none"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-normal focus:ring-2 focus:ring-[#9A5B3C] focus:border-[#9A5B3C] outline-none"
                 />
               </div>
 
@@ -1770,6 +1804,7 @@ export const AdminDashboard: React.FC = () => {
                 <label className="block font-bold text-slate-700 mb-1">Operating Hours *</label>
                 <CustomSelect
                   required
+                  themeColor="orange"
                   value={branchFormData.operatingHours}
                   onChange={(val) => setBranchFormData({ ...branchFormData, operatingHours: val })}
                   placeholder="Select Option"
@@ -1794,7 +1829,7 @@ export const AdminDashboard: React.FC = () => {
                 <button
                   type="submit"
                   disabled={isFormSubmitting}
-                  className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-heading font-extrabold shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 transition"
+                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#9A5B3C] to-[#B37046] hover:opacity-95 text-white font-heading font-extrabold shadow-md shadow-[#9A5B3C]/20 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 transition"
                 >
                   {isFormSubmitting ? (
                     <Loader2 className="w-4 h-4 animate-spin text-white" />
@@ -1814,7 +1849,7 @@ export const AdminDashboard: React.FC = () => {
           <div className="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto border border-slate-100 animate-fade-in">
             <div className="flex items-center justify-between border-b border-slate-100 pb-4">
               <h3 className="font-heading font-extrabold text-lg text-slate-900 flex items-center gap-2">
-                <Plus className="w-5 h-5 text-[#0F4C81]" />
+                <Plus className="w-5 h-5 text-[#9A5B3C]" />
                 <span>{editingCareService ? `Edit Care Service` : 'Add New Care Service'}</span>
               </h3>
               <button onClick={() => setIsCareServiceModalOpen(false)} className="p-1 text-slate-400 hover:text-slate-700 transition cursor-pointer">
@@ -1831,7 +1866,7 @@ export const AdminDashboard: React.FC = () => {
                     required
                     value={careServiceFormData.name}
                     onChange={(e) => setCareServiceFormData({ ...careServiceFormData, name: e.target.value })}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:ring-2 focus:ring-[#0F4C81] outline-none"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:ring-2 focus:ring-[#9A5B3C] focus:border-[#9A5B3C] outline-none"
                     placeholder="e.g. Complete Blood Count"
                   />
                 </div>
@@ -1840,6 +1875,7 @@ export const AdminDashboard: React.FC = () => {
                   <label className="block font-bold text-slate-700 mb-1">Category *</label>
                   <CustomSelect
                     required
+                    themeColor="orange"
                     value={careServiceFormData.category}
                     onChange={(val) => setCareServiceFormData({ ...careServiceFormData, category: val as any })}
                     placeholder="Select Option"
@@ -1859,7 +1895,7 @@ export const AdminDashboard: React.FC = () => {
                     min="0"
                     value={careServiceFormData.price || ''}
                     onChange={(e) => setCareServiceFormData({ ...careServiceFormData, price: e.target.value ? Number(e.target.value) : '' as any })}
-                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:ring-2 focus:ring-[#0F4C81] outline-none"
+                    className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-bold focus:ring-2 focus:ring-[#9A5B3C] focus:border-[#9A5B3C] outline-none"
                     placeholder="e.g. 250"
                   />
                 </div>
@@ -1868,6 +1904,7 @@ export const AdminDashboard: React.FC = () => {
                   <label className="block font-bold text-slate-700 mb-1">Assigned Doctor/Pathologist *</label>
                   <CustomSelect
                     required
+                    themeColor="orange"
                     value={careServiceFormData.doctorId}
                     onChange={(val) => setCareServiceFormData({ ...careServiceFormData, doctorId: val })}
                     placeholder="Select Option"
@@ -1885,7 +1922,7 @@ export const AdminDashboard: React.FC = () => {
                   rows={2}
                   value={careServiceFormData.description}
                   onChange={(e) => setCareServiceFormData({ ...careServiceFormData, description: e.target.value })}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-normal focus:ring-2 focus:ring-[#0F4C81] outline-none"
+                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-normal focus:ring-2 focus:ring-[#9A5B3C] focus:border-[#9A5B3C] outline-none"
                   placeholder="Service details, instructions, etc."
                 />
               </div>
@@ -1896,7 +1933,7 @@ export const AdminDashboard: React.FC = () => {
                   id="isActive"
                   checked={careServiceFormData.isActive}
                   onChange={(e) => setCareServiceFormData({ ...careServiceFormData, isActive: e.target.checked })}
-                  className="w-4 h-4 text-[#0F4C81] border-slate-300 rounded focus:ring-[#0F4C81]"
+                  className="w-4 h-4 text-[#9A5B3C] border-slate-300 rounded focus:ring-[#9A5B3C] cursor-pointer"
                 />
                 <label htmlFor="isActive" className="font-bold text-slate-700 cursor-pointer">Service is active and available for booking</label>
               </div>
@@ -1912,7 +1949,7 @@ export const AdminDashboard: React.FC = () => {
                 <button
                   type="submit"
                   disabled={isFormSubmitting}
-                  className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-heading font-extrabold shadow-md flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 transition"
+                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#9A5B3C] to-[#B37046] hover:opacity-95 text-white font-heading font-extrabold shadow-md shadow-[#9A5B3C]/20 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 transition"
                 >
                   {isFormSubmitting ? (
                     <Loader2 className="w-4 h-4 animate-spin text-white" />

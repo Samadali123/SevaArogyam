@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { API_BASE_URL, AUTH_TOKEN_KEY } from '../services/api';
+import { CustomSelect } from '../components/ui/CustomSelect';
 
 interface PatientDashboardProps {
   onNavigate?: (tab: string) => void;
@@ -93,24 +94,24 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ onNavigate }
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-9 font-manrope text-slate-800">
       
       {/* Welcome Patient Banner */}
-      <div className="rounded-3xl bg-linear-to-r from-[#0B2545] via-[#0F4C81] to-[#0A2540] p-8 sm:p-10 text-white shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden border border-white/10 glow-teal">
+      <div className="rounded-3xl bg-gradient-to-r from-[#0B1F3A] via-[#0D2B4E] to-[#132D4D] p-8 sm:p-10 text-white shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden border border-white/10 glow-teal">
         {/* Decorative Background Blur */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-400/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-10 w-72 h-72 bg-sky-400/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-[#2DD4BF]/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-10 w-72 h-72 bg-[#5EAAF0]/10 rounded-full blur-3xl pointer-events-none" />
         
         <div className="space-y-2.5 text-center md:text-left z-10">
-          <span className="text-xs font-sora font-extrabold text-emerald-300 uppercase tracking-widest block">
+          <span className="text-xs font-sora font-extrabold text-[#2DD4BF] uppercase tracking-widest block">
             {language === 'en' ? 'PATIENT PORTAL DASHBOARD' : 'मरीज़ पोर्टल डैशबोर्ड'}
           </span>
           <h1 className="text-3xl sm:text-4xl font-sora font-extrabold tracking-tight text-white">
             {language === 'en' ? 'Welcome back, ' : 'स्वागत है, '}
-            <span className="bg-linear-to-r from-emerald-300 via-sky-200 to-teal-200 bg-clip-text text-transparent font-black">
+            <span className="bg-gradient-to-r from-[#2DD4BF] via-teal-200 to-sky-200 bg-clip-text text-transparent font-black">
               {patientName}
             </span>
             <span className="inline-block animate-bounce ml-1.5">👋</span>
           </h1>
           
-          <p className="text-xs sm:text-sm text-sky-100/90 max-w-xl font-medium leading-relaxed">
+          <p className="text-xs sm:text-sm text-slate-300 max-w-xl font-medium leading-relaxed">
             {language === 'en' 
               ? 'Manage your hospital appointment tokens, instant video OPD consultations, medical prescriptions, and care services.' 
               : 'अपने अस्पताल के अपॉइंटमेंट टोकन, वीडियो परामर्श और चिकित्सा नुस्खे प्रबंधित करें।'}
@@ -119,9 +120,9 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ onNavigate }
 
         <button
           onClick={() => openBookingModal(undefined, undefined)}
-          className="bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-sora font-extrabold px-6 py-3.5 rounded-2xl text-xs shadow-xl transition transform hover:scale-[1.02] shrink-0 flex items-center gap-2 cursor-pointer z-10 glow-emerald"
+          className="bg-gradient-to-r from-[#10B981] to-[#0D9488] hover:opacity-95 text-white font-sora font-extrabold px-6 py-3.5 rounded-2xl text-xs shadow-xl transition transform hover:scale-[1.02] shrink-0 flex items-center gap-2 cursor-pointer z-10 border border-white/20"
         >
-          <Calendar className="w-4 h-4 text-slate-950" />
+          <Calendar className="w-4 h-4 text-white" />
           <span>{language === 'en' ? 'Book New OPD Appointment' : 'नया OPD अपॉइंटमेंट बुक करें'}</span>
         </button>
       </div>
@@ -270,17 +271,18 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ onNavigate }
             </div>
             <div>
               <label className="block text-xs font-bold text-slate-700 mb-1.5">{language === 'en' ? 'New Time Slot' : 'नया समय'}</label>
-              <select
+              <CustomSelect
                 value={rescheduleSlot}
-                onChange={(e) => setRescheduleSlot(e.target.value)}
-                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:ring-2 focus:ring-[#0F4C81] outline-none"
-              >
-                <option value="09:00 AM">09:00 AM</option>
-                <option value="10:00 AM">10:00 AM</option>
-                <option value="11:30 AM">11:30 AM</option>
-                <option value="02:00 PM">02:00 PM</option>
-                <option value="04:00 PM">04:00 PM</option>
-              </select>
+                onChange={(val) => setRescheduleSlot(val)}
+                themeColor="teal"
+                options={[
+                  { value: '09:00 AM', label: '09:00 AM' },
+                  { value: '10:00 AM', label: '10:00 AM' },
+                  { value: '11:30 AM', label: '11:30 AM' },
+                  { value: '02:00 PM', label: '02:00 PM' },
+                  { value: '04:00 PM', label: '04:00 PM' },
+                ]}
+              />
             </div>
             <div className="flex justify-end gap-3 pt-2">
               <button onClick={() => setReschedulingApptId(null)} className="px-4 py-2.5 rounded-xl text-slate-600 font-bold hover:bg-slate-100 text-xs cursor-pointer">

@@ -13,6 +13,8 @@ interface UIState {
   preselectedDoctorId?: string;
   preselectedClinicId?: string;
   preselectedMode?: AppointmentMode;
+  isAppDownloadModalOpen: boolean;
+  appPlatform: 'android' | 'ios' | 'both';
 }
 
 const getInitialLanguage = (): Language => {
@@ -35,6 +37,8 @@ const initialState: UIState = {
   preselectedDoctorId: undefined,
   preselectedClinicId: undefined,
   preselectedMode: undefined,
+  isAppDownloadModalOpen: false,
+  appPlatform: 'both',
 };
 
 export const uiSlice = createSlice({
@@ -70,6 +74,13 @@ export const uiSlice = createSlice({
       state.preselectedClinicId = action.payload.clinicId;
       state.preselectedMode = action.payload.mode;
     },
+    openAppDownloadModal: (state, action: PayloadAction<'android' | 'ios' | 'both' | undefined>) => {
+      state.isAppDownloadModalOpen = true;
+      state.appPlatform = action.payload || 'both';
+    },
+    closeAppDownloadModal: (state) => {
+      state.isAppDownloadModalOpen = false;
+    }
   },
 });
 
@@ -82,6 +93,8 @@ export const {
   setSelectedBlogId,
   setSelectedSpecialtyFilter,
   setPreselectedBooking,
+  openAppDownloadModal,
+  closeAppDownloadModal,
 } = uiSlice.actions;
 
 export default uiSlice.reducer;

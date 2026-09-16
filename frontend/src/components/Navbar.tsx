@@ -83,21 +83,21 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
       
       {/* Top Banner: Emergency Helpline (Only shown for Public/Patients) */}
       {!isStaffOrAdminOrDoctor && (
-        <div className="hidden sm:block bg-linear-to-r from-[#0A2540] via-[#0F2C59] to-[#0284C7] text-white text-xs py-1.5 px-3 border-b border-white/10">
+        <div className="hidden sm:block bg-linear-to-r from-[#0B1F3A] via-[#0D2B4E] to-[#132D4D] text-white text-xs py-1.5 px-3 border-b border-white/10">
           <div className="w-full px-4 sm:px-6 lg:px-8 flex flex-wrap justify-between items-center gap-2">
             
             {/* Emergency & Branches */}
             <div className="flex flex-wrap items-center gap-3">
-              <span className="flex items-center gap-1.5 font-semibold bg-rose-500/20 text-rose-200 px-2.5 py-0.5 rounded-full border border-rose-400/30">
-                <ShieldAlert className="w-3.5 h-3.5 text-rose-300 animate-pulse" />
+              <span className="flex items-center gap-1.5 font-semibold bg-[#C2410C]/20 text-orange-200 px-2.5 py-0.5 rounded-full border border-[#C2410C]/40">
+                <ShieldAlert className="w-3.5 h-3.5 text-orange-300 animate-pulse" />
                 <span>{language === 'en' ? '24x7 Emergency Line:' : '24x7 हेल्पलाइन:'}</span>
-                <a href="tel:1800-7382-723" className="font-extrabold underline text-white hover:text-sky-200">
+                <a href="tel:1800-7382-723" className="font-extrabold underline text-[#5EAAF0] hover:text-sky-200">
                   1800-SEVA-CLINIC (1800-7382-723)
                 </a>
               </span>
 
               <span className="hidden lg:flex items-center gap-2 text-sky-100/90 text-[11px] font-medium">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                <ShieldCheck className="w-3.5 h-3.5 text-[#2DD4BF]" />
                 <span>NABH Accredited Healthcare Network • Sarangpur • Shujalpur • Rajgarh</span>
               </span>
             </div>
@@ -116,10 +116,10 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
           }}
           className="flex items-center gap-3 cursor-pointer group shrink-0"
         >
-          <div className="w-10 h-10 rounded-xl bg-linear-to-tr from-[#0284C7] via-[#0F2C59] to-[#0A2540] flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-all glow-teal">
-            <Stethoscope className="w-5.5 h-5.5 text-sky-300" />
+          <div className="w-10 h-10 rounded-xl bg-linear-to-tr from-[#10B981] to-[#0D9488] flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-all glow-teal">
+            <Stethoscope className="w-5.5 h-5.5 text-white" />
           </div>
-          <span className="font-outfit font-extrabold text-2xl bg-linear-to-r from-[#0A2540] via-[#0F2C59] to-[#0284C7] bg-clip-text text-transparent tracking-tight">
+          <span className="font-outfit font-extrabold text-2xl bg-linear-to-r from-[#0B1F3A] via-[#0D2B4E] to-[#0D9488] bg-clip-text text-transparent tracking-tight">
             JansevaArogyam
           </span>
         </div>
@@ -177,7 +177,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
                 onClick={() => setCurrentTab('home')}
                 className={`px-4 py-2 rounded-xl text-xs font-black transition-all whitespace-nowrap flex items-center gap-1.5 ${
                   currentTab === 'home' 
-                    ? 'bg-linear-to-r from-[#0F4C81] to-[#0B2545] text-white shadow-md' 
+                    ? 'bg-linear-to-r from-[#0B1F3A] to-[#0D2B4E] text-white shadow-md' 
                     : 'text-slate-600 hover:text-slate-900 hover:bg-white/90'
                 }`}
               >
@@ -189,7 +189,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
                 onClick={() => setCurrentTab('about')}
                 className={`px-4 py-2 rounded-xl text-xs font-black transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
                   currentTab === 'about' 
-                    ? 'bg-linear-to-r from-[#0F4C81] to-[#0B2545] text-white shadow-md' 
+                    ? 'bg-linear-to-r from-[#0B1F3A] to-[#0D2B4E] text-white shadow-md' 
                     : 'text-slate-600 hover:text-slate-900 hover:bg-white/90'
                 }`}
               >
@@ -202,7 +202,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
                   onClick={() => { setSelectedSpecialtyFilter('all'); setCurrentTab('specialties'); setOpenDropdown(null); }}
                   className={`px-4 py-2 rounded-xl text-xs font-black transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
                     currentTab === 'specialties' 
-                      ? 'bg-linear-to-r from-[#0F4C81] to-[#0B2545] text-white shadow-md' 
+                      ? 'bg-linear-to-r from-[#0B1F3A] to-[#0D2B4E] text-white shadow-md' 
                       : 'text-slate-600 hover:text-slate-900 hover:bg-white/90'
                   }`}
                 >
@@ -217,7 +217,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
                       <button
                         key={sp.id}
                         onClick={() => { setSelectedSpecialtyFilter(sp.category || sp.id); setCurrentTab('specialties'); setOpenDropdown(null); }}
-                        className="w-full text-left px-3 py-2 rounded-xl hover:bg-emerald-50 hover:text-emerald-800 text-xs font-bold text-slate-800 flex items-center justify-between transition cursor-pointer"
+                        className="w-full text-left px-3 py-2 rounded-xl hover:bg-teal-50 hover:text-[#0D9488] text-xs font-bold text-slate-800 flex items-center justify-between transition cursor-pointer"
                       >
                         <span className="truncate">{language === 'en' ? sp.nameEn : (sp.nameHi || sp.nameEn)}</span>
                         <ChevronRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />
@@ -233,7 +233,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
                   onClick={() => { setActiveBranchId('all'); setCurrentTab('locations'); setOpenDropdown(null); }}
                   className={`px-4 py-2 rounded-xl text-xs font-black transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
                     currentTab === 'locations' 
-                      ? 'bg-linear-to-r from-[#0F4C81] to-[#0B2545] text-white shadow-md' 
+                      ? 'bg-linear-to-r from-[#0B1F3A] to-[#0D2B4E] text-white shadow-md' 
                       : 'text-slate-600 hover:text-slate-900 hover:bg-white/90'
                   }`}
                 >
@@ -250,7 +250,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
                         <button
                           key={c.id}
                           onClick={() => { setActiveBranchId(c.id); setCurrentTab('locations'); setOpenDropdown(null); }}
-                          className="w-full text-left px-3 py-2 rounded-xl hover:bg-sky-50 hover:text-[#0F4C81] text-xs font-bold text-slate-800 flex items-center justify-between transition cursor-pointer"
+                          className="w-full text-left px-3 py-2 rounded-xl hover:bg-teal-50 hover:text-[#0D9488] text-xs font-bold text-slate-800 flex items-center justify-between transition cursor-pointer"
                         >
                           <span className="truncate">{language === 'en' ? c.name : branchNameHi}</span>
                           <ChevronRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />
@@ -267,7 +267,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
                   onClick={() => setOpenDropdown(openDropdown === 'services' ? null : 'services')}
                   className={`px-4 py-2 rounded-xl text-xs font-black transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
                     ['pharmacy', 'diagnostics', 'laboratory'].includes(currentTab)
-                      ? 'bg-linear-to-r from-[#0F4C81] to-[#0B2545] text-white shadow-md'
+                      ? 'bg-linear-to-r from-[#0B1F3A] to-[#0D2B4E] text-white shadow-md'
                       : 'text-slate-600 hover:text-slate-900 hover:bg-white/90'
                   }`}
                 >
@@ -284,7 +284,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
                       <button 
                         key={tab} 
                         onClick={() => { setCurrentTab(tab); setOpenDropdown(null); }} 
-                        className="w-full text-left px-3 py-2 rounded-xl hover:bg-sky-50 hover:text-[#0F4C81] text-xs font-bold text-slate-800 flex items-center justify-between transition cursor-pointer"
+                        className="w-full text-left px-3 py-2 rounded-xl hover:bg-teal-50 hover:text-[#0D9488] text-xs font-bold text-slate-800 flex items-center justify-between transition cursor-pointer"
                       >
                         <span className="truncate">{label}</span>
                         <ChevronRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />
@@ -299,7 +299,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
                 onClick={() => setCurrentTab('referrals')}
                 className={`px-4 py-2 rounded-xl text-xs font-black transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
                   currentTab === 'referrals' 
-                    ? 'bg-linear-to-r from-[#0F4C81] to-[#0B2545] text-white shadow-md' 
+                    ? 'bg-linear-to-r from-[#0B1F3A] to-[#0D2B4E] text-white shadow-md' 
                     : 'text-slate-600 hover:text-slate-900 hover:bg-white/90'
                 }`}
               >
@@ -307,17 +307,17 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
                 <span>{language === 'en' ? 'Refer & Earn' : 'रेफर करें और कमाएं'}</span>
               </button>
 
-              {/* My Dashboard (when Patient logged in) */}
-              {activeRole === 'PATIENT' && (
+              {/* My Dashboard (only when Patient logged in) */}
+              {Boolean(currentUser && activeRole === 'PATIENT') && (
                 <button
                   onClick={() => setCurrentTab('patient-dashboard')}
                   className={`px-4 py-2 rounded-xl text-xs font-black transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
                     currentTab === 'patient-dashboard' 
-                      ? 'bg-linear-to-r from-[#0F4C81] to-[#0B2545] text-white shadow-md' 
+                      ? 'bg-linear-to-r from-[#0B1F3A] to-[#0D2B4E] text-white shadow-md' 
                       : 'text-slate-600 hover:text-slate-900 hover:bg-white/90'
                   }`}
                 >
-                  <Calendar className="w-3.5 h-3.5" />
+                  <Calendar className="w-3.5 h-3.5 text-[#2DD4BF]" />
                   <span>{language === 'en' ? 'My Dashboard' : 'मेरा डैशबोर्ड'}</span>
                 </button>
               )}
@@ -329,7 +329,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
                 onClick={() => setLanguage('hi')}
                 className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
                   language === 'hi' 
-                    ? 'bg-emerald-600 text-white shadow-xs font-bold' 
+                    ? 'bg-[#0D9488] text-white shadow-xs font-bold' 
                     : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
                 }`}
                 title="हिन्दी में वेबसाइट देखें"
@@ -340,7 +340,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
                 onClick={() => setLanguage('en')}
                 className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
                   language === 'en' 
-                    ? 'bg-[#0F4C81] text-white shadow-xs font-bold' 
+                    ? 'bg-[#0B1F3A] text-white shadow-xs font-bold' 
                     : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
                 }`}
                 title="View website in English"
@@ -372,11 +372,11 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
               <div className="hidden lg:relative lg:block shrink-0" onMouseEnter={() => setOpenDropdown('login')} onMouseLeave={() => setOpenDropdown(null)}>
                 <button
                   onClick={() => setOpenDropdown(openDropdown === 'login' ? null : 'login')}
-                  className="bg-linear-to-r from-[#0F4C81] to-[#0B2545] hover:opacity-95 text-white font-black px-4 py-2 rounded-xl text-xs flex items-center gap-2 transition-all cursor-pointer shadow-md"
+                  className="bg-linear-to-r from-[#10B981] to-[#0D9488] hover:opacity-95 text-white font-black px-4 py-2 rounded-xl text-xs flex items-center gap-2 transition-all cursor-pointer shadow-md"
                 >
-                  <User className="w-4 h-4 text-emerald-300" />
-                  <span>{language === 'en' ? 'Login' : 'लॉगिन'}</span>
-                  <ChevronDown className={`w-3.5 h-3.5 text-emerald-300 transition-transform ${openDropdown === 'login' ? 'rotate-180' : ''}`} />
+                  <User className="w-4 h-4 text-white" />
+                  <span>{language === 'en' ? 'Login' : 'लॉगइन'}</span>
+                  <ChevronDown className={`w-3.5 h-3.5 text-white transition-transform ${openDropdown === 'login' ? 'rotate-180' : ''}`} />
                 </button>
 
                 {/* Dropdown Menu */}
@@ -389,15 +389,15 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
                         setOpenDropdown(null);
                         openAuthModal();
                       }}
-                      className="w-full text-left px-3.5 py-2.5 rounded-xl hover:bg-sky-50 text-xs font-extrabold text-slate-800 flex items-center justify-between transition cursor-pointer group"
+                      className="w-full text-left px-3.5 py-2.5 rounded-xl hover:bg-teal-50 text-xs font-extrabold text-slate-800 flex items-center justify-between transition cursor-pointer group"
                     >
                       <div className="flex items-center gap-2.5">
-                        <div className="w-7 h-7 rounded-lg bg-sky-100 flex items-center justify-center text-[#0F4C81] group-hover:bg-[#0F4C81] group-hover:text-white transition">
+                        <div className="w-7 h-7 rounded-lg bg-teal-100 flex items-center justify-center text-[#0D9488] group-hover:bg-[#0D9488] group-hover:text-white transition">
                           <User className="w-3.5 h-3.5" />
                         </div>
                         <span>{language === 'en' ? 'Patient' : 'मरीज़'}</span>
                       </div>
-                      <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#0F4C81]" />
+                      <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#0D9488]" />
                     </button>
 
                     {/* Option 2: Doctor & Staff */}

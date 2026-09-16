@@ -70,8 +70,8 @@ export const Referrals: React.FC = () => {
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 space-y-10 font-manrope text-slate-800">
       
-      {/* HERO & REWARD HIGHLIGHT BOX */}
-      <div className="rounded-3xl bg-linear-to-r from-[#0B2545] via-[#0F4C81] to-[#0A2540] p-8 sm:p-12 text-white shadow-2xl relative overflow-hidden border border-white/10 glow-teal">
+      {/* HERO BANNER */}
+      <div className="rounded-3xl bg-gradient-to-r from-[#0B1F3A] via-[#0D2B4E] to-[#132D4D] p-8 sm:p-12 text-white shadow-2xl relative overflow-hidden border border-white/10 glow-teal">
         <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-400/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-10 -left-10 w-80 h-80 bg-sky-400/10 rounded-full blur-3xl pointer-events-none" />
         

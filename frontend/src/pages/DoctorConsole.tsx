@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   Users, 
   Stethoscope, 
@@ -12,13 +12,104 @@ import {
   Edit3,
   X,
   Clock,
-  Loader2
+  Loader2,
+  ChevronDown
 } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { useApp, DEFAULT_DOCTOR_AVATAR } from '../context/AppContext';
 import type { Appointment, PrescriptionItem, MealTiming } from '../types';
 import { ConfirmDialog } from '../components/ConfirmDialog';
+
+interface ThemeSelectOption {
+  value: string;
+  label: string;
+  sublabel?: string;
+}
+
+interface ThemeSelectProps {
+  label?: string;
+  value: string;
+  onChange: (val: string) => void;
+  options: ThemeSelectOption[];
+  placeholder?: string;
+  className?: string;
+}
+
+const ThemeSelect: React.FC<ThemeSelectProps> = ({
+  label,
+  value,
+  onChange,
+  options,
+  placeholder = 'Select option...',
+  className = ''
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const selectedOpt = options.find(o => o.value === value);
+
+  return (
+    <div className={`relative ${className}`} ref={dropdownRef}>
+      {label && (
+        <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
+          {label}
+        </label>
+      )}
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full bg-white border-2 border-emerald-500/50 hover:border-emerald-600 text-slate-800 font-bold px-3.5 py-2.5 rounded-xl text-xs flex items-center justify-between shadow-xs transition focus:outline-none focus:ring-2 focus:ring-emerald-500/20 cursor-pointer text-left"
+      >
+        <span className="truncate pr-2">
+          {selectedOpt ? selectedOpt.label : (
+            <span className="text-slate-400 font-normal">{placeholder}</span>
+          )}
+        </span>
+        <ChevronDown className={`w-4 h-4 text-emerald-600 transition-transform duration-200 shrink-0 ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      {isOpen && (
+        <div className="absolute z-50 left-0 right-0 mt-1 bg-white border border-emerald-200 rounded-2xl shadow-xl py-1.5 max-h-60 overflow-y-auto animate-fade-in divide-y divide-slate-50 min-w-[200px]">
+          {options.map((opt) => {
+            const isSelected = opt.value === value;
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => {
+                  onChange(opt.value);
+                  setIsOpen(false);
+                }}
+                className={`w-full px-4 py-2.5 text-xs text-left flex items-center justify-between font-bold transition cursor-pointer ${
+                  isSelected 
+                    ? 'bg-emerald-50 text-emerald-800 font-black' 
+                    : 'text-slate-700 hover:bg-slate-50 hover:text-emerald-600'
+                }`}
+              >
+                <div className="truncate">
+                  <span>{opt.label}</span>
+                  {opt.sublabel && <span className="block text-[10px] text-slate-400 font-normal">{opt.sublabel}</span>}
+                </div>
+                {isSelected && <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 ml-2" />}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+};
 
 interface DoctorConsoleProps {
   onNavigate?: (tab: string) => void;
@@ -139,8 +230,12 @@ export const DoctorConsole: React.FC<DoctorConsoleProps> = ({ onNavigate }) => {
 
   const handleSaveArticle = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!articleTitle || !articleExcerpt) {
+    if (!articleTitle.trim() || !articleExcerpt.trim()) {
       setArticleError('Please fill in Title and Summary Excerpt');
+      return;
+    }
+    if (!articleImageUrl) {
+      setArticleError('Mandatory: Please upload a cover image for the article before saving.');
       return;
     }
     setArticleLoading(true);
@@ -469,8 +564,8 @@ export const DoctorConsole: React.FC<DoctorConsoleProps> = ({ onNavigate }) => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 font-sans">
       
-      {/* Doctor Console Top Header - Unified Deep Navy Brand Gradient */}
-      <div className="bg-gradient-to-r from-[#0B2545] via-[#0F4C81] to-[#0A2540] text-white p-6 sm:p-8 rounded-3xl shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 border border-white/10">
+      {/* Doctor Console Top Header - Deep Forest Green Brand Gradient (#0B3D2E -> #0A2E22) */}
+      <div className="bg-gradient-to-r from-[#0B3D2E] via-[#0A2E22] to-[#0B3D2E] text-white p-6 sm:p-8 rounded-3xl shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 border border-white/10">
         <div className="flex items-center gap-4">
           <img 
             src={currentDoctor.avatarUrl || DEFAULT_DOCTOR_AVATAR} 
@@ -481,12 +576,12 @@ export const DoctorConsole: React.FC<DoctorConsoleProps> = ({ onNavigate }) => {
           <div>
             <div className="flex items-center gap-2">
               <h2 className="text-xl sm:text-2xl font-heading font-extrabold text-white tracking-tight">{currentDoctor.name}</h2>
-              <span className="bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-                {language === 'en' ? 'Active OPD' : 'ओपीडी चालू'}
+              <span className="bg-[rgba(255,255,255,0.15)] border border-white/20 text-white text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider backdrop-blur-md">
+                {language === 'en' ? 'DOCTOR PORTAL' : 'डॉक्टर पोर्टल'}
               </span>
             </div>
-            <p className="text-xs text-sky-200 font-medium mt-0.5">{currentDoctor.specialization}</p>
-            <p className="text-[11px] text-sky-100/80 mt-0.5">
+            <p className="text-xs text-emerald-100 font-medium mt-0.5">{currentDoctor.specialization}</p>
+            <p className="text-[11px] text-emerald-100/80 mt-0.5">
               Reg: {currentDoctor.regNumber} • {language === 'en' ? 'Assigned Branches:' : 'शाखाएं:'} {currentDoctor.clinicsCovered && currentDoctor.clinicsCovered.length > 0 
                 ? currentDoctor.clinicsCovered.map((cId: string) => clinics.find(c => c.id === cId)?.name || cId).join(', ') 
                 : 'Sarangpur & Tele-OPD'}
@@ -495,14 +590,14 @@ export const DoctorConsole: React.FC<DoctorConsoleProps> = ({ onNavigate }) => {
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-1.5 bg-white/10 p-1.5 rounded-2xl border border-white/15 text-xs font-bold font-heading">
+          <div className="flex items-center gap-1.5 bg-[rgba(255,255,255,0.15)] p-1.5 rounded-2xl border border-white/20 text-xs font-bold font-heading backdrop-blur-md">
             <button
               onClick={() => setActiveConsoleTab('OPD')}
               className={`px-4 py-2 rounded-xl transition flex items-center gap-2 cursor-pointer ${
-                activeConsoleTab === 'OPD' ? 'bg-white text-[#0B2545] shadow-md font-extrabold' : 'text-slate-200 hover:text-white'
+                activeConsoleTab === 'OPD' ? 'bg-gradient-to-r from-[#0B7A56] to-[#0F9D6D] text-white shadow-md font-extrabold border border-white/20' : 'text-emerald-100 hover:text-white'
               }`}
             >
-              <Stethoscope className="w-4 h-4 text-emerald-600" />
+              <Stethoscope className="w-4 h-4 text-white" />
               <span>{language === 'en' ? 'OPD & Queue' : 'ओपीडी एवं कतार'}</span>
             </button>
             <button
@@ -782,24 +877,24 @@ export const DoctorConsole: React.FC<DoctorConsoleProps> = ({ onNavigate }) => {
 
             {/* Select Doctor's Patient Dropdown */}
             <div className="w-full sm:w-auto">
-              <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">
-                Select Patient:
-              </label>
-              <select
+              <ThemeSelect
+                label="Select Patient:"
                 value={activeAppointment?.id || ''}
-                onChange={(e) => {
-                  const found = appointments.find(a => a.id === e.target.value);
+                onChange={(val) => {
+                  const found = appointments.find(a => a.id === val);
                   if (found) setActiveAppointment(found);
                 }}
-                className="w-full sm:w-60 px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
-              >
-                <option value="">-- Doctor's Patient List --</option>
-                {appointments.map(a => (
-                  <option key={a.id} value={a.id}>
-                    {a.patientName || 'Patient'} ({a.tokenNumber || 'TK'}) {a.patientPhone ? `- ${a.patientPhone}` : ''}
-                  </option>
-                ))}
-              </select>
+                placeholder="-- Doctor's Patient List --"
+                options={[
+                  { value: '', label: "-- Doctor's Patient List --" },
+                  ...appointments.map(a => ({
+                    value: a.id,
+                    label: `${a.patientName || 'Patient'} (${a.tokenNumber || 'TK'})`,
+                    sublabel: a.patientPhone ? `Phone: +91 ${a.patientPhone}` : undefined
+                  }))
+                ]}
+                className="w-full sm:w-64"
+              />
             </div>
           </div>
 
@@ -885,18 +980,18 @@ export const DoctorConsole: React.FC<DoctorConsoleProps> = ({ onNavigate }) => {
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label className="block text-[11px] font-bold text-slate-600 mb-1">Frequency</label>
-                  <select
+                  <ThemeSelect
+                    label="Frequency"
                     value={medFreq}
-                    onChange={(e) => setMedFreq(e.target.value)}
-                    className="w-full px-2 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                  >
-                    <option value="1-0-1">1-0-1 (Morning & Night)</option>
-                    <option value="1-0-0">1-0-0 (Morning Only)</option>
-                    <option value="0-0-1">0-0-1 (Night Only)</option>
-                    <option value="1-1-1">1-1-1 (Thrice Daily)</option>
-                    <option value="Once Weekly">Once Weekly</option>
-                  </select>
+                    onChange={setMedFreq}
+                    options={[
+                      { value: '1-0-1', label: '1-0-1 (Morning & Night)' },
+                      { value: '1-0-0', label: '1-0-0 (Morning Only)' },
+                      { value: '0-0-1', label: '0-0-1 (Night Only)' },
+                      { value: '1-1-1', label: '1-1-1 (Thrice Daily)' },
+                      { value: 'Once Weekly', label: 'Once Weekly' }
+                    ]}
+                  />
                 </div>
 
                 <div className="sm:col-span-2">
@@ -1085,21 +1180,19 @@ export const DoctorConsole: React.FC<DoctorConsoleProps> = ({ onNavigate }) => {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1.5 text-[11px]">
-                    Specialty Category
-                  </label>
-                  <select
+                  <ThemeSelect
+                    label="Specialty Category"
                     value={articleCategory}
-                    onChange={(e) => setArticleCategory(e.target.value)}
-                    className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
-                  >
-                    <option value="General Medicine">General Medicine</option>
-                    <option value="Pediatrics">Pediatrics</option>
-                    <option value="Orthopedics">Orthopedics</option>
-                    <option value="Gynecology">Gynecology</option>
-                    <option value="Cardiology">Cardiology</option>
-                    <option value="Diabetes & Metabolic">Diabetes & Metabolic</option>
-                  </select>
+                    onChange={setArticleCategory}
+                    options={[
+                      { value: 'General Medicine', label: 'General Medicine' },
+                      { value: 'Pediatrics', label: 'Pediatrics' },
+                      { value: 'Orthopedics', label: 'Orthopedics' },
+                      { value: 'Gynecology', label: 'Gynecology' },
+                      { value: 'Cardiology', label: 'Cardiology' },
+                      { value: 'Diabetes & Metabolic', label: 'Diabetes & Metabolic' }
+                    ]}
+                  />
                 </div>
 
                 <div>
@@ -1146,7 +1239,7 @@ export const DoctorConsole: React.FC<DoctorConsoleProps> = ({ onNavigate }) => {
 
               <div>
                 <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1.5 text-[11px]">
-                  Upload Cover Image
+                  Upload Cover Image <span className="text-emerald-600 font-extrabold">*</span>
                 </label>
                 <div className="flex items-center gap-3">
                   <input
@@ -1159,7 +1252,7 @@ export const DoctorConsole: React.FC<DoctorConsoleProps> = ({ onNavigate }) => {
                     <img
                       src={articleImageUrl}
                       alt="Preview"
-                      className="w-12 h-12 rounded-xl object-cover border border-slate-200 shrink-0"
+                      className="w-12 h-12 rounded-xl object-cover border border-emerald-500 shrink-0 shadow-xs"
                     />
                   )}
                 </div>
@@ -1252,18 +1345,15 @@ export const DoctorConsole: React.FC<DoctorConsoleProps> = ({ onNavigate }) => {
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1.5 text-[11px]">
-                  New Time Slot *
-                </label>
-                <select
+                <ThemeSelect
+                  label="New Time Slot *"
                   value={rescheduleTimeSlot}
-                  onChange={(e) => setRescheduleTimeSlot(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
-                >
-                  {['09:00 AM', '09:30 AM', '10:00 AM', '10:30 AM', '11:00 AM', '11:30 AM', '12:00 PM', '04:00 PM', '04:30 PM', '05:00 PM', '05:30 PM', '06:00 PM'].map(slot => (
-                    <option key={slot} value={slot}>{slot}</option>
-                  ))}
-                </select>
+                  onChange={setRescheduleTimeSlot}
+                  options={['09:00 AM', '09:30 AM', '10:00 AM', '10:30 AM', '11:00 AM', '11:30 AM', '12:00 PM', '04:00 PM', '04:30 PM', '05:00 PM', '05:30 PM', '06:00 PM'].map(slot => ({
+                    value: slot,
+                    label: slot
+                  }))}
+                />
               </div>
 
               <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-3">
@@ -1297,16 +1387,16 @@ export const DoctorConsole: React.FC<DoctorConsoleProps> = ({ onNavigate }) => {
       {/* HIDDEN PRINT CONTAINER FOR NATIVE BROWSER PRINT DIALOG */}
       <div id="printable-rx-container" className="hidden print:block font-sans text-slate-900 bg-white p-6 leading-normal">
         {/* Header Branding */}
-        <div className="bg-gradient-to-r from-[#0B2545] to-[#0F4C81] text-white p-6 rounded-2xl flex items-center justify-between">
+        <div className="bg-gradient-to-r from-[#0B3D2E] via-[#0A2E22] to-[#0B3D2E] text-white p-6 rounded-2xl flex items-center justify-between">
           <div>
             <h1 className="text-xl font-heading font-extrabold tracking-tight">SEVASADAN HEALTHCARE NETWORK</h1>
-            <p className="text-xs text-sky-200 mt-1">Sarangpur • Shujalpur • Rajgarh & Virtual Telemedicine OPD</p>
-            <p className="text-[10px] text-sky-100/80">Emergency Helpline: 1800-SEVA-CLINIC | www.sevasadanclinic.in</p>
+            <p className="text-xs text-emerald-200 mt-1">Sarangpur • Shujalpur • Rajgarh & Virtual Telemedicine OPD</p>
+            <p className="text-[10px] text-emerald-100/80">Emergency Helpline: 1800-SEVA-CLINIC | www.sevasadanclinic.in</p>
           </div>
           <div className="text-right">
             <h3 className="font-heading font-extrabold text-sm text-white">{currentDoctor.name}</h3>
-            <p className="text-xs text-sky-200">{currentDoctor.qualification}</p>
-            <p className="text-[10px] text-sky-100/80">Reg: {currentDoctor.regNumber} • {currentDoctor.specialization}</p>
+            <p className="text-xs text-emerald-200">{currentDoctor.qualification}</p>
+            <p className="text-[10px] text-emerald-100/80">Reg: {currentDoctor.regNumber} • {currentDoctor.specialization}</p>
           </div>
         </div>
 
@@ -1319,23 +1409,23 @@ export const DoctorConsole: React.FC<DoctorConsoleProps> = ({ onNavigate }) => {
           </div>
           <div className="space-y-1 text-right">
             <p><strong>Date:</strong> {new Date().toLocaleDateString('en-IN')}</p>
-            <p><strong>Token No:</strong> <span className="font-mono font-bold text-[#0F4C81]">{activeAppointment?.tokenNumber || 'SAR-014'}</span></p>
+            <p><strong>Token No:</strong> <span className="font-mono font-bold text-[#0F9D6D]">{activeAppointment?.tokenNumber || 'SAR-014'}</span></p>
             <p><strong>OPD Mode:</strong> {activeAppointment?.appointmentMode || 'IN_CLINIC'}</p>
           </div>
         </div>
 
         {/* Clinical Observations */}
         <div className="border-b border-slate-200 pb-3 mb-4">
-          <h4 className="text-xs font-heading font-extrabold text-[#0B2545] uppercase tracking-wider mb-1">Clinical Diagnosis & Observations</h4>
+          <h4 className="text-xs font-heading font-extrabold text-[#0B3D2E] uppercase tracking-wider mb-1">Clinical Diagnosis & Observations</h4>
           <p className="text-xs text-slate-700"><strong>Diagnosis:</strong> {diagnosis}</p>
           <p className="text-xs text-slate-600 mt-0.5"><strong>Clinical Notes:</strong> {clinicalNotes}</p>
         </div>
 
         {/* Rx Medicines Table */}
         <div className="mb-6">
-          <div className="text-2xl font-serif font-black text-emerald-600 mb-2">Rx</div>
+          <div className="text-2xl font-serif font-black text-[#0F9D6D] mb-2">Rx</div>
           <table className="w-full text-left text-xs border border-slate-200 rounded-xl overflow-hidden">
-            <thead className="bg-[#0B2545] text-white font-heading font-bold text-[11px]">
+            <thead className="bg-[#0B3D2E] text-white font-heading font-bold text-[11px]">
               <tr>
                 <th className="p-2.5">#</th>
                 <th className="p-2.5">Medicine Name</th>
@@ -1352,7 +1442,7 @@ export const DoctorConsole: React.FC<DoctorConsoleProps> = ({ onNavigate }) => {
                   <td className="p-2.5 font-bold">{idx + 1}</td>
                   <td className="p-2.5 font-bold text-slate-900">{item.medicineName}</td>
                   <td className="p-2.5 text-slate-600">{item.dosage}</td>
-                  <td className="p-2.5 font-mono font-bold text-[#0F4C81]">{item.frequency}</td>
+                  <td className="p-2.5 font-mono font-bold text-[#0F9D6D]">{item.frequency}</td>
                   <td className="p-2.5 text-slate-600">{item.durationDays} Days</td>
                   <td className="p-2.5 text-slate-600">{item.timing.replace('_', ' ')}</td>
                   <td className="p-2.5 text-slate-600">{item.specialInstructions || '-'}</td>
@@ -1365,7 +1455,7 @@ export const DoctorConsole: React.FC<DoctorConsoleProps> = ({ onNavigate }) => {
         {/* Investigations & Advice Grid */}
         <div className="grid grid-cols-2 gap-4 mb-4 text-xs">
           <div className="bg-slate-50 border border-slate-200 p-3 rounded-xl">
-            <h5 className="font-heading font-extrabold text-[11px] text-[#0B2545] uppercase tracking-wider mb-1">Investigations Ordered</h5>
+            <h5 className="font-heading font-extrabold text-[11px] text-[#0B3D2E] uppercase tracking-wider mb-1">Investigations Ordered</h5>
             <p className="text-slate-700">{investigationsInput || 'None'}</p>
           </div>
           <div className="bg-slate-50 border border-slate-200 p-3 rounded-xl">

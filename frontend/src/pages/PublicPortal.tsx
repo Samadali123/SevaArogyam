@@ -3,23 +3,30 @@ import {
   Building2, 
   Video, 
   MapPin, 
-  Phone, 
-  Clock,
   Calendar,
   ChevronDown,
-  HeartPulse,
-  Baby,
   Activity,
-  Sparkle,
   Award,
   Stethoscope,
   PhoneCall,
   FileText,
   ChevronRight,
   ShieldAlert,
-  Navigation,
   ShieldCheck
 } from 'lucide-react';
+import { 
+  FiMapPin, 
+  FiPhoneCall, 
+  FiClock, 
+  FiNavigation, 
+  FiCalendar, 
+  FiActivity, 
+  FiHeart, 
+  FiShield, 
+  FiUserCheck,
+  FiEye,
+  FiAlertCircle
+} from 'react-icons/fi';
 import { useApp } from '../context/AppContext';
 import { useSEO } from '../hooks/useSEO';
 import { DEFAULT_BRANCH_IMAGES } from '../data/mockData';
@@ -39,25 +46,15 @@ export const PublicPortal: React.FC<PublicPortalProps> = ({ onNavigate }) => {
 
   const { 
     clinics, 
-    doctors, 
     healthBlogs, 
     openBookingModal,
     setSelectedBlogId,
-    language
+    language,
+    setSelectedSpecialtyFilter
   } = useApp();
 
   // Filtering State
-  const [selectedSpecialty, setSelectedSpecialty] = useState<string>('all');
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
-
-  const specialtiesList = [
-    { id: 'all', labelEn: 'All Specialties', labelHi: 'सभी विभाग', icon: Activity, desc: 'Complete multi-specialty care' },
-    { id: 'General', labelEn: 'General & Diabetes', labelHi: 'जनरल मेडिसिन', icon: HeartPulse, desc: 'Internal medicine, fever & chronic disease' },
-    { id: 'Pediatric', labelEn: 'Pediatrics & Child Care', labelHi: 'बाल रोग विशेषज्ञ', icon: Baby, desc: 'Newborn care, growth & immunization' },
-    { id: 'Ortho', labelEn: 'Orthopedics & Joint Care', labelHi: 'हड्डी एवं जोड़ रोग', icon: Activity, desc: 'Joint replacement, fracture & pain' },
-    { id: 'Derm', labelEn: 'Dermatology & Cosmetology', labelHi: 'त्वचा एवं सौंदर्य', icon: Sparkle, desc: 'Skin allergies, hair fall & cosmetics' },
-    { id: 'Cardio', labelEn: 'Cardiology & Heart Health', labelHi: 'हृदय रोग विशेषज्ञ', icon: HeartPulse, desc: 'ECG, Echo & cardiac wellness' }
-  ];
 
   const faqs = [
     {
@@ -90,22 +87,22 @@ export const PublicPortal: React.FC<PublicPortalProps> = ({ onNavigate }) => {
     <div className="pb-24 overflow-x-hidden w-full max-w-full font-jakarta text-slate-800 bg-slate-50/50">
       
       {/* 1. CLINIC FACILITIES & KEY HIGHLIGHTS MARQUEE RIBBON */}
-      <div className="bg-[#0A2540] text-white py-2.5 border-b border-emerald-500/20 overflow-hidden relative shadow-inner font-sans">
+      <div className="bg-[#0B1F3A] text-white py-2.5 border-b border-white/10 overflow-hidden relative shadow-inner font-sans">
         <div className="flex items-center whitespace-nowrap animate-marquee gap-8 text-xs">
           <span className="font-heading font-extrabold text-amber-300 flex items-center gap-2 shrink-0 uppercase tracking-widest text-xs">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+            <span className="w-2.5 h-2.5 rounded-full bg-[#2DD4BF] shrink-0 animate-pulse"></span>
             {language === 'en' ? 'SEVASADAN CLINIC HIGHLIGHTS & FACILITIES:' : 'सेवा सदन क्लीनिक मुख्य बिंदु एवं सुविधाएं:'}
           </span>
 
           <span className="inline-flex items-center gap-2 font-medium text-slate-200">
-            <ShieldAlert className="w-3.5 h-3.5 text-rose-400 shrink-0" />
-            <strong className="text-rose-300 font-extrabold font-heading">{language === 'en' ? '24x7 Emergency & ICU:' : '24x7 आपातकालीन एवं आईसीयू:'}</strong>
-            <span>{language === 'en' ? 'ACLS Ambulance Helpline: 1800-SEVA-CLINIC' : 'एमर्जेंसी एम्बुलेंस हेल्पलाइन: 1800-SEVA-CLINIC'}</span>
+            <ShieldAlert className="w-3.5 h-3.5 text-orange-400 shrink-0" />
+            <strong className="text-orange-300 font-extrabold font-heading">{language === 'en' ? '24x7 Emergency & ICU:' : '24x7 आपातकालीन एवं आईसीयू:'}</strong>
+            <span className="text-[#5EAAF0] font-bold">{language === 'en' ? 'ACLS Ambulance Helpline: 1800-SEVA-CLINIC' : 'एमर्जेंसी एम्बुलेंस हेल्पलाइन: 1800-SEVA-CLINIC'}</span>
           </span>
 
           <span className="inline-flex items-center gap-2 font-medium text-slate-200">
-            <FileText className="w-3.5 h-3.5 text-sky-400 shrink-0" />
-            <strong className="text-sky-300 font-extrabold font-heading">{language === 'en' ? 'High-Tech Pathology Lab:' : 'हाई-टेक पैथोलॉजी लैब:'}</strong>
+            <FileText className="w-3.5 h-3.5 text-[#5EAAF0] shrink-0" />
+            <strong className="text-[#5EAAF0] font-extrabold font-heading">{language === 'en' ? 'High-Tech Pathology Lab:' : 'हाई-टेक पैथोलॉजी लैब:'}</strong>
             <span>{language === 'en' ? 'Automated Testing & Doorstep WhatsApp PDF Reports' : 'स्वचालित लैब टेस्ट और व्हाट्सएप पीडीएफ रिपोर्ट'}</span>
           </span>
 
@@ -116,8 +113,8 @@ export const PublicPortal: React.FC<PublicPortalProps> = ({ onNavigate }) => {
           </span>
 
           <span className="inline-flex items-center gap-2 font-medium text-slate-200">
-            <Stethoscope className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-            <strong className="text-emerald-300 font-extrabold font-heading">{language === 'en' ? '15+ Board Doctors:' : '15+ विशेषज्ञ डॉक्टर:'}</strong>
+            <Stethoscope className="w-3.5 h-3.5 text-[#2DD4BF] shrink-0" />
+            <strong className="text-[#2DD4BF] font-extrabold font-heading">{language === 'en' ? '15+ Board Doctors:' : '15+ विशेषज्ञ डॉक्टर:'}</strong>
             <span>{language === 'en' ? 'General Medicine, Pediatrics, Ortho, Derm, Cardio & Gynae' : 'जनरल मेडिसिन, शिशु रोग, हड्डी, त्वचा, हृदय एवं स्त्री रोग'}</span>
           </span>
 
@@ -134,18 +131,18 @@ export const PublicPortal: React.FC<PublicPortalProps> = ({ onNavigate }) => {
           </span>
 
           <span className="inline-flex items-center gap-2 font-medium text-slate-200">
-            <Building2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-            <strong className="text-emerald-300 font-extrabold font-heading">{language === 'en' ? '24/7 Pharmacy:' : '24/7 मेडिकल स्टोर:'}</strong>
+            <Building2 className="w-3.5 h-3.5 text-[#2DD4BF] shrink-0" />
+            <strong className="text-[#2DD4BF] font-extrabold font-heading">{language === 'en' ? '24/7 Pharmacy:' : '24/7 मेडिकल स्टोर:'}</strong>
             <span>{language === 'en' ? '100% Certified Genuine Medicines & Vaccines' : '100% प्रामाणिक दवाएं और टीके'}</span>
           </span>
         </div>
       </div>
 
       {/* 2. HERO SECTION — ELEGANT MEDICAL HEADLINE & DOCTOR HIGHLIGHT */}
-      <section className="relative bg-gradient-to-br from-[#0A2540] via-[#0F4C81] to-[#0D3862] text-white pt-12 sm:pt-16 pb-16 sm:pb-20 rounded-b-[3rem] shadow-2xl overflow-hidden font-sans">
+      <section className="relative bg-gradient-to-br from-[#0B1F3A] via-[#0D2B4E] to-[#132D4D] text-white pt-12 sm:pt-16 pb-16 sm:pb-20 rounded-b-[3rem] shadow-2xl overflow-hidden font-sans">
         {/* Ambient Glass Glow Lighting Orbs */}
-        <div className="absolute top-[-10%] right-[-5%] w-140 h-140 bg-teal-400/15 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-[-10%] left-[-5%] w-140 h-140 bg-sky-500/15 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-[-10%] right-[-5%] w-140 h-140 bg-[#2DD4BF]/15 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-[-10%] left-[-5%] w-140 h-140 bg-[#5EAAF0]/15 rounded-full blur-3xl pointer-events-none" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           
@@ -156,9 +153,9 @@ export const PublicPortal: React.FC<PublicPortalProps> = ({ onNavigate }) => {
             <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
               
               {/* Eyebrow Label */}
-              <div className="flex items-center justify-center lg:justify-start gap-2.5 text-xs font-heading font-extrabold text-emerald-300 tracking-widest uppercase">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping shrink-0"></span>
-                <span>{language === 'en' ? 'PEDIATRIC SURGERY • NEONATAL CARE • GENERAL SURGERY' : 'बाल रोग शल्य चिकित्सा • नवजात शिशु देखभाल • जनरल सर्जरी'}</span>
+              <div className="flex items-center justify-center lg:justify-start gap-2.5 text-xs font-heading font-extrabold text-[#2DD4BF] tracking-widest uppercase">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#2DD4BF] shrink-0 animate-pulse"></span>
+                <span>{language === 'en' ? 'EXPERT OPD CONSULTATION • PEDIATRIC & GENERAL SURGERY' : 'विशेषज्ञ ओपीडी परामर्श • बाल रोग एवं जनरल सर्जरी'}</span>
               </div>
 
               {/* Main Heading & Subheading */}
@@ -166,7 +163,7 @@ export const PublicPortal: React.FC<PublicPortalProps> = ({ onNavigate }) => {
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-heading font-extrabold tracking-tight leading-none text-white">
                   Dr. Ankur Deshwali
                 </h1>
-                <p className="text-lg sm:text-2xl font-heading font-bold bg-gradient-to-r from-emerald-300 via-sky-200 to-teal-300 bg-clip-text text-transparent">
+                <p className="text-lg sm:text-2xl font-heading font-bold bg-gradient-to-r from-[#2DD4BF] via-[#5EAAF0] to-[#10B981] bg-clip-text text-transparent">
                   {language === 'en' 
                     ? 'Pediatric Surgeon | Neonatal Surgeon | General Surgeon' 
                     : 'बाल रोग सर्जन | नवजात शिशु सर्जन | जनरल सर्जन'}
@@ -174,7 +171,7 @@ export const PublicPortal: React.FC<PublicPortalProps> = ({ onNavigate }) => {
               </div>
 
               {/* Description */}
-              <p className="text-sm sm:text-base text-sky-100/90 max-w-2xl leading-relaxed font-sans font-medium">
+              <p className="text-sm sm:text-base text-[#CBD5E1] max-w-2xl leading-relaxed font-sans font-medium">
                 {language === 'en'
                   ? 'Providing world-class specialized surgical care for newborns, children, and adults with compassionate expertise in pediatric anomalies, laparoscopic procedures, pediatric urology, and antenatal counseling.'
                   : 'नवजात शिशुओं, बच्चों और वयस्कों के लिए विश्वस्तरीय विशेषज्ञ शल्य चिकित्सा सेवाएं - बाल रोग, लेप्रोस्कोपिक प्रक्रियाएं, बाल मूत्र रोग और जन्मपूर्व परामर्श।'}
@@ -182,20 +179,17 @@ export const PublicPortal: React.FC<PublicPortalProps> = ({ onNavigate }) => {
 
               {/* Badges Row */}
               <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-1">
-                <div className="inline-flex items-center gap-2 text-xs font-mono font-bold text-amber-300">
-                  <Award className="w-4 h-4 text-amber-400 shrink-0" />
+                <div className="inline-flex items-center text-xs font-mono font-bold text-amber-300">
                   <span>MBBS | MS (General Surgery) | MCh (Pediatric Surgery)</span>
                 </div>
                 
-                <div className="inline-flex items-center gap-1.5 text-xs font-heading font-bold text-sky-200">
-                  <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
+                <div className="inline-flex items-center text-xs font-heading font-bold text-[#2DD4BF]">
                   <span>{language === 'en' ? 'NABH Certified Practice' : 'एनएबीएच प्रमाणित चिकित्सा'}</span>
                 </div>
               </div>
 
               {/* Location Tag */}
-              <div className="flex items-center justify-center lg:justify-start gap-2 text-xs font-semibold text-sky-200/90 pt-1 font-sans">
-                <MapPin className="w-4 h-4 text-emerald-400 shrink-0" />
+              <div className="flex items-center justify-center lg:justify-start text-xs font-semibold text-slate-300 pt-1 font-sans">
                 <span>{language === 'en' ? 'Civil Hospital, Sarangpur & District Hospital, Rajgarh, Madhya Pradesh' : 'सिविल अस्पताल सारंगपुर एवं जिला अस्पताल राजगढ़, मध्य प्रदेश'}</span>
               </div>
 
@@ -203,10 +197,10 @@ export const PublicPortal: React.FC<PublicPortalProps> = ({ onNavigate }) => {
               <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-3">
                 <button
                   onClick={() => openBookingModal()}
-                  className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-heading font-extrabold px-7 py-4 rounded-2xl text-sm shadow-xl shadow-emerald-500/25 transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex items-center gap-2.5 cursor-pointer"
+                  className="bg-linear-to-r from-[#10B981] to-[#0D9488] hover:opacity-95 text-white font-heading font-extrabold px-7 py-4 rounded-2xl text-sm shadow-xl transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex items-center gap-2.5 cursor-pointer"
                 >
-                  <Calendar className="w-5 h-5 text-slate-950" />
-                  <span>{language === 'en' ? 'Book Consultation' : 'अपॉइंटमेंट बुक करें'}</span>
+                  <Calendar className="w-5 h-5 text-white" />
+                  <span>{language === 'en' ? 'Book Appointment' : 'अपॉइंटमेंट बुक करें'}</span>
                 </button>
 
                 <button
@@ -217,9 +211,9 @@ export const PublicPortal: React.FC<PublicPortalProps> = ({ onNavigate }) => {
                       if (el) el.scrollIntoView({ behavior: 'smooth' });
                     }
                   }}
-                  className="bg-white/10 hover:bg-white/20 text-white font-heading font-bold border border-white/20 px-6 py-4 rounded-2xl text-sm backdrop-blur-md transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex items-center gap-2.5 cursor-pointer"
+                  className="bg-[#1E3A5F] hover:bg-[#1E3A5F]/80 text-white font-heading font-bold border border-white/10 px-6 py-4 rounded-2xl text-sm backdrop-blur-md transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex items-center gap-2.5 cursor-pointer"
                 >
-                  <Stethoscope className="w-5 h-5 text-sky-300" />
+                  <Stethoscope className="w-5 h-5 text-[#2DD4BF]" />
                   <span>{language === 'en' ? 'Explore Specialties' : 'विशेषज्ञताएँ देखें'}</span>
                 </button>
               </div>
@@ -227,16 +221,16 @@ export const PublicPortal: React.FC<PublicPortalProps> = ({ onNavigate }) => {
               {/* Trust Metrics Bar */}
               <div className="grid grid-cols-3 gap-4 pt-4 border-t border-white/10 max-w-xl mx-auto lg:mx-0">
                 <div className="text-center lg:text-left">
-                  <p className="text-xl sm:text-2xl font-heading font-extrabold text-emerald-300">15+</p>
-                  <p className="text-[11px] text-sky-200/80 font-medium">{language === 'en' ? 'Expert Doctors' : 'विशेषज्ञ डॉक्टर'}</p>
+                  <p className="text-xl sm:text-2xl font-heading font-extrabold text-[#2DD4BF]">15+</p>
+                  <p className="text-[11px] text-[#CBD5E1] font-medium">{language === 'en' ? 'Expert Doctors' : 'विशेषज्ञ डॉक्टर'}</p>
                 </div>
                 <div className="text-center lg:text-left">
-                  <p className="text-xl sm:text-2xl font-heading font-extrabold text-sky-300">25,000+</p>
-                  <p className="text-[11px] text-sky-200/80 font-medium">{language === 'en' ? 'Patients Treated' : 'उपचारित मरीज'}</p>
+                  <p className="text-xl sm:text-2xl font-heading font-extrabold text-[#5EAAF0]">25,000+</p>
+                  <p className="text-[11px] text-[#CBD5E1] font-medium">{language === 'en' ? 'Patients Treated' : 'उपचारित मरीज'}</p>
                 </div>
                 <div className="text-center lg:text-left">
                   <p className="text-xl sm:text-2xl font-heading font-extrabold text-amber-300">4.9 ★</p>
-                  <p className="text-[11px] text-sky-200/80 font-medium">{language === 'en' ? 'Patient Satisfaction' : 'मरीज संतुष्टि'}</p>
+                  <p className="text-[11px] text-[#CBD5E1] font-medium">{language === 'en' ? 'Patient Satisfaction' : 'मरीज संतुष्टि'}</p>
                 </div>
               </div>
 
@@ -383,37 +377,112 @@ export const PublicPortal: React.FC<PublicPortalProps> = ({ onNavigate }) => {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 pt-4">
-          {specialtiesList.map(sp => {
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-4 pt-4">
+          {[
+            {
+              id: 'general-medicine',
+              category: 'Internal Medicine',
+              nameEn: 'General Medicine & Diabetes',
+              nameHi: 'जनरल मेडिसिन एवं मधुमेह',
+              taglineEn: 'Comprehensive care for diabetes, fever, hypertension & lifestyle diseases.',
+              taglineHi: 'मधुमेह, बुखार, उच्च रक्तचाप एवं जीवनशैली संबंधी बीमारियों का इलाज।',
+              icon: FiShield,
+              count: 4
+            },
+            {
+              id: 'pediatrics',
+              category: 'Child Health',
+              nameEn: 'Pediatrics & Neonatology',
+              nameHi: 'बाल रोग एवं नवजात शिशु देखभाल',
+              taglineEn: 'Specialized surgical and medical care for newborns, infants & children.',
+              taglineHi: 'नवजात शिशुओं और बच्चों के लिए शल्य एवं चिकित्सा देखभाल।',
+              icon: FiUserCheck,
+              count: 3
+            },
+            {
+              id: 'orthopedics',
+              category: 'Bone & Joint',
+              nameEn: 'Orthopedics & Joint Care',
+              nameHi: 'हड्डी, जोड़ एवं ट्रॉमा विशेषज्ञ',
+              taglineEn: 'Total knee & hip replacement, fracture trauma and spine care.',
+              taglineHi: 'घुटने और कूल्हे का प्रतिस्थापन, फ्रैक्चर और रीढ़ की हड्डी की देखभाल।',
+              icon: FiActivity,
+              count: 3
+            },
+            {
+              id: 'dermatology',
+              category: 'Skin & Hair',
+              nameEn: 'Dermatology & Cosmetology',
+              nameHi: 'त्वचा, बाल एवं सौंदर्य विशेषज्ञ',
+              taglineEn: 'Advanced skin treatments, PRP hair therapy & cosmetology.',
+              taglineHi: 'त्वचा के रोग, बालों के झड़ने का इलाज और सौंदर्य देखभाल।',
+              icon: FiEye,
+              count: 2
+            },
+            {
+              id: 'cardiology',
+              category: 'Cardiovascular',
+              nameEn: 'Cardiology & Heart Care',
+              nameHi: 'हृदय रोग एवं कार्डियक केयर',
+              taglineEn: 'ECG, 2D Echo, cardiac screening and heart health management.',
+              taglineHi: 'ईसीजी, 2डी ईको और हृदय रोग जांच एवं उपचार।',
+              icon: FiHeart,
+              count: 2
+            },
+            {
+              id: 'gynecology',
+              category: 'Womens Health',
+              nameEn: 'Obstetrics & Gynecology',
+              nameHi: 'स्त्री एवं प्रसूति रोग विशेषज्ञ',
+              taglineEn: 'Maternity care, high-risk pregnancy & laparoscopic surgery.',
+              taglineHi: 'गर्भावस्था देखभाल, प्रसूति सहायता और लेप्रोस्कोपिक सर्जरी।',
+              icon: FiShield,
+              count: 3
+            },
+            {
+              id: 'ophthalmology',
+              category: 'Eye Care',
+              nameEn: 'Ophthalmology & Eye Care',
+              nameHi: 'नेत्र रोग एवं दृष्टि विज्ञान',
+              taglineEn: 'Micro-incision cataract surgery, computerized vision testing.',
+              taglineHi: 'मोतियाबिंद सर्जरी, कंप्यूटर से आंखों की जांच एवं उपचार।',
+              icon: FiEye,
+              count: 2
+            },
+            {
+              id: 'emergency-care',
+              category: 'Critical Care',
+              nameEn: 'Emergency & Critical Care',
+              nameHi: 'आपातकालीन एवं आईसीयू विभाग',
+              taglineEn: '24/7 ACLS trauma resuscitation, ICU support & ambulance.',
+              taglineHi: '24 घंटे आपातकालीन आघात चिकित्सा, आईसीयू एवं एम्बुलेंस।',
+              icon: FiAlertCircle,
+              count: 5
+            }
+          ].map(sp => {
             const IconComp = sp.icon;
-            const count = sp.id === 'all' 
-              ? doctors.length 
-              : doctors.filter(d => d.specialization.toLowerCase().includes(sp.id.toLowerCase())).length;
-
-            const isSelected = selectedSpecialty === sp.id;
-
             return (
               <button
                 key={sp.id}
-                onClick={() => setSelectedSpecialty(sp.id)}
-                className={`p-5 rounded-2xl border text-center transition-all duration-300 flex flex-col items-center justify-between gap-4 cursor-pointer ${
-                  isSelected
-                    ? 'border-[#0F4C81] bg-[#0A2540] text-white shadow-xl scale-105'
-                    : 'border-slate-200 bg-white hover:border-slate-300 text-slate-800 hover:shadow-md hover:-translate-y-0.5'
-                }`}
+                onClick={() => {
+                  setSelectedSpecialtyFilter(sp.category || sp.id);
+                  if (onNavigate) onNavigate('specialties');
+                }}
+                className="p-5 rounded-2xl border border-slate-200 bg-white hover:border-emerald-500 hover:shadow-xl text-slate-800 transition-all duration-300 flex flex-col items-center justify-between text-center gap-4 cursor-pointer group hover:-translate-y-1"
               >
-                <div className={`w-13 h-13 rounded-2xl flex items-center justify-center transition-colors ${
-                  isSelected ? 'bg-emerald-400 text-slate-950 font-bold shadow-md shadow-emerald-400/30' : 'bg-sky-50 text-[#0F4C81]'
-                }`}>
-                  <IconComp className="w-6 h-6" />
+                <div className="w-14 h-14 rounded-2xl bg-sky-50 text-[#0F4C81] group-hover:bg-emerald-500 group-hover:text-slate-950 flex items-center justify-center transition-colors shadow-xs">
+                  <IconComp className="w-7 h-7" />
                 </div>
                 <div>
-                  <h4 className="font-heading font-extrabold text-xs sm:text-sm leading-tight">
-                    {language === 'en' ? sp.labelEn : sp.labelHi}
+                  <h4 className="font-heading font-extrabold text-sm text-slate-900 group-hover:text-emerald-700 leading-snug">
+                    {language === 'en' ? sp.nameEn : sp.nameHi}
                   </h4>
-                  <p className={`text-[11px] mt-1.5 font-semibold ${isSelected ? 'text-emerald-300' : 'text-slate-500'}`}>
-                    {count} {language === 'en' ? 'Specialists' : 'विशेषज्ञ'}
+                  <p className="text-[11px] text-slate-500 font-medium mt-1.5 line-clamp-2">
+                    {language === 'en' ? sp.taglineEn : sp.taglineHi}
                   </p>
+                  <span className="inline-block text-[11px] mt-2.5 font-bold text-[#0F4C81] group-hover:text-emerald-600">
+                    {sp.count} {language === 'en' ? 'Doctors' : 'विशेषज्ञ'} →
+                  </span>
                 </div>
               </button>
             );
@@ -455,7 +524,7 @@ export const PublicPortal: React.FC<PublicPortalProps> = ({ onNavigate }) => {
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent" />
                   <div className="absolute bottom-4 left-5 right-5 text-white space-y-1">
                     <span className="text-emerald-300 font-heading font-extrabold text-[11px] uppercase tracking-wider flex items-center gap-1.5 drop-shadow-xs">
-                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                      <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
                       {language === 'en' ? 'OPD Active Today' : 'ओपीडी आज चालू है'}
                     </span>
                     <h3 className="font-heading font-extrabold text-xl text-white tracking-tight">{language === 'hi' ? (c.nameHi || c.name) : c.name}</h3>
@@ -463,48 +532,48 @@ export const PublicPortal: React.FC<PublicPortalProps> = ({ onNavigate }) => {
                   </div>
                 </div>
 
-                {/* Details Body */}
+                {/* Details Body (Using react-icons) */}
                 <div className="p-6 space-y-3.5 text-xs">
                   <div className="flex items-start gap-3 text-slate-600">
                     <div className="w-7 h-7 rounded-xl bg-sky-50 flex items-center justify-center text-[#0F4C81] shrink-0 mt-0.5 border border-sky-100">
-                      <MapPin className="w-4 h-4" />
+                      <FiMapPin className="w-4 h-4" />
                     </div>
                     <span className="font-medium leading-relaxed pt-0.5 text-slate-700">{language === 'hi' ? (c.addressHi || c.address) : c.address}</span>
                   </div>
 
                   <div className="flex items-center gap-3 text-slate-600 font-mono">
                     <div className="w-7 h-7 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 shrink-0 border border-emerald-100">
-                      <Phone className="w-4 h-4" />
+                      <FiPhoneCall className="w-4 h-4" />
                     </div>
                     <span className="font-bold text-slate-800">{c.phone}</span>
                   </div>
 
                   <div className="flex items-center gap-3 text-slate-600">
                     <div className="w-7 h-7 rounded-xl bg-amber-50 flex items-center justify-center text-amber-600 shrink-0 border border-amber-100">
-                      <Clock className="w-4 h-4" />
+                      <FiClock className="w-4 h-4" />
                     </div>
                     <span className="font-semibold text-slate-700">{c.operatingHours}</span>
                   </div>
                 </div>
               </div>
 
-              {/* Action Buttons */}
+              {/* Action Buttons (Using react-icons) */}
               <div className="p-5 bg-slate-50/80 border-t border-slate-100 flex items-center justify-between gap-3 font-sans">
                 <a
                   href={c.googleMapDirectionsUrl || (c.coordinates?.lat ? `https://www.google.com/maps/dir/?api=1&destination=${c.coordinates.lat},${c.coordinates.lng}` : `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${c.name} ${c.address}`)}`)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 py-2.5 px-4 rounded-xl text-xs font-heading font-bold flex items-center gap-1.5 shadow-xs transition"
+                  className="bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 py-2.5 px-4 rounded-xl text-xs font-heading font-bold flex items-center gap-1.5 shadow-xs transition cursor-pointer"
                 >
-                  <Navigation className="w-3.5 h-3.5 text-[#0F4C81]" />
+                  <FiNavigation className="w-3.5 h-3.5 text-[#0F4C81]" />
                   <span>{language === 'en' ? 'Directions' : 'दिशा-निर्देश'}</span>
                 </a>
 
                 <button
                   onClick={() => openBookingModal(undefined, c.id)}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 px-4 rounded-xl text-xs font-heading font-extrabold flex items-center gap-1.5 shadow-md transition"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 px-4 rounded-xl text-xs font-heading font-extrabold flex items-center gap-1.5 shadow-md transition cursor-pointer"
                 >
-                  <Calendar className="w-3.5 h-3.5 text-white" />
+                  <FiCalendar className="w-3.5 h-3.5 text-white" />
                   <span>{language === 'en' ? 'Book Token' : 'टोकन बुक करें'}</span>
                 </button>
               </div>
@@ -625,18 +694,18 @@ export const PublicPortal: React.FC<PublicPortalProps> = ({ onNavigate }) => {
       </section>
 
       {/* 8. FLOATING STICKY ACTION BAR AT BOTTOM */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-[#0A2540]/95 backdrop-blur-xl border-t border-white/10 py-3.5 px-4 shadow-2xl font-sans">
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-[#0B1F3A]/95 backdrop-blur-xl border-t border-white/10 py-3.5 px-4 shadow-2xl font-sans">
         <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
           
           <div className="hidden md:flex items-center gap-3 text-white text-xs font-heading font-extrabold">
-            <span className="w-3 h-3 rounded-full bg-emerald-400 animate-pulse shrink-0"></span>
+            <span className="w-3 h-3 rounded-full bg-[#2DD4BF] animate-pulse shrink-0"></span>
             <span>{language === 'en' ? 'SEVASADAN 24x7 Multi-Specialty Helpdesk' : 'सेवा सदन 24x7 मल्टी-स्पेशलिटी हेल्पडेस्क'}</span>
           </div>
 
           <div className="flex items-center justify-between w-full md:w-auto gap-3">
             <a
               href="tel:1800-7382-723"
-              className="flex-1 md:flex-initial bg-rose-600 hover:bg-rose-700 text-white font-heading font-extrabold px-5 py-3 rounded-xl text-xs flex items-center justify-center gap-2 shadow-md transition cursor-pointer"
+              className="flex-1 md:flex-initial bg-[#C2410C] hover:bg-[#C2410C]/90 text-white font-heading font-extrabold px-5 py-3 rounded-xl text-xs flex items-center justify-center gap-2 shadow-md transition cursor-pointer"
             >
               <PhoneCall className="w-4 h-4" />
               <span>{language === 'en' ? 'Call Helpline' : 'हेल्पलाइन पर कॉल करें'}</span>
@@ -644,7 +713,7 @@ export const PublicPortal: React.FC<PublicPortalProps> = ({ onNavigate }) => {
 
             <button
               onClick={() => openBookingModal(undefined, undefined)}
-              className="flex-1 md:flex-initial bg-emerald-600 hover:bg-emerald-700 text-white font-heading font-extrabold px-6 py-3 rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg transition transform hover:scale-105 cursor-pointer"
+              className="flex-1 md:flex-initial bg-linear-to-r from-[#10B981] to-[#0D9488] hover:opacity-95 text-white font-heading font-extrabold px-6 py-3 rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg transition transform hover:scale-105 cursor-pointer"
             >
               <Calendar className="w-4 h-4 text-white" />
               <span>{language === 'en' ? 'Book Appointment' : 'अपॉइंटमेंट बुक करें'}</span>
@@ -652,9 +721,9 @@ export const PublicPortal: React.FC<PublicPortalProps> = ({ onNavigate }) => {
 
             <button
               onClick={() => openBookingModal(undefined, undefined, 'VIDEO')}
-              className="flex-1 md:flex-initial bg-white/10 hover:bg-white/20 text-white font-heading font-extrabold px-5 py-3 rounded-xl text-xs border border-white/20 flex items-center justify-center gap-2 backdrop-blur-md transition cursor-pointer"
+              className="flex-1 md:flex-initial bg-[#1E3A5F] hover:bg-[#1E3A5F]/80 text-white font-heading font-extrabold px-5 py-3 rounded-xl text-xs border border-white/10 flex items-center justify-center gap-2 backdrop-blur-md transition cursor-pointer"
             >
-              <Video className="w-4 h-4 text-emerald-400" />
+              <Video className="w-4 h-4 text-[#2DD4BF]" />
               <span>{language === 'en' ? 'Video OPD' : 'वीडियो ओपीडी'}</span>
             </button>
           </div>

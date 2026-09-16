@@ -23,9 +23,12 @@ import { DeskStaffPortal } from './pages/DeskStaffPortal';
 import { ServiceCatalog } from './pages/ServiceCatalog';
 import { Referrals } from './pages/Referrals';
 import { ResetPassword } from './pages/ResetPassword';
+import { NotFound } from './pages/NotFound';
+import { AppDownloadModal } from './components/AppDownloadModal';
 
 const getTabFromPath = (path: string): string => {
   const cleanPath = path.toLowerCase().replace(/\/$/, '');
+  if (cleanPath === '' || cleanPath === '/') return 'home';
   if (cleanPath === '/adminp' || cleanPath === '/admin') return 'admin';
   if (cleanPath === '/doctor' || cleanPath === '/doctor-console') return 'doctor-console';
   if (cleanPath === '/support' || cleanPath === '/desk-staff') return 'desk-staff-dashboard';
@@ -42,11 +45,22 @@ const getTabFromPath = (path: string): string => {
   if (cleanPath === '/laboratory') return 'laboratory';
   if (cleanPath === '/referrals') return 'referrals';
   if (cleanPath.startsWith('/reset-password/')) return 'reset-password';
-  return 'home';
+  return '404';
 };
 
 const MainContent: React.FC = () => {
-  const { activeRole, currentUser, switchRole, language, isAdminAuthenticated, openAdminAuthModal, openStaffAuthModal } = useApp();
+  const { 
+    activeRole, 
+    currentUser, 
+    switchRole, 
+    language, 
+    isAdminAuthenticated, 
+    openAdminAuthModal, 
+    openStaffAuthModal,
+    isAppDownloadModalOpen,
+    closeAppDownloadModal,
+    appPlatform
+  } = useApp();
 
   const [currentTab, setCurrentTabState] = useState<string>(() => {
     return getTabFromPath(window.location.pathname);
@@ -203,6 +217,10 @@ const MainContent: React.FC = () => {
             <ResetPassword onNavigate={handleSetCurrentTab} />
           </>
         )}
+        {currentTab === '404' && <NotFound onNavigate={handleSetCurrentTab} />}
+        {!['home', 'about', 'specialties', 'locations', 'doctors', 'telemedicine', 'patient-dashboard', 'doctor-console', 'desk-staff-dashboard', 'admin', 'article-detail', 'terms', 'privacy', 'pharmacy', 'diagnostics', 'laboratory', 'referrals', 'reset-password', '404'].includes(currentTab) && (
+          <NotFound onNavigate={handleSetCurrentTab} />
+        )}
       </main>
 
       {/* Footer */}
@@ -214,6 +232,11 @@ const MainContent: React.FC = () => {
       <StaffAuthModal />
       <BookingWizardModal />
       <DoctorProfileModal />
+      <AppDownloadModal 
+        isOpen={isAppDownloadModalOpen} 
+        onClose={closeAppDownloadModal} 
+        platform={appPlatform} 
+      />
     </div>
   );
 };

@@ -50,7 +50,7 @@ export const LocationsFacilities: React.FC = () => {
       {/* ==========================================
           SECTION 1: HERO SECTION
       ========================================== */}
-      <section className="relative bg-gradient-to-br from-[#0B2545] via-[#0F4C81] to-[#0A2540] text-white pt-14 sm:pt-18 pb-16 sm:pb-20 rounded-b-[3rem] shadow-2xl overflow-hidden border-b border-emerald-500/20">
+      <section className="relative bg-gradient-to-br from-[#0B1F3A] via-[#0D2B4E] to-[#132D4D] text-white pt-14 sm:pt-18 pb-16 sm:pb-20 rounded-b-[3rem] shadow-2xl overflow-hidden border-b border-[#2DD4BF]/20">
         
         {/* Glow Lighting Orbs */}
         <div className="absolute top-[-10%] right-[-5%] w-140 h-140 bg-teal-400/15 rounded-full blur-3xl pointer-events-none" />

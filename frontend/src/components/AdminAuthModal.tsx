@@ -83,15 +83,15 @@ export const AdminAuthModal: React.FC = () => {
     <div className="fixed inset-0 z-99999 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-200">
       <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-slate-200/80">
         
-        {/* Header: Deep Navy Hospital Security Banner */}
-        <div className="bg-linear from-[#0B2545] via-[#0F4C81] to-[#0A365C] text-white p-6 relative">
+        {/* Header: Orange Admin Brand Security Banner */}
+        <div className="bg-gradient-to-r from-[#9A5B3C] via-[#B37046] to-[#9A5B3C] text-white p-6 relative">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center text-emerald-300 shadow-sm">
-                <ShieldCheck className="w-6 h-6 text-emerald-400" />
+              <div className="w-10 h-10 rounded-xl bg-[rgba(255,255,255,0.15)] border border-white/30 flex items-center justify-center text-white shadow-sm backdrop-blur-md">
+                <ShieldCheck className="w-6 h-6 text-white" />
               </div>
               <div>
-                <span className="bg-emerald-500/20 text-emerald-300 text-[10px] font-black px-2 py-0.5 rounded uppercase tracking-wider border border-emerald-500/30">
+                <span className="bg-[rgba(255,255,255,0.15)] text-white text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider border border-white/30 backdrop-blur-md">
                   {language === 'en' ? 'Admin Access Portal' : 'सुरक्षित एडमिन लॉगिन'}
                 </span>
                 <h3 className="font-extrabold text-lg text-white tracking-tight mt-0.5">
@@ -142,7 +142,7 @@ export const AdminAuthModal: React.FC = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="admin@sevasadanclinic.in"
-                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0F4C81] focus:bg-white transition"
+                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#9A5B3C] focus:border-[#9A5B3C] transition"
                     required
                   />
                 </div>
@@ -156,7 +156,7 @@ export const AdminAuthModal: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => { setError(''); setSuccessMsg(''); setMode('FORGOT_PASSWORD'); }}
-                    className="text-xs text-[#0F4C81] font-extrabold hover:underline"
+                    className="text-xs text-[#9A5B3C] font-extrabold hover:underline cursor-pointer"
                   >
                     {language === 'en' ? 'Forgot Password?' : 'पासवर्ड भूल गए?'}
                   </button>
@@ -170,7 +170,7 @@ export const AdminAuthModal: React.FC = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••••••"
-                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0F4C81] focus:bg-white transition"
+                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#9A5B3C] focus:border-[#9A5B3C] transition"
                     required
                   />
                 </div>
@@ -179,7 +179,7 @@ export const AdminAuthModal: React.FC = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-[#0F4C81] hover:bg-[#0B2545] text-white font-bold py-3 rounded-xl text-sm shadow-md transition flex items-center justify-center gap-2 cursor-pointer mt-2"
+                className="w-full bg-gradient-to-r from-[#9A5B3C] to-[#B37046] hover:opacity-95 text-white font-extrabold py-3.5 rounded-xl text-sm shadow-md shadow-[#9A5B3C]/20 transition flex items-center justify-center gap-2 cursor-pointer mt-2"
               >
                 {loading ? (
                   <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
@@ -214,7 +214,7 @@ export const AdminAuthModal: React.FC = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="admin@sevasadanclinic.in"
-                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0F4C81] focus:bg-white transition"
+                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#9A5B3C] focus:border-[#9A5B3C] transition"
                     required
                   />
                 </div>
@@ -231,7 +231,7 @@ export const AdminAuthModal: React.FC = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-2/3 bg-[#0F4C81] hover:bg-[#0B2545] text-white font-bold py-3 rounded-xl text-xs shadow-md transition flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-2/3 bg-gradient-to-r from-[#9A5B3C] to-[#B37046] hover:opacity-95 text-white font-extrabold py-3 rounded-xl text-xs shadow-md shadow-[#9A5B3C]/20 transition flex items-center justify-center gap-2 cursor-pointer"
                 >
                   {loading ? (
                     <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>

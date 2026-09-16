@@ -158,7 +158,7 @@ export const ServiceCatalog: React.FC<{ kind: Kind }> = ({ kind }) => {
       {/* ==========================================
           SECTION 1: HERO BANNER
       ========================================== */}
-      <section className="relative bg-gradient-to-br from-[#0B2545] via-[#0F4C81] to-[#0A2540] text-white pt-16 sm:pt-20 pb-20 sm:pb-24 rounded-b-[3rem] shadow-2xl overflow-hidden border-b border-emerald-500/20">
+      <section className="relative bg-gradient-to-br from-[#0B1F3A] via-[#0D2B4E] to-[#132D4D] text-white pt-16 sm:pt-20 pb-20 sm:pb-24 rounded-b-[3rem] shadow-2xl overflow-hidden border-b border-[#2DD4BF]/20">
         
         {/* Glow Orbs */}
         <div className="absolute top-[-10%] right-[-5%] w-140 h-140 bg-teal-400/15 rounded-full blur-3xl pointer-events-none" />
@@ -194,13 +194,28 @@ export const ServiceCatalog: React.FC<{ kind: Kind }> = ({ kind }) => {
               </div>
             </div>
 
-            {/* Right Badge Graphic */}
+            {/* Right Badge Graphic - High Quality Healthcare Photo Container */}
             <div className="lg:col-span-4 flex justify-center lg:justify-end">
-              <div className="relative mx-auto grid h-48 w-48 sm:h-56 sm:w-56 place-items-center rounded-full border-12 border-white/10 bg-gradient-to-br from-[#0284C7] to-emerald-500 shadow-2xl glow-teal">
-                <Icon className="h-20 w-20 text-white" />
-                <span className="absolute -bottom-4 rounded-2xl bg-white px-4 py-2 text-xs font-sora font-black text-slate-900 shadow-xl border border-slate-100 flex items-center gap-1.5">
-                  <Sparkles className="w-4 h-4 text-emerald-600" />
-                  100% Genuine Care
+              <div className="relative group max-w-xs sm:max-w-sm w-full">
+                <div className="relative overflow-hidden rounded-3xl border-4 border-white/20 shadow-2xl bg-slate-900 aspect-4/3 sm:aspect-square">
+                  <img
+                    src={
+                      kind === 'pharmacy' 
+                        ? 'https://images.unsplash.com/photo-1586015555751-63bb77f4322a?auto=format&fit=crop&q=80&w=800'
+                        : kind === 'diagnostics'
+                        ? 'https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&q=80&w=800'
+                        : 'https://images.unsplash.com/photo-1579154204601-01588f351e67?auto=format&fit=crop&q=80&w=800'
+                    }
+                    alt={meta.titleEn}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent" />
+                </div>
+                
+                {/* Floating Genuine Care Badge */}
+                <span className="absolute -bottom-4 left-1/2 -translate-x-1/2 rounded-2xl bg-white/95 backdrop-blur-md px-4 py-2.5 text-xs font-sora font-black text-slate-900 shadow-2xl border border-slate-100 flex items-center gap-2 whitespace-nowrap">
+                  <Sparkles className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>100% Genuine Care & Certified Reports</span>
                 </span>
               </div>
             </div>

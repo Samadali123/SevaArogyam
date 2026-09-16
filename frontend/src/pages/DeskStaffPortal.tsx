@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import type { Appointment, Clinic } from '../types';
 import { useApp, DEFAULT_DOCTOR_AVATAR } from '../context/AppContext';
+import { ThemeSelect } from '../components/ThemeSelect';
 
 const formatAssignedBranches = (clinicsCovered?: string[], clinicsList: Clinic[] = []): string => {
   if (!clinicsCovered || clinicsCovered.length === 0) return 'No Assigned Branch';
@@ -191,40 +192,47 @@ export const DeskStaffPortal: React.FC = () => {
     <div className="min-h-screen bg-slate-50/50 pb-20 pt-6 font-sans">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         
-        {/* HERO HEADER BANNER */}
-        <div className="bg-gradient-to-r from-[#0B2545] via-[#0F4C81] to-[#0A2540] text-white p-6 sm:p-8 rounded-3xl shadow-xl flex flex-col md:flex-row items-stretch md:items-center justify-between gap-6 border border-white/10 relative overflow-hidden">
-          <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-[#0F4C81]/20 rounded-full blur-3xl pointer-events-none" />
+        {/* HERO HEADER BANNER - Staff Dusty Slate-Violet Theme (#5B5588 -> #6E6B9E) */}
+        <div className="bg-gradient-to-r from-[#5B5588] via-[#6E6B9E] to-[#5B5588] text-white p-6 sm:p-8 rounded-3xl shadow-xl flex flex-col md:flex-row items-stretch md:items-center justify-between gap-6 border border-white/10 relative">
+          <div className="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none">
+            <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-white/10 rounded-full blur-3xl" />
+          </div>
           
           <div className="space-y-2 relative z-10 text-center md:text-left">
-            <div className="inline-flex items-center gap-2 bg-emerald-500/20 text-emerald-300 text-[11px] font-heading font-extrabold px-3 py-1 rounded-full uppercase border border-emerald-400/30 backdrop-blur-xs">
-              <UserCheck className="w-3.5 h-3.5 text-emerald-400" />
+            <div className="inline-flex items-center gap-2 bg-white/15 text-white text-[11px] font-heading font-extrabold px-3 py-1 rounded-full uppercase border border-white/20 backdrop-blur-xs">
+              <UserCheck className="w-3.5 h-3.5 text-purple-200" />
               <span>FRONT DESK RECEPTION PORTAL</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-heading font-extrabold text-white tracking-tight">
               OPD Desk & Walk-in Token Management
             </h1>
-            <p className="text-xs sm:text-sm text-sky-100/90 font-sans font-normal max-w-2xl leading-relaxed">
+            <p className="text-xs sm:text-sm text-purple-100/90 font-sans font-normal max-w-2xl leading-relaxed">
               Register walk-in patients on-ground, collect cash payments, assign tokens & manage live lobby queue across branches seamlessly.
             </p>
           </div>
 
           <div className="flex flex-col sm:flex-row items-center gap-3 relative z-10 shrink-0">
-            <div className="relative w-full sm:w-auto">
-              <select
+            <div className="w-full sm:w-auto">
+              <ThemeSelect
                 value={selectedBranchFilter}
-                onChange={(e) => setSelectedBranchFilter(e.target.value)}
-                className="w-full bg-white/10 hover:bg-white/15 border border-white/20 text-white text-xs font-heading font-bold rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-400 cursor-pointer backdrop-blur-md transition"
-              >
-                <option value="all" className="bg-[#0B2545] text-white">All Clinic Branches</option>
-                {clinics.map(c => (
-                  <option key={c.id} value={c.id} className="bg-[#0B2545] text-white">{c.name} OPD Desk</option>
-                ))}
-              </select>
+                onChange={setSelectedBranchFilter}
+                variant="dark"
+                themeColor="purple"
+                placeholder="Select Clinic Branch"
+                options={[
+                  { value: 'all', label: 'All Clinic Branches' },
+                  ...clinics.map(c => ({
+                    value: c.id,
+                    label: `${c.name} OPD Desk`
+                  }))
+                ]}
+                className="w-full sm:w-60"
+              />
             </div>
 
             <button
               onClick={() => setIsWalkInModalOpen(true)}
-              className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-heading font-extrabold px-5 py-3 rounded-xl text-xs shadow-lg hover:shadow-emerald-600/20 transition cursor-pointer flex items-center justify-center gap-2 shrink-0 border border-emerald-400/30"
+              className="w-full sm:w-auto bg-gradient-to-r from-[#5B5588] to-[#6E6B9E] hover:opacity-95 text-white font-heading font-extrabold px-5 py-3 rounded-xl text-xs shadow-lg shadow-purple-600/20 transition cursor-pointer flex items-center justify-center gap-2 shrink-0 border border-white/20"
             >
               <Plus className="w-4 h-4 text-white stroke-[3]" />
               <span>Book Walk-in Patient (Cash)</span>
@@ -502,89 +510,75 @@ export const DeskStaffPortal: React.FC = () => {
               {/* TOP SELECTION CONTROLS */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block font-heading font-bold text-slate-700 mb-1.5">Hospital Clinic Branch *</label>
-                  <select
+                  <ThemeSelect
+                    label="Hospital Clinic Branch *"
                     value={walkInForm.branchId}
-                    onChange={(e) => setWalkInForm({ ...walkInForm, branchId: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-sans font-medium focus:ring-2 focus:ring-[#0F4C81] focus:bg-white outline-none transition"
-                  >
-                    {clinics.map(c => (
-                      <option key={c.id} value={c.id}>{c.name} ({c.city})</option>
-                    ))}
-                  </select>
+                    onChange={(val) => setWalkInForm({ ...walkInForm, branchId: val })}
+                    themeColor="purple"
+                    options={clinics.map(c => ({
+                      value: c.id,
+                      label: `${c.name} (${c.city})`
+                    }))}
+                  />
                 </div>
 
                 <div>
-                  <label className="block font-heading font-bold text-slate-700 mb-1.5">Assign Doctor *</label>
-                  <select
-                    required
+                  <ThemeSelect
+                    label="Assign Doctor *"
                     value={walkInForm.doctorId}
-                    onChange={(e) => {
-                      const docId = e.target.value;
-                      const doc = doctors.find(d => d.id === docId);
+                    onChange={(val) => {
+                      const doc = doctors.find(d => d.id === val);
                       setWalkInForm({
                         ...walkInForm,
-                        doctorId: docId,
+                        doctorId: val,
                         feePaid: doc?.consultationFeeClinic || 300
                       });
                     }}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-sans font-medium focus:ring-2 focus:ring-[#0F4C81] focus:bg-white outline-none transition"
-                  >
-                    <option value="" disabled>Select Duty Doctor</option>
-                    {(availableBranchDoctors.length > 0 ? availableBranchDoctors : doctors).map(d => (
-                      <option key={d.id} value={d.id}>
-                        {d.name.startsWith('Dr.') ? d.name : `Dr. ${d.name}`} ({d.specialization}) - ₹{d.consultationFeeClinic || 300}
-                      </option>
-                    ))}
-                  </select>
+                    placeholder="Select Duty Doctor"
+                    themeColor="purple"
+                    options={(availableBranchDoctors.length > 0 ? availableBranchDoctors : doctors).map(d => ({
+                      value: d.id,
+                      label: `${d.name.startsWith('Dr.') ? d.name : `Dr. ${d.name}`} (${d.specialization}) - ₹${d.consultationFeeClinic || 300}`
+                    }))}
+                  />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block font-heading font-bold text-slate-700 mb-1.5">Patient Type *</label>
-                  <select
+                  <ThemeSelect
+                    label="Patient Type *"
                     value={walkInForm.patientType}
-                    onChange={(e) => setWalkInForm({ ...walkInForm, patientType: e.target.value as any })}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-sans font-medium focus:ring-2 focus:ring-[#0F4C81] focus:bg-white outline-none transition"
-                  >
-                    <option value="NEW">New Patient (First Visit)</option>
-                    <option value="EXISTING">Existing Registered Patient</option>
-                  </select>
+                    onChange={(val) => setWalkInForm({ ...walkInForm, patientType: val as any })}
+                    themeColor="purple"
+                    options={[
+                      { value: 'NEW', label: 'New Patient (First Visit)' },
+                      { value: 'EXISTING', label: 'Existing Registered Patient' }
+                    ]}
+                  />
                 </div>
 
                 <div>
-                  <label className="block font-heading font-bold text-slate-700 mb-1.5">Appointment Time Slot *</label>
-                  <select
+                  <ThemeSelect
+                    label="Appointment Time Slot *"
                     value={walkInForm.timeSlot}
-                    onChange={(e) => setWalkInForm({ ...walkInForm, timeSlot: e.target.value })}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-sans font-medium focus:ring-2 focus:ring-[#0F4C81] focus:bg-white outline-none transition font-mono"
-                  >
-                    <option value="09:00 AM">09:00 AM</option>
-                    <option value="09:30 AM">09:30 AM</option>
-                    <option value="10:00 AM">10:00 AM</option>
-                    <option value="10:30 AM">10:30 AM</option>
-                    <option value="11:00 AM">11:00 AM</option>
-                    <option value="11:30 AM">11:30 AM</option>
-                    <option value="12:00 PM">12:00 PM</option>
-                    <option value="04:00 PM">04:00 PM</option>
-                    <option value="04:30 PM">04:30 PM</option>
-                    <option value="05:00 PM">05:00 PM</option>
-                    <option value="05:30 PM">05:30 PM</option>
-                    <option value="06:00 PM">06:00 PM</option>
-                  </select>
+                    onChange={(val) => setWalkInForm({ ...walkInForm, timeSlot: val })}
+                    themeColor="purple"
+                    options={['09:00 AM', '09:30 AM', '10:00 AM', '10:30 AM', '11:00 AM', '11:30 AM', '12:00 PM', '04:00 PM', '04:30 PM', '05:00 PM', '05:30 PM', '06:00 PM'].map(slot => ({
+                      value: slot,
+                      label: slot
+                    }))}
+                  />
                 </div>
               </div>
 
               {/* CONDITIONAL PATIENT DETAILS ACCORDING TO PATIENT TYPE */}
               {walkInForm.patientType !== 'NEW' ? (
-                <div className="bg-sky-50/70 p-4 rounded-2xl border border-sky-100 space-y-3">
-                  <label className="block text-xs font-heading font-bold text-[#0F4C81]">
-                    Select Registered Patient ({walkInForm.doctorId ? 'Doctor\'s Patient List' : 'All Registered Patient Records'})
-                  </label>
-                  <select
-                    onChange={(e) => {
-                      const selectedVal = e.target.value;
+                <div className="bg-purple-50/50 p-4 rounded-2xl border border-purple-100 space-y-3">
+                  <ThemeSelect
+                    label={`Select Registered Patient (${walkInForm.doctorId ? "Doctor's Patient List" : 'All Registered Patient Records'})`}
+                    value={existingPatientsList.find(p => p.name === walkInForm.patientName)?.id || ''}
+                    onChange={(selectedVal) => {
                       const p = existingPatientsList.find(item => item.id === selectedVal || item.name === selectedVal);
                       if (p) {
                         setWalkInForm({
@@ -596,20 +590,22 @@ export const DeskStaffPortal: React.FC = () => {
                         });
                       }
                     }}
-                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-xs font-sans font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0F4C81]"
-                  >
-                    <option value="">-- Choose Patient from Registered Patients List --</option>
-                    {existingPatientsList.map(p => (
-                      <option key={p.id} value={p.id}>
-                        {p.name} ({p.age} Yrs, {p.gender} {p.phone ? `• +91 ${p.phone}` : ''})
-                      </option>
-                    ))}
-                  </select>
+                    placeholder="-- Choose Patient from Registered Patients List --"
+                    themeColor="purple"
+                    options={[
+                      { value: '', label: '-- Choose Patient from Registered Patients List --' },
+                      ...existingPatientsList.map(p => ({
+                        value: p.id,
+                        label: `${p.name} (${p.age} Yrs, ${p.gender})`,
+                        sublabel: p.phone ? `Phone: +91 ${p.phone}` : undefined
+                      }))
+                    ]}
+                  />
 
                   {walkInForm.patientName && (
-                    <div className="bg-emerald-50 border border-emerald-200 p-3 rounded-xl flex items-center justify-between text-xs text-emerald-900 font-sans font-medium">
+                    <div className="bg-purple-50 border border-purple-200 p-3 rounded-xl flex items-center justify-between text-xs text-purple-900 font-sans font-medium">
                       <span>Selected Patient: <span className="font-heading font-bold text-slate-900">{walkInForm.patientName}</span> ({walkInForm.patientAge} Yrs, {walkInForm.patientGender} • +91 {walkInForm.patientPhone})</span>
-                      <span className="text-[10px] bg-emerald-200 text-emerald-900 px-2 py-0.5 rounded-full font-heading font-extrabold uppercase">Registered</span>
+                      <span className="text-[10px] bg-purple-200 text-purple-900 px-2 py-0.5 rounded-full font-heading font-extrabold uppercase">Registered</span>
                     </div>
                   )}
                 </div>
@@ -624,7 +620,7 @@ export const DeskStaffPortal: React.FC = () => {
                         value={walkInForm.patientName}
                         onChange={(e) => setWalkInForm({ ...walkInForm, patientName: e.target.value })}
                         placeholder="e.g. Ramesh Chandra"
-                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-sans font-medium focus:ring-2 focus:ring-[#0F4C81] focus:bg-white outline-none transition"
+                        className="w-full px-4 py-3 bg-[#5B5588]/5 border border-[#5B5588]/20 rounded-xl font-sans font-medium focus:ring-2 focus:ring-[#5B5588] focus:border-[#5B5588] focus:bg-white outline-none transition"
                       />
                     </div>
 
@@ -637,7 +633,7 @@ export const DeskStaffPortal: React.FC = () => {
                         value={walkInForm.patientPhone}
                         onChange={(e) => setWalkInForm({ ...walkInForm, patientPhone: e.target.value.replace(/\D/g, '') })}
                         placeholder="98260XXXXX"
-                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-sans font-medium focus:ring-2 focus:ring-[#0F4C81] focus:bg-white outline-none transition font-mono"
+                        className="w-full px-4 py-3 bg-[#5B5588]/5 border border-[#5B5588]/20 rounded-xl font-sans font-medium focus:ring-2 focus:ring-[#5B5588] focus:border-[#5B5588] focus:bg-white outline-none transition font-mono"
                       />
                     </div>
                   </div>
@@ -651,34 +647,35 @@ export const DeskStaffPortal: React.FC = () => {
                         max={120}
                         value={walkInForm.patientAge}
                         onChange={(e) => setWalkInForm({ ...walkInForm, patientAge: Number(e.target.value) })}
-                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-sans font-medium focus:ring-2 focus:ring-[#0F4C81] focus:bg-white outline-none transition"
+                        className="w-full px-4 py-3 bg-[#5B5588]/5 border border-[#5B5588]/20 rounded-xl font-sans font-medium focus:ring-2 focus:ring-[#5B5588] focus:border-[#5B5588] focus:bg-white outline-none transition"
                       />
                     </div>
 
                     <div>
-                      <label className="block font-heading font-bold text-slate-700 mb-1.5">Gender</label>
-                      <select
+                      <ThemeSelect
+                        label="Gender"
                         value={walkInForm.patientGender}
-                        onChange={(e) => setWalkInForm({ ...walkInForm, patientGender: e.target.value as any })}
-                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-sans font-medium focus:ring-2 focus:ring-[#0F4C81] focus:bg-white outline-none transition"
-                      >
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                        <option value="Other">Other</option>
-                      </select>
+                        onChange={(val) => setWalkInForm({ ...walkInForm, patientGender: val as any })}
+                        themeColor="purple"
+                        options={[
+                          { value: 'Male', label: 'Male' },
+                          { value: 'Female', label: 'Female' },
+                          { value: 'Other', label: 'Other' }
+                        ]}
+                      />
                     </div>
                   </div>
                 </div>
               )}
 
-              <div className="bg-emerald-50/80 p-4 rounded-2xl border border-emerald-200/80 flex items-center justify-between">
+              <div className="bg-[#5B5588]/10 p-4 rounded-2xl border border-[#5B5588]/20 flex items-center justify-between">
                 <div>
-                  <p className="font-heading font-extrabold text-emerald-950 text-xs">Payment Collection Mode</p>
-                  <p className="text-[11px] text-emerald-800 font-sans font-medium">Cash Collected at Reception Counter</p>
+                  <p className="font-heading font-extrabold text-[#5B5588] text-xs">Payment Collection Mode</p>
+                  <p className="text-[11px] text-slate-600 font-sans font-medium">Cash Collected at Reception Counter</p>
                 </div>
                 <div className="text-right">
                   <span className="text-[10px] uppercase font-heading font-bold text-slate-500">In-Clinic Token Fee</span>
-                  <p className="text-xl font-heading font-extrabold text-emerald-700">₹{walkInForm.feePaid}</p>
+                  <p className="text-xl font-heading font-extrabold text-[#5B5588]">₹{walkInForm.feePaid}</p>
                 </div>
               </div>
 
@@ -693,7 +690,7 @@ export const DeskStaffPortal: React.FC = () => {
                 <button
                   type="submit"
                   disabled={isFormSubmitting}
-                  className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-heading font-extrabold shadow-md flex items-center gap-2 cursor-pointer disabled:opacity-50 transition text-xs"
+                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#5B5588] to-[#6E6B9E] hover:opacity-95 text-white font-heading font-extrabold shadow-md shadow-[#5B5588]/20 flex items-center gap-2 cursor-pointer disabled:opacity-50 transition text-xs"
                 >
                   {isFormSubmitting ? (
                     <>
@@ -719,17 +716,17 @@ export const DeskStaffPortal: React.FC = () => {
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl space-y-5 border border-slate-100 animate-fade-in text-slate-900 font-sans">
             <div className="text-center space-y-1 border-b border-slate-200/80 pb-4">
-              <span className="bg-emerald-100 text-emerald-900 text-[10px] font-heading font-extrabold px-3 py-0.5 rounded-full uppercase border border-emerald-200">
+              <span className="bg-[#5B5588]/10 text-[#5B5588] text-[10px] font-heading font-extrabold px-3 py-0.5 rounded-full uppercase border border-[#5B5588]/20">
                 OFFICIAL OPD TOKEN RECEIPT
               </span>
               <h3 className="font-heading font-extrabold text-xl text-slate-900 mt-1">SEVASADAN CLINIC NETWORK</h3>
               <p className="text-xs text-slate-500 font-sans font-medium">{printedTokenAppt.clinicName || 'Sarangpur Branch'}</p>
             </div>
 
-            <div className="bg-gradient-to-br from-[#0B2545] to-[#0F4C81] text-white p-6 rounded-2xl text-center space-y-1 shadow-md border border-white/10">
-              <p className="text-[10px] font-heading font-bold text-emerald-400 uppercase tracking-widest">Token Sequence Number</p>
-              <p className="text-4xl font-mono font-extrabold text-amber-300 tracking-wider">#{printedTokenAppt.tokenNumber || 'TK-101'}</p>
-              <p className="text-[11px] text-sky-100/80 font-sans pt-1">Please wait in lobby until your token is called</p>
+            <div className="bg-gradient-to-r from-[#5B5588] via-[#6E6B9E] to-[#5B5588] text-white p-6 rounded-2xl text-center space-y-1 shadow-md border border-white/10">
+              <p className="text-[10px] font-heading font-bold text-purple-100 uppercase tracking-widest">Token Sequence Number</p>
+              <p className="text-4xl font-mono font-extrabold text-white tracking-wider">#{printedTokenAppt.tokenNumber || 'TK-101'}</p>
+              <p className="text-[11px] text-purple-100/90 font-sans pt-1">Please wait in lobby until your token is called</p>
             </div>
 
             <div className="space-y-2 text-xs font-sans bg-slate-50 p-4 rounded-2xl border border-slate-200/80">
@@ -743,11 +740,11 @@ export const DeskStaffPortal: React.FC = () => {
               </div>
               <div className="flex justify-between border-b border-slate-200/60 pb-2">
                 <span className="text-slate-500">Slot & Date:</span>
-                <span className="font-mono font-medium text-slate-900">{printedTokenAppt.timeSlot} ({printedTokenAppt.appointmentDate})</span>
+                <span className="font-mono font-medium text-slate-900">{printedTokenAppt.timeSlot} ({String(printedTokenAppt.appointmentDate || '').split('T')[0]})</span>
               </div>
               <div className="flex justify-between pt-0.5">
                 <span className="text-slate-500">Amount Paid (Cash):</span>
-                <span className="font-heading font-extrabold text-emerald-700">₹{printedTokenAppt.amountPaid || 300} (PAID)</span>
+                <span className="font-heading font-extrabold text-[#5B5588]">₹{printedTokenAppt.amountPaid || 300} (PAID)</span>
               </div>
             </div>
 
@@ -762,13 +759,72 @@ export const DeskStaffPortal: React.FC = () => {
                 onClick={() => {
                   window.print();
                 }}
-                className="px-5 py-2.5 bg-[#0F4C81] hover:bg-[#0B2545] text-white text-xs font-heading font-extrabold rounded-xl shadow-md flex items-center gap-2 cursor-pointer transition"
+                className="px-5 py-2.5 bg-gradient-to-r from-[#5B5588] to-[#6E6B9E] hover:opacity-95 text-white text-xs font-heading font-extrabold rounded-xl shadow-md shadow-[#5B5588]/20 flex items-center gap-2 cursor-pointer transition border border-white/20"
               >
                 <Printer className="w-4 h-4" />
                 <span>Print OPD Pass</span>
               </button>
             </div>
 
+          </div>
+        </div>
+      )}
+
+      {/* HIDDEN PRINT CONTAINER FOR NATIVE BROWSER PRINT DIALOG */}
+      {printedTokenAppt && (
+        <div id="printable-opd-pass-container" className="hidden print:block font-sans text-slate-900 bg-white p-6 leading-normal max-w-md mx-auto">
+          <div className="text-center space-y-1 border-b-2 border-slate-900 pb-4">
+            <span className="text-[10px] font-bold text-slate-700 uppercase tracking-widest border border-slate-900 px-2 py-0.5 rounded-full">
+              OFFICIAL OPD TOKEN RECEIPT
+            </span>
+            <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tight mt-1">SEVASADAN CLINIC NETWORK</h2>
+            <p className="text-xs font-bold text-slate-700">{printedTokenAppt.clinicName || 'Sarangpur Hospital Branch'}</p>
+            <p className="text-[10px] text-slate-500">24x7 Emergency OPD & Specialist Healthcare Network</p>
+          </div>
+
+          <div className="my-6 p-6 border-2 border-slate-900 rounded-2xl text-center space-y-1 bg-slate-50">
+            <p className="text-[10px] font-bold text-slate-700 uppercase tracking-widest">TOKEN SEQUENCE NUMBER</p>
+            <p className="text-5xl font-mono font-black text-slate-900">#{printedTokenAppt.tokenNumber || 'TK-101'}</p>
+            <p className="text-xs font-semibold text-slate-600 pt-1">Please wait in the hospital lobby until your token is announced.</p>
+          </div>
+
+          <div className="space-y-3 text-xs border border-slate-300 rounded-xl p-4">
+            <div className="flex justify-between border-b border-slate-200 pb-1.5">
+              <span className="font-bold text-slate-600">Patient Name:</span>
+              <span className="font-black text-slate-900 text-sm">{printedTokenAppt.patientName}</span>
+            </div>
+            <div className="flex justify-between border-b border-slate-200 pb-1.5">
+              <span className="font-bold text-slate-600">Patient Age / Gender:</span>
+              <span className="font-bold text-slate-900">{printedTokenAppt.patientAge || 30} Yrs / {printedTokenAppt.patientGender || 'Male'}</span>
+            </div>
+            <div className="flex justify-between border-b border-slate-200 pb-1.5">
+              <span className="font-bold text-slate-600">Assigned Doctor:</span>
+              <span className="font-bold text-slate-900">{printedTokenAppt.doctorName}</span>
+            </div>
+            <div className="flex justify-between border-b border-slate-200 pb-1.5">
+              <span className="font-bold text-slate-600">OPD Date & Time Slot:</span>
+              <span className="font-bold text-slate-900">{printedTokenAppt.timeSlot} ({String(printedTokenAppt.appointmentDate || '').split('T')[0]})</span>
+            </div>
+            <div className="flex justify-between border-b border-slate-200 pb-1.5">
+              <span className="font-bold text-slate-600">Payment Status:</span>
+              <span className="font-black text-[#5B5588]">₹{printedTokenAppt.amountPaid || 300} (CASH PAID)</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-bold text-slate-600">Registration Mode:</span>
+              <span className="font-bold text-slate-800">Front Desk Walk-in Counter</span>
+            </div>
+          </div>
+
+          <div className="mt-8 pt-4 border-t border-slate-300 flex items-end justify-between text-[10px] text-slate-600">
+            <div>
+              <p className="font-bold text-slate-800">Sevasadan OPD Desk Stamp</p>
+              <p>Printed: {new Date().toLocaleString()}</p>
+            </div>
+            <div className="text-right">
+              <p className="font-bold text-slate-800">Authorized Reception Sign</p>
+              <div className="h-6"></div>
+              <p className="border-t border-slate-400 pt-0.5">Reception Counter Desk</p>
+            </div>
           </div>
         </div>
       )}
