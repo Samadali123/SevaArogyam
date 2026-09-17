@@ -355,7 +355,7 @@ export const AboutUs: React.FC<AboutUsProps> = () => {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         <div className="bg-white rounded-3xl border border-slate-200/90 p-8 sm:p-10 shadow-xs space-y-8">
           
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-slate-100 pb-5">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
             <div>
               <span className="text-xs font-sora font-black text-[#0F4C81] uppercase tracking-wider block">
                 {hi ? 'सर्जिकल स्पेक्ट्रम' : 'Surgical Spectrum'}

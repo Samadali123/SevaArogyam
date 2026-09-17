@@ -218,6 +218,9 @@ export interface Appointment {
   patientNotes?: string;
   symptoms?: string[];
   attachedFiles?: { name: string; url: string; size: string }[];
+  voiceNoteUrl?: string;
+  documents?: Array<{ id?: string; url: string; name?: string }>;
+  originalDate?: string;
   consentAccepted: boolean;
   consentTimestamp?: string;
   paymentStatus: PaymentStatus;

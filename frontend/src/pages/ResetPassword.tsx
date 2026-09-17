@@ -94,8 +94,8 @@ export const ResetPassword: React.FC<{ onNavigate: (tab: string) => void }> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-99999 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-slate-200/80 relative animate-fade-in">
+    <div className="fixed inset-0 z-99999 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-200 overflow-y-auto">
+      <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-slate-200/80 relative animate-fade-in max-h-[92vh] my-auto flex flex-col">
         
         {/* Header: Deep Navy Security Banner */}
         <div className="bg-linear-to-r from-[#0B2545] via-[#0F4C81] to-[#0A365C] text-white p-6 relative">

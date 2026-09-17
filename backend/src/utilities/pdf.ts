@@ -20,7 +20,7 @@ export const generateTokenPDF = (appointment: PopulatedAppointment, res: Respons
   doc.pipe(res);
 
   // Header
-  doc.fontSize(20).text('Jansevarogyam Hospital', { align: 'center' });
+  doc.fontSize(20).text('Jansevaarogyam Clinic', { align: 'center' });
   doc.moveDown();
   
   if (appointment.bookingMode === 'PHYSICAL') {
@@ -42,7 +42,8 @@ export const generateTokenPDF = (appointment: PopulatedAppointment, res: Respons
   doc.moveDown();
 
   // Doctor Details
-  doc.text(`Consulting Doctor: Dr. ${appointment.doctor.name}`);
+  const docName = (appointment.doctor?.name || 'Doctor').replace(/^dr\.?\s*/i, '');
+  doc.text(`Consulting Doctor: Dr. ${docName}`);
   if (appointment.branch) {
     doc.text(`Branch: ${appointment.branch.name}`);
   }
@@ -66,65 +67,65 @@ export const generatePrescriptionPDF = (appointment: PopulatedAppointment, res: 
 
   doc.pipe(res);
 
+  const docName = (appointment.doctor?.name || 'Doctor').replace(/^dr\.?\s*/i, '');
+
   // Header
-  doc.fontSize(20).text('Jansevarogyam Hospital - Digital Prescription', { align: 'center' });
-  doc.moveDown(2);
+  doc.fontSize(22).font('Helvetica-Bold').text('Jansevaarogyam Clinic', { align: 'center' });
+  doc.fontSize(12).font('Helvetica-Bold').text(`Prescribed by Dr. ${docName}`, { align: 'center' });
+  doc.moveDown(1.5);
 
   // Patient Details
-  doc.fontSize(12).text(`Patient Name: ${appointment.patient.name}`);
-  doc.text(`Age: ${appointment.patient.age || 'N/A'}`);
-  doc.moveDown();
-
-  // Doctor Details
-  doc.text(`Doctor: Dr. ${appointment.doctor.name}`);
-  doc.text(`Specialization: ${appointment.doctor.specialization || 'N/A'}`);
-  doc.text(`Date: ${appointment.appointmentDate.toDateString()}`);
-  doc.moveDown(2);
+  doc.fontSize(11).font('Helvetica-Bold').text(`Patient Name: ${appointment.patient?.name || 'N/A'}`);
+  doc.font('Helvetica').text(`Patient Age: ${appointment.patient?.age || 'N/A'}`);
+  doc.text(`Consultation Date: ${appointment.appointmentDate ? new Date(appointment.appointmentDate).toDateString() : new Date().toDateString()}`);
+  doc.moveDown(1.5);
 
   const rx = appointment.prescription as any;
 
   if (rx) {
     if (rx.diagnosis) {
-      doc.fontSize(14).text('Clinical Diagnosis:', { underline: true });
-      doc.fontSize(12).text(rx.diagnosis);
+      doc.fontSize(12).font('Helvetica-Bold').text('Diagnosis / Clinical Summary:');
+      doc.fontSize(11).font('Helvetica').text(rx.diagnosis);
       doc.moveDown();
     }
 
     if (rx.medicines && Array.isArray(rx.medicines) && rx.medicines.length > 0) {
-      doc.fontSize(14).text('Prescribed Medicines (Rx):', { underline: true });
+      doc.fontSize(12).font('Helvetica-Bold').text('Prescribed Medicines (Rx):');
       doc.moveDown(0.5);
       
       rx.medicines.forEach((med: any, index: number) => {
-        doc.fontSize(12).text(`${index + 1}. ${med.name} - ${med.dosage}`);
-        doc.fontSize(10).text(`   Frequency: ${med.frequency} | Duration: ${med.duration} | Timing: ${med.timing}`);
-        doc.moveDown(0.5);
+        doc.fontSize(11).font('Helvetica-Bold').text(`${index + 1}. ${med.name || med.medicineName} — Dose: ${med.dosage || med.dose || 'As advised'}`);
+        if (med.frequency || med.duration || med.timing) {
+          doc.fontSize(10).font('Helvetica').text(`   Frequency: ${med.frequency || 'N/A'} | Duration: ${med.duration || 'N/A'}`);
+        }
+        doc.moveDown(0.4);
       });
       doc.moveDown();
     }
 
-    if (rx.investigations) {
-      doc.fontSize(14).text('Investigations Ordered:', { underline: true });
-      doc.fontSize(12).text(rx.investigations);
+    if (rx.recommendedTests || rx.investigations) {
+      doc.fontSize(12).font('Helvetica-Bold').text('Recommended Tests:');
+      doc.fontSize(11).font('Helvetica').text(rx.recommendedTests || rx.investigations);
       doc.moveDown();
     }
 
-    if (rx.examinationNotes) {
-      doc.fontSize(14).text('Clinical Examination Notes:', { underline: true });
-      doc.fontSize(12).text(rx.examinationNotes);
+    if (rx.followUpDate) {
+      doc.fontSize(12).font('Helvetica-Bold').text('Follow-up Date:');
+      doc.fontSize(11).font('Helvetica').text(rx.followUpDate);
       doc.moveDown();
     }
 
     if (rx.advice) {
-      doc.fontSize(14).text('Advice & Lifestyle:', { underline: true });
-      doc.fontSize(12).text(rx.advice);
+      doc.fontSize(12).font('Helvetica-Bold').text('Doctor Advice:');
+      doc.fontSize(11).font('Helvetica').text(rx.advice);
       doc.moveDown();
     }
   } else {
-    doc.fontSize(12).text('No prescription details have been recorded yet.');
+    doc.fontSize(11).text('No prescription details recorded.');
   }
 
-  doc.moveDown(4);
-  doc.font('Helvetica-Oblique').fontSize(10).text('This is a digitally generated prescription.', { align: 'center' });
+  doc.moveDown(2);
+  doc.font('Helvetica-Oblique').fontSize(9).text('Jansevaarogyam Verified Digital Prescription', { align: 'center' });
 
   doc.end();
 };

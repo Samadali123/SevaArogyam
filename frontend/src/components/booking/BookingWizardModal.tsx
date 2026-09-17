@@ -53,24 +53,6 @@ export const BookingWizardModal: React.FC = () => {
     language 
   } = useApp();
 
-  const existingPatientsList = useMemo(() => {
-    const map = new Map<string, { id: string; name: string; age: number; gender: string; phone: string }>();
-    appointments.forEach(a => {
-      if (a.patientName && a.patientName !== 'Patient') {
-        const key = `${a.patientName.toLowerCase()}_${a.patientPhone}`;
-        if (!map.has(key)) {
-          map.set(key, {
-            id: a.patientId || key,
-            name: a.patientName,
-            age: a.patientAge || 30,
-            gender: a.patientGender || 'Male',
-            phone: a.patientPhone || ''
-          });
-        }
-      }
-    });
-    return Array.from(map.values());
-  }, [appointments]);
 
   const [step, setStep] = useState<number>(1);
 
@@ -81,12 +63,12 @@ export const BookingWizardModal: React.FC = () => {
   const [appointmentDate, setAppointmentDate] = useState<string>(
     new Date().toISOString().split('T')[0]
   );
-  const [timeSlot, setTimeSlot] = useState<string>('10:30 AM');
+  const [timeSlot, setTimeSlot] = useState<string>('10:00 AM');
   const [patientType, setPatientType] = useState<PatientType>('EXISTING');
   const [patientName, setPatientName] = useState<string>('');
   const [patientId, setPatientId] = useState<string>('');
-  const [patientAge, setPatientAge] = useState<number>(45);
-  const [patientGender, setPatientGender] = useState<string>('Male');
+  const [patientAge, setPatientAge] = useState<number | string>('');
+  const [patientGender, setPatientGender] = useState<string>('');
   const [patientNotes, setPatientNotes] = useState<string>('');
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
   void patientId;
@@ -147,7 +129,7 @@ export const BookingWizardModal: React.FC = () => {
     }
   };
 
-  // Step 5: Dummy Razorpay / Cash Payment Choice State
+  // Step 5: Payment Choice State (Online vs Offline)
   const [paymentModeChoice, setPaymentModeChoice] = useState<'RAZORPAY' | 'CASH'>('RAZORPAY');
   const [isProcessingPayment, setIsProcessingPayment] = useState<boolean>(false);
   
@@ -176,8 +158,8 @@ export const BookingWizardModal: React.FC = () => {
     if (currentUser && currentUser.role === 'PATIENT') {
       setPatientName((currentUser as any).name || '');
       setPatientId((currentUser as any).patientId || '');
-      setPatientAge((currentUser as any).age || 40);
-      setPatientGender((currentUser as any).gender || 'Male');
+      setPatientAge((currentUser as any).age || '');
+      setPatientGender((currentUser as any).gender || '');
     }
   }, [preselectedDoctorId, preselectedClinicId, preselectedMode, isBookingModalOpen]);
 
@@ -186,10 +168,45 @@ export const BookingWizardModal: React.FC = () => {
   const currentDoctor = doctors.find(d => d.id === selectedDoctorId) || doctors[0];
   const currentClinic = clinics.find(c => c.id === selectedClinicId) || clinics[0];
 
-  const availableSlots = [
-    '09:00 AM', '09:30 AM', '10:00 AM', '10:30 AM', '11:00 AM', '11:30 AM',
-    '02:00 PM', '02:30 PM', '03:00 PM', '04:00 PM', '04:30 PM', '05:30 PM', '06:30 PM'
-  ];
+  // Section 5: Filter unique registered patients who have booked with current Doctor (any status)
+  const registeredPatientsList = useMemo(() => {
+    if (!selectedDoctorId) return [];
+    const map = new Map<string, { id: string; name: string; age: number | string; gender: string; phone?: string }>();
+    (appointments || []).forEach(a => {
+      if (a.doctorId === selectedDoctorId && a.patientName && a.patientName !== 'Patient') {
+        const key = `${a.patientName.toLowerCase().trim()}_${a.patientAge || ''}_${(a.patientPhone || '').trim()}`;
+        if (!map.has(key)) {
+          map.set(key, {
+            id: a.patientId || key,
+            name: a.patientName,
+            age: a.patientAge || '',
+            gender: a.patientGender || '',
+            phone: a.patientPhone || ''
+          });
+        }
+      }
+    });
+    return Array.from(map.values());
+  }, [appointments, selectedDoctorId]);
+
+  // Section 1.2: Dynamic time slots per doctor's working schedule & excluding booked slots
+  const availableSlots = useMemo(() => {
+    if (!currentDoctor) return ['09:00 AM', '10:00 AM', '11:00 AM', '02:00 PM', '04:00 PM'];
+    
+    // Standard doctor slots from opdScheduleSummary or standard 30-min working hours
+    const baseSlots = [
+      '09:00 AM', '09:30 AM', '10:00 AM', '10:30 AM', '11:00 AM', '11:30 AM',
+      '02:00 PM', '02:30 PM', '03:00 PM', '03:30 PM', '04:00 PM', '04:30 PM', '05:00 PM', '05:30 PM'
+    ];
+
+    // Filter out slots already booked for this doctor on this date
+    const booked = (appointments || [])
+      .filter(a => a.doctorId === currentDoctor.id && a.appointmentDate === appointmentDate && a.status !== 'CANCELLED')
+      .map(a => (a.timeSlot || '').trim().toUpperCase());
+
+    const filtered = baseSlots.filter(s => !booked.includes(s.trim().toUpperCase()));
+    return filtered.length > 0 ? filtered : ['09:00 AM', '10:00 AM', '11:00 AM', '02:00 PM'];
+  }, [currentDoctor, appointmentDate, appointments]);
 
   const commonSymptoms = [
     'Fever / Chills', 'Cold & Cough', 'Diabetes Check', 'Hypertension / BP',
@@ -204,6 +221,18 @@ export const BookingWizardModal: React.FC = () => {
 
   const handleNextStep = () => {
     if (step === 2 && !selectedDoctorId) return;
+    if (step === 3) {
+      if (patientType === 'NEW' && (!patientName || !String(patientName).trim())) {
+        alert('Please enter the patient name.');
+        return;
+      }
+    }
+    if (step === 4) {
+      if (!patientNotes || !patientNotes.trim()) {
+        alert('Medical Intake & Specific Concerns is mandatory. Please enter your symptoms or health concerns before continuing.');
+        return;
+      }
+    }
     setStep(prev => prev + 1);
   };
 
@@ -289,7 +318,7 @@ export const BookingWizardModal: React.FC = () => {
         paymentMethod: paymentModeChoice === 'CASH' ? 'CASH_AT_CLINIC' : 'RAZORPAY',
         patientType,
         patientName: patientName || 'Patient',
-        patientAge,
+        patientAge: patientAge ? Number(patientAge) : undefined,
         patientGender,
         documents: uploadedFiles.map(f => f.file).filter(Boolean) as File[],
         voiceNote: voiceNoteFile || undefined
@@ -379,8 +408,8 @@ export const BookingWizardModal: React.FC = () => {
 
     // Header Title
     ctx.fillStyle = '#FFFFFF';
-    ctx.font = '900 26px sans-serif';
-    ctx.fillText('SEVASADAN CLINIC & TELE-OPD', 40, 65);
+    ctx.font = '900 24px sans-serif';
+    ctx.fillText('JANSEVAAROGYAM CLINIC & TELE-OPD', 40, 65);
 
     ctx.fillStyle = '#10B981';
     ctx.font = '600 13px sans-serif';
@@ -483,11 +512,11 @@ export const BookingWizardModal: React.FC = () => {
     // Footer Branding
     ctx.fillStyle = '#64748B';
     ctx.font = '600 11px sans-serif';
-    ctx.fillText('SEVASADAN — Verified OPD & Digital Telemedicine Network', 140, 695);
+    ctx.fillText('JANSEVAAROGYAM — Verified OPD & Digital Telemedicine Network', 120, 695);
 
     // Trigger Download
     const link = document.createElement('a');
-    link.download = `SEVASADAN_Token_${createdAppointment.tokenNumber}.png`;
+    link.download = `Jansevaarogyam_Token_${createdAppointment.tokenNumber}.png`;
     link.href = canvas.toDataURL('image/png');
     link.click();
   };
@@ -497,7 +526,7 @@ export const BookingWizardModal: React.FC = () => {
     : (currentDoctor?.consultationFeeClinic || 300);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/80 backdrop-blur-md animate-fade-in overflow-y-auto">
       
       {/* File Replace Hidden Input */}
       <input 
@@ -508,7 +537,7 @@ export const BookingWizardModal: React.FC = () => {
         accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
       />
 
-      <div className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden border border-slate-100 flex flex-col max-h-[90vh] relative">
+      <div className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden border border-slate-100 flex flex-col max-h-[92vh] my-auto relative">
         
         {/* Header with Stepper Progress */}
         <div className="bg-linear-to-r from-[#0B1F3A] via-[#0D2B4E] to-[#132D4D] text-white p-6 shrink-0">
@@ -634,7 +663,7 @@ export const BookingWizardModal: React.FC = () => {
                   <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
                     1. Select Clinic Branch
                   </label>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     {clinics.map(c => (
                       <button
                         key={c.id}
@@ -757,7 +786,7 @@ export const BookingWizardModal: React.FC = () => {
                     min={new Date().toISOString().split('T')[0]}
                     value={appointmentDate}
                     onChange={(e) => setAppointmentDate(e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0F4C81]"
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0F4C81] cursor-pointer"
                   />
                 </div>
 
@@ -786,7 +815,7 @@ export const BookingWizardModal: React.FC = () => {
                   <CustomSelect
                     value={patientId || ''}
                     onChange={(selectedVal) => {
-                      const p = existingPatientsList.find(item => item.id === selectedVal || item.name === selectedVal);
+                      const p = registeredPatientsList.find(item => item.id === selectedVal || item.name === selectedVal);
                       if (p) {
                         setPatientId(p.id);
                         setPatientName(p.name);
@@ -794,12 +823,12 @@ export const BookingWizardModal: React.FC = () => {
                         setPatientGender(p.gender);
                       }
                     }}
-                    placeholder="-- Choose Patient from Registered Patients List --"
+                    placeholder="-- Select Registered Patient --"
                     showPlaceholderOption={true}
                     themeColor="teal"
-                    options={existingPatientsList.map(p => ({
+                    options={registeredPatientsList.map(p => ({
                       value: p.id,
-                      label: `${p.name} (${p.age} Yrs, ${p.gender}${p.phone ? ` • +91 ${p.phone}` : ''})`
+                      label: `${p.name}${p.age ? ` (${p.age} Yrs` : ''}${p.gender ? `, ${p.gender})` : ')'}${p.phone ? ` • +91 ${p.phone}` : ''}`
                     }))}
                   />
                 </div>
@@ -812,7 +841,7 @@ export const BookingWizardModal: React.FC = () => {
                       type="text"
                       value={patientName}
                       onChange={(e) => setPatientName(e.target.value)}
-                      placeholder="Enter Full Name"
+                      placeholder="Enter patient name"
                       className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold"
                     />
                   </div>
@@ -821,7 +850,8 @@ export const BookingWizardModal: React.FC = () => {
                     <input
                       type="number"
                       value={patientAge}
-                      onChange={(e) => setPatientAge(Number(e.target.value))}
+                      onChange={(e) => setPatientAge(e.target.value ? Number(e.target.value) : '')}
+                      placeholder="Enter age"
                       className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold"
                     />
                   </div>
@@ -830,6 +860,8 @@ export const BookingWizardModal: React.FC = () => {
                     <CustomSelect
                       value={patientGender}
                       onChange={(val) => setPatientGender(val)}
+                      placeholder="Select Gender"
+                      showPlaceholderOption={true}
                       themeColor="teal"
                       options={[
                         { value: 'Male', label: 'Male' },
@@ -842,7 +874,7 @@ export const BookingWizardModal: React.FC = () => {
               ) : (
                 patientName && (
                   <div className="bg-emerald-50 border border-emerald-200 p-3 rounded-2xl flex items-center justify-between text-xs text-emerald-900 font-bold">
-                    <span>Selected Patient: <span className="text-slate-900 font-black">{patientName}</span> ({patientAge} Yrs, {patientGender})</span>
+                    <span>Selected Patient: <span className="text-slate-900 font-black">{patientName}</span> {patientAge ? `(${patientAge} Yrs` : ''}{patientGender ? `, ${patientGender})` : ')'}</span>
                     <span className="text-[10px] bg-emerald-200 text-emerald-900 px-2.5 py-0.5 rounded-full uppercase font-black">Registered Patient</span>
                   </div>
                 )
@@ -851,7 +883,7 @@ export const BookingWizardModal: React.FC = () => {
               {/* Time Slots */}
               <div className="space-y-2">
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                  Available Time Slots
+                  Available Time Slots ({availableSlots.length} Available)
                 </label>
                 <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                   {availableSlots.map(slot => (
@@ -880,7 +912,7 @@ export const BookingWizardModal: React.FC = () => {
               {/* Symptoms */}
               <div className="space-y-2">
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                  Common Symptoms (Select all that apply)
+                  Common Symptoms (Select all that apply - Optional)
                 </label>
                 <div className="flex flex-wrap gap-2">
                   {commonSymptoms.map(sym => (
@@ -903,7 +935,7 @@ export const BookingWizardModal: React.FC = () => {
               {/* Medical Concerns */}
               <div className="space-y-2">
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                  Medical Intake & Specific Concerns (Optional)
+                  Medical Intake & Specific Concerns *
                 </label>
                 <textarea
                   rows={3}
@@ -1073,9 +1105,9 @@ export const BookingWizardModal: React.FC = () => {
                 <div className="flex items-center justify-between border-b border-white/10 pb-3">
                   <div className="flex items-center gap-2">
                     <div className="bg-[#2DD4BF] text-slate-950 font-black px-2.5 py-1 rounded-md text-xs tracking-wider uppercase">
-                      RAZORPAY
+                      PAYMENT OPTIONS
                     </div>
-                    <span className="text-xs text-slate-300 font-bold">Payment Gateway</span>
+                    <span className="text-xs text-slate-300 font-bold">Secure Booking</span>
                   </div>
                   <span className="bg-[#0D9488]/20 text-[#2DD4BF] text-[10px] font-extrabold px-2.5 py-1 rounded-full border border-[#0D9488]/30 flex items-center gap-1">
                     <Lock className="w-3 h-3" />
@@ -1085,8 +1117,8 @@ export const BookingWizardModal: React.FC = () => {
 
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-[11px] text-slate-300 uppercase tracking-wider font-bold">Merchant Name</p>
-                    <h4 className="text-base font-black text-white">SEVASADAN Super Specialty OPD</h4>
+                    <p className="text-[11px] text-slate-300 uppercase tracking-wider font-bold">Center Name</p>
+                    <h4 className="text-base font-black text-white">Jansevaarogyam Clinic</h4>
                     <p className="text-xs text-[#2DD4BF]">{appointmentMode === 'VIDEO' ? 'Virtual Video OPD Token' : `${currentClinic?.name}`}</p>
                   </div>
                   <div className="text-right">
@@ -1103,7 +1135,7 @@ export const BookingWizardModal: React.FC = () => {
                 </label>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* Option 1: Razorpay Online Payment */}
+                  {/* Option 1: Pay Online */}
                   <div 
                     onClick={() => setPaymentModeChoice('RAZORPAY')}
                     className={`cursor-pointer p-5 rounded-3xl border-2 transition-all relative flex flex-col justify-between ${
@@ -1119,12 +1151,12 @@ export const BookingWizardModal: React.FC = () => {
                     )}
                     <div className="space-y-3">
                       <div className="w-10 h-10 bg-[#0B1F3A] text-[#2DD4BF] font-black text-xs px-2.5 rounded-xl flex items-center justify-center tracking-wider">
-                        RAZORPAY
+                        ONLINE
                       </div>
                       <div>
-                        <h4 className="font-black text-base text-slate-900">Razorpay Online Payment</h4>
+                        <h4 className="font-black text-base text-slate-900">Pay Online</h4>
                         <p className="text-xs text-slate-500 mt-1 leading-relaxed font-medium">
-                          Instant digital payment via Razorpay Gateway (UPI, Cards & Netbanking supported).
+                          Instant digital payment via UPI, Credit/Debit Cards, or Netbanking.
                         </p>
                       </div>
                     </div>
@@ -1134,7 +1166,7 @@ export const BookingWizardModal: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Option 2: Pay Cash at Clinic OPD */}
+                  {/* Option 2: Pay Offline */}
                   <div 
                     onClick={() => { if (appointmentMode === 'IN_CLINIC') setPaymentModeChoice('CASH'); }}
                     className={`p-5 rounded-3xl border-2 transition-all relative flex flex-col justify-between ${
@@ -1154,14 +1186,14 @@ export const BookingWizardModal: React.FC = () => {
                         <Building2 className="w-5 h-5" />
                       </div>
                       <div>
-                        <h4 className="font-black text-base text-slate-900">Pay Cash at Clinic OPD</h4>
+                        <h4 className="font-black text-base text-slate-900">Pay Offline</h4>
                         <p className="text-xs text-slate-500 mt-1 leading-relaxed font-medium">
-                          Generate token now and pay cash at Sarangpur, Shujalpur or Rajgarh OPD counter.
+                          Generate OPD token pass now and pay in-person at clinic reception counter upon arrival.
                         </p>
                       </div>
                     </div>
                     <div className="mt-4 pt-3 border-t border-slate-200/80 flex items-center justify-between text-xs font-bold text-[#0D9488]">
-                      <span>Counter Verification</span>
+                      <span>In-Person OPD Counter</span>
                       <span>Pay at Visit</span>
                     </div>
                   </div>

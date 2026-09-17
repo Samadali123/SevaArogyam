@@ -10,11 +10,13 @@ import {
   Users,
   FileText,
   CheckCircle2,
-  X
+  X,
+  Eye
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { API_BASE_URL, AUTH_TOKEN_KEY } from '../services/api';
 import { CustomSelect } from '../components/ui/CustomSelect';
+import { PrescriptionModal } from '../components/PrescriptionModal';
 
 interface PatientDashboardProps {
   onNavigate?: (tab: string) => void;
@@ -26,6 +28,7 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ onNavigate }
   const [rescheduleDate, setRescheduleDate] = React.useState('');
   const [rescheduleSlot, setRescheduleSlot] = React.useState('');
   const [copiedCode, setCopiedCode] = React.useState(false);
+  const [selectedPrescription, setSelectedPrescription] = React.useState<any>(null);
 
   const rawName = (currentUser as any)?.name;
   const patientName = (rawName && rawName.trim().toLowerCase() !== 'patient') ? rawName : 'Samad';
@@ -334,13 +337,22 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ onNavigate }
                   <p className="text-[11px] text-slate-400 font-mono mt-1">Issued: {new Date(p.createdAt).toLocaleDateString()}</p>
                 </div>
 
-                <button
-                  onClick={() => downloadProtectedPdf(`/patient/appointments/${p.appointmentId}/prescription/download`, `Prescription_${p.patientName}_${p.id.substring(0,5)}.pdf`)}
-                  className="w-full btn-primary py-2.5 rounded-xl text-xs font-sora font-bold flex items-center justify-center gap-2 transition cursor-pointer shadow-xs"
-                >
-                  <Download className="w-4 h-4 text-emerald-300" />
-                  <span>{language === 'en' ? 'Download PDF Prescription' : 'पीडीएफ डाउनलोड करें'}</span>
-                </button>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => setSelectedPrescription(p)}
+                    className="bg-purple-600 hover:bg-purple-700 text-white font-sora font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 transition cursor-pointer shadow-xs"
+                  >
+                    <Eye className="w-3.5 h-3.5" />
+                    <span>{language === 'en' ? 'View Prescription' : 'पर्ची देखें'}</span>
+                  </button>
+                  <button
+                    onClick={() => downloadProtectedPdf(`/patient/appointments/${p.appointmentId}/prescription/download`, `Prescription_${p.patientName}_${p.id.substring(0,5)}.pdf`)}
+                    className="btn-primary py-2.5 rounded-xl text-xs font-sora font-bold flex items-center justify-center gap-1.5 transition cursor-pointer shadow-xs"
+                  >
+                    <Download className="w-3.5 h-3.5 text-emerald-300" />
+                    <span>{language === 'en' ? 'Download PDF' : 'डाउनलोड'}</span>
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -432,6 +444,13 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ onNavigate }
           </div>
         </div>
       </section>
+
+      {/* Prescription View Modal */}
+      <PrescriptionModal
+        isOpen={!!selectedPrescription}
+        onClose={() => setSelectedPrescription(null)}
+        prescription={selectedPrescription}
+      />
 
     </div>
   );

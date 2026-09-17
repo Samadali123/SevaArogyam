@@ -13,7 +13,8 @@ import {
   X,
   Clock,
   Loader2,
-  ChevronDown
+  ChevronDown,
+  FileText
 } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -136,7 +137,7 @@ export const DoctorConsole: React.FC<DoctorConsoleProps> = ({ onNavigate }) => {
   const [activeConsoleTab, setActiveConsoleTab] = useState<'OPD' | 'ARTICLES'>('OPD');
 
   // OPD Queue & Active Appointment State
-  const [selectedQueueFilter, setSelectedQueueFilter] = useState<'ALL' | 'WAITING' | 'IN_PROGRESS' | 'COMPLETED'>('ALL');
+  const [selectedQueueFilter, setSelectedQueueFilter] = useState<'PENDING' | 'RESCHEDULED' | 'CANCELLED' | 'ALL'>('PENDING');
   const [activeAppointment, setActiveAppointment] = useState<Appointment | null>(appointments[0] || null);
 
   React.useEffect(() => {
@@ -555,12 +556,26 @@ export const DoctorConsole: React.FC<DoctorConsoleProps> = ({ onNavigate }) => {
   };
 
   const filteredAppointments = appointments.filter(a => {
+    if (selectedQueueFilter === 'PENDING') return a.status === 'PENDING';
+    if (selectedQueueFilter === 'RESCHEDULED') return (a.status as string) === 'RESCHEDULED';
+    if (selectedQueueFilter === 'CANCELLED') return a.status === 'CANCELLED';
     if (selectedQueueFilter === 'ALL') return true;
-    if (selectedQueueFilter === 'WAITING') return a.status === 'CONFIRMED' || a.status === 'PENDING';
-    if (selectedQueueFilter === 'IN_PROGRESS') return a.status === 'IN_PROGRESS';
-    if (selectedQueueFilter === 'COMPLETED') return a.status === 'COMPLETED';
     return true;
   });
+
+  // Section 11: Doctor Panel full historical patient list across all statuses
+  const doctorHistoricalPatients = React.useMemo(() => {
+    const map = new Map<string, Appointment>();
+    (appointments || []).forEach(a => {
+      if (a.patientName && a.patientName !== 'Patient') {
+        const key = `${a.patientName.toLowerCase().trim()}_${a.patientAge || ''}_${(a.patientPhone || '').trim()}`;
+        if (!map.has(key)) {
+          map.set(key, a);
+        }
+      }
+    });
+    return Array.from(map.values());
+  }, [appointments]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 font-sans">
@@ -725,17 +740,22 @@ export const DoctorConsole: React.FC<DoctorConsoleProps> = ({ onNavigate }) => {
             <span className="text-xs text-slate-500 font-medium">Real-time Sync</span>
           </div>
 
-          {/* Queue Filter Buttons */}
-          <div className="flex items-center gap-1 bg-slate-100 p-1.5 rounded-2xl text-[11px] font-heading font-bold">
-            {(['ALL', 'WAITING', 'IN_PROGRESS', 'COMPLETED'] as const).map(f => (
+          {/* Queue Filter Buttons (Section 8: Pending, Rescheduled, Cancelled, All) */}
+          <div className="flex items-center gap-1 bg-slate-100 p-1.5 rounded-2xl text-[11px] font-heading font-bold overflow-x-auto whitespace-nowrap shrink-0 max-w-full">
+            {[
+              { id: 'PENDING', label: 'Pending' },
+              { id: 'RESCHEDULED', label: 'Rescheduled' },
+              { id: 'CANCELLED', label: 'Cancelled' },
+              { id: 'ALL', label: 'All' },
+            ].map(f => (
               <button
-                key={f}
-                onClick={() => setSelectedQueueFilter(f)}
+                key={f.id}
+                onClick={() => setSelectedQueueFilter(f.id as any)}
                 className={`flex-1 py-1.5 rounded-xl transition cursor-pointer ${
-                  selectedQueueFilter === f ? 'bg-white text-[#0F4C81] shadow-xs font-extrabold' : 'text-slate-600 hover:text-slate-900'
+                  selectedQueueFilter === f.id ? 'bg-white text-[#0F4C81] shadow-xs font-extrabold' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                {f}
+                {f.label}
               </button>
             ))}
           </div>
@@ -745,7 +765,7 @@ export const DoctorConsole: React.FC<DoctorConsoleProps> = ({ onNavigate }) => {
             {filteredAppointments.length === 0 ? (
               <div className="py-12 px-4 text-center bg-slate-50 border border-dashed border-slate-200 rounded-2xl">
                 <p className="font-heading font-bold text-slate-700 text-xs">
-                  No Appointments available now
+                  No Appointments under {selectedQueueFilter}
                 </p>
               </div>
             ) : (
@@ -765,7 +785,9 @@ export const DoctorConsole: React.FC<DoctorConsoleProps> = ({ onNavigate }) => {
                   </span>
                   <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider ${
                     appt.status === 'COMPLETED' ? 'bg-emerald-100 text-emerald-800 border border-emerald-200/80' :
-                    appt.status === 'IN_PROGRESS' ? 'bg-amber-100 text-amber-800 border border-amber-200/80 animate-pulse' :
+                    appt.status === 'CONFIRMED' ? 'bg-teal-100 text-teal-800 border border-teal-200/80' :
+                    (appt.status as string) === 'RESCHEDULED' ? 'bg-amber-100 text-amber-800 border border-amber-200/80' :
+                    appt.status === 'CANCELLED' ? 'bg-rose-100 text-rose-800 border border-rose-200/80' :
                     'bg-sky-100 text-sky-800 border border-sky-200/80'
                   }`}>
                     {appt.status}
@@ -781,6 +803,22 @@ export const DoctorConsole: React.FC<DoctorConsoleProps> = ({ onNavigate }) => {
                   </p>
                 </div>
 
+                {/* Section 7.2: Rescheduled Date Display */}
+                {((appt.status as string) === 'RESCHEDULED' || (appt as any).rescheduledFrom) && (
+                  <div className="bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-xl text-xs font-bold text-amber-900 flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                    <span>Rescheduled to {new Date(appt.appointmentDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })} ({appt.timeSlot})</span>
+                  </div>
+                )}
+
+                {/* Section 4: Cancellation Visibility */}
+                {appt.status === 'CANCELLED' && (
+                  <div className="bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-xl text-xs font-bold text-rose-800 flex items-center gap-1.5">
+                    <X className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                    <span>This patient cancelled his booking</span>
+                  </div>
+                )}
+
                 <div className="flex items-center justify-between text-[11px] text-slate-600 pt-1.5 border-t border-slate-100">
                   <span className="flex items-center gap-1 font-medium">
                     {appt.appointmentMode === 'VIDEO' ? <Video className="w-3.5 h-3.5 text-emerald-600" /> : <Building2 className="w-3.5 h-3.5 text-[#0F4C81]" />}
@@ -788,6 +826,27 @@ export const DoctorConsole: React.FC<DoctorConsoleProps> = ({ onNavigate }) => {
                   </span>
                   <span className="font-bold text-slate-700">{appt.timeSlot}</span>
                 </div>
+
+                {/* Section 9.1: Doctor Confirmation Prompt (Yes / No) for Pending Appointments */}
+                {appt.status === 'PENDING' && (
+                  <div className="bg-amber-50 border border-amber-200 p-2.5 rounded-xl space-y-1.5 text-center" onClick={(e) => e.stopPropagation()}>
+                    <p className="text-xs font-black text-amber-900">Confirm Appointment?</p>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); updateAppointmentStatus(appt.id, 'CONFIRMED'); }}
+                        className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-1.5 rounded-lg text-xs transition shadow-xs cursor-pointer"
+                      >
+                        Yes (Confirm)
+                      </button>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); updateAppointmentStatus(appt.id, 'CANCELLED'); }}
+                        className="flex-1 bg-rose-600 hover:bg-rose-700 text-white font-bold py-1.5 rounded-lg text-xs transition shadow-xs cursor-pointer"
+                      >
+                        No (Cancel)
+                      </button>
+                    </div>
+                  </div>
+                )}
 
                 {appt.appointmentMode === 'VIDEO' && appt.status !== 'CANCELLED' && appt.status !== 'COMPLETED' && (
                   <button
@@ -807,46 +866,55 @@ export const DoctorConsole: React.FC<DoctorConsoleProps> = ({ onNavigate }) => {
                   </button>
                 )}
 
-                <div className="pt-1 flex items-center gap-2">
-                  <button
-                    onClick={(e) => { e.stopPropagation(); handleAnnounceToken(appt); }}
-                    disabled={announcingTokenId === appt.id}
-                    className="flex-1 bg-[#0F4C81] hover:bg-[#0B2545] text-white py-1.5 rounded-xl text-[10px] font-bold transition flex items-center justify-center gap-1 cursor-pointer disabled:opacity-75"
-                    title="Audio OPD Announcement"
-                  >
-                    {announcingTokenId === appt.id ? (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    ) : (
-                      <Volume2 className="w-3.5 h-3.5 text-amber-300" />
+                {/* Section 9.2 & 10: Doctor Status Action Buttons (Confirmed, Rescheduled, Cancelled, Completed) */}
+                {appt.status !== 'PENDING' && (
+                  <div className="pt-1 space-y-2" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleAnnounceToken(appt); }}
+                        disabled={announcingTokenId === appt.id}
+                        className="flex-1 bg-[#0F4C81] hover:bg-[#0B2545] text-white py-1.5 rounded-xl text-[10px] font-bold transition flex items-center justify-center gap-1 cursor-pointer disabled:opacity-75"
+                        title="Audio OPD Announcement"
+                      >
+                        {announcingTokenId === appt.id ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <Volume2 className="w-3.5 h-3.5 text-amber-300" />
+                        )}
+                        <span>Call Token</span>
+                      </button>
+                      
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleMarkDone(appt.id); }}
+                        disabled={markingDoneApptId === appt.id || appt.status === 'COMPLETED'}
+                        className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-1.5 rounded-xl text-[10px] font-bold transition flex items-center justify-center gap-1 cursor-pointer disabled:opacity-75"
+                      >
+                        {markingDoneApptId === appt.id ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <span>Mark Completed</span>
+                        )}
+                      </button>
+                    </div>
+
+                    {appt.status !== 'CANCELLED' && (
+                      <div className="flex items-center gap-2">
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); openRescheduleModal(appt); }} 
+                          className="flex-1 rounded-xl bg-amber-50 hover:bg-amber-100 py-1.5 text-[10px] font-bold text-amber-800 transition cursor-pointer border border-amber-200"
+                        >
+                          Reschedule
+                        </button>
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); setPendingCancelApptId(appt.id); }} 
+                          className="flex-1 rounded-xl bg-rose-50 hover:bg-rose-100 py-1.5 text-[10px] font-bold text-rose-700 transition cursor-pointer border border-rose-200"
+                        >
+                          Cancel
+                        </button>
+                      </div>
                     )}
-                    <span>Call Token</span>
-                  </button>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); handleMarkDone(appt.id); }}
-                    disabled={markingDoneApptId === appt.id}
-                    className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-1.5 rounded-xl text-[10px] font-bold transition flex items-center justify-center gap-1 cursor-pointer disabled:opacity-75"
-                  >
-                    {markingDoneApptId === appt.id ? (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    ) : (
-                      <span>Mark Done</span>
-                    )}
-                  </button>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button 
-                    onClick={(e) => { e.stopPropagation(); setPendingCancelApptId(appt.id); }} 
-                    className="flex-1 rounded-xl bg-rose-50 hover:bg-rose-100 py-1.5 text-[10px] font-bold text-rose-700 transition cursor-pointer"
-                  >
-                    Cancel
-                  </button>
-                  <button 
-                    onClick={(e) => { e.stopPropagation(); openRescheduleModal(appt); }} 
-                    className="flex-1 rounded-xl bg-amber-50 hover:bg-amber-100 py-1.5 text-[10px] font-bold text-amber-800 transition cursor-pointer"
-                  >
-                    Reschedule
-                  </button>
-                </div>
+                  </div>
+                )}
               </div>
             )))}
           </div>
@@ -872,9 +940,39 @@ export const DoctorConsole: React.FC<DoctorConsoleProps> = ({ onNavigate }) => {
                 {activeAppointment?.patientGender ? ` • ${activeAppointment.patientGender}` : ''} 
                 {activeAppointment?.patientPhone ? ` • Phone: +91 ${activeAppointment.patientPhone}` : ''}
               </p>
+
+              {/* Section 3: Voice Note Audio Player */}
+              {(activeAppointment?.voiceNoteUrl || (activeAppointment as any)?.audioUrl) && activeAppointment && (
+                <div className="mt-3 p-2 bg-white border border-slate-200 rounded-xl flex items-center gap-2 max-w-sm">
+                  <Volume2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <audio src={activeAppointment.voiceNoteUrl || (activeAppointment as any).audioUrl} controls className="h-7 grow" />
+                </div>
+              )}
+
+              {/* Section 3: Uploaded Documents */}
+              {((activeAppointment?.documents && activeAppointment.documents.length > 0) || (activeAppointment as any)?.documentUrl) && activeAppointment && (
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {(activeAppointment.documents || [(activeAppointment as any).documentUrl]).map((docUrl: any, idx: number) => {
+                    const urlStr = typeof docUrl === 'string' ? docUrl : docUrl?.url || '';
+                    if (!urlStr) return null;
+                    return (
+                      <a
+                        key={idx}
+                        href={urlStr}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-xs bg-sky-100 text-[#0F4C81] hover:underline font-bold px-2.5 py-1 rounded-lg flex items-center gap-1 border border-sky-200"
+                      >
+                        <FileText className="w-3.5 h-3.5" />
+                        <span>Document #{idx + 1}</span>
+                      </a>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
-            {/* Select Doctor's Patient Dropdown */}
+            {/* Section 11: Select Doctor's Registered Patient Dropdown */}
             <div className="w-full sm:w-auto">
               <ThemeSelect
                 label="Select Patient:"
@@ -883,12 +981,12 @@ export const DoctorConsole: React.FC<DoctorConsoleProps> = ({ onNavigate }) => {
                   const found = appointments.find(a => a.id === val);
                   if (found) setActiveAppointment(found);
                 }}
-                placeholder="-- Doctor's Patient List --"
+                placeholder="-- Doctor's Registered Patients List --"
                 options={[
-                  { value: '', label: "-- Doctor's Patient List --" },
-                  ...appointments.map(a => ({
+                  { value: '', label: "-- Doctor's Registered Patients List --" },
+                  ...doctorHistoricalPatients.map(a => ({
                     value: a.id,
-                    label: `${a.patientName || 'Patient'} (${a.tokenNumber || 'TK'})`,
+                    label: `${a.patientName || 'Patient'}${a.patientAge ? ` (${a.patientAge} Yrs` : ''}${a.patientGender ? `, ${a.patientGender})` : ')'}`,
                     sublabel: a.patientPhone ? `Phone: +91 ${a.patientPhone}` : undefined
                   }))
                 ]}

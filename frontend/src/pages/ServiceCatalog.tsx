@@ -225,16 +225,17 @@ export const ServiceCatalog: React.FC<{ kind: Kind }> = ({ kind }) => {
       </section>
 
       {/* ==========================================
-          SECTION 2: SEARCH & FILTER BAR
+          SECTION 2: SEARCH & HEADER BAR
       ========================================== */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-20 -mt-10">
-        <div className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-4 border-b border-slate-200/80">
           
-          <div>
-            <span className="text-[11px] font-sora font-extrabold uppercase tracking-widest text-emerald-700 block">
+          <div className="space-y-1.5">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-50 text-[#0D9488] border border-teal-200/60 text-[11px] font-sora font-extrabold uppercase tracking-wider">
+              <Sparkles className="w-3.5 h-3.5 text-[#0D9488]" />
               {hi ? 'लोकप्रिय विकल्प' : 'Browse Services'}
             </span>
-            <h2 className="text-xl font-sora font-black text-slate-900 mt-0.5">
+            <h2 className="text-2xl sm:text-3xl font-sora font-black text-slate-900 tracking-tight">
               {hi ? 'पारदर्शी कीमतें। सरल बुकिंग।' : 'Transparent Pricing. One-Click Booking.'}
             </h2>
           </div>
@@ -249,12 +250,12 @@ export const ServiceCatalog: React.FC<{ kind: Kind }> = ({ kind }) => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={hi ? 'सेवा या टेस्ट खोजें...' : 'Search a service or test...'}
-              className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0F4C81] focus:bg-white transition"
+              className="w-full pl-10 pr-9 py-2.5 bg-white border border-slate-300/80 rounded-full text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0D9488] focus:border-transparent shadow-xs hover:border-slate-400 transition-all"
             />
             {searchQuery && (
               <button 
                 onClick={() => setSearchQuery('')}
-                className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>

@@ -54,8 +54,11 @@ export const DeskStaffPortal: React.FC = () => {
   const existingPatientsList = useMemo(() => {
     const map = new Map<string, { id: string; name: string; age: number; gender: string; phone: string }>();
     appointments.forEach(a => {
+      if (walkInForm.doctorId && a.doctorId !== walkInForm.doctorId) return;
+      if (walkInForm.branchId && a.clinicId !== walkInForm.branchId) return;
+
       if (a.patientName && a.patientName !== 'Patient') {
-        const key = `${a.patientName.toLowerCase()}_${a.patientPhone}`;
+        const key = `${a.patientName.toLowerCase().trim()}_${a.patientPhone}`;
         if (!map.has(key)) {
           map.set(key, {
             id: a.patientId || key,
@@ -68,7 +71,7 @@ export const DeskStaffPortal: React.FC = () => {
       }
     });
     return Array.from(map.values());
-  }, [appointments]);
+  }, [appointments, walkInForm.doctorId, walkInForm.branchId]);
 
   // Filter appointments for desk staff
   const branchAppts = appointments.filter(a => 
@@ -457,8 +460,8 @@ export const DeskStaffPortal: React.FC = () => {
 
       {/* WALK-IN PATIENT CASH REGISTRATION MODAL */}
       {isWalkInModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto border border-slate-100 animate-fade-in font-sans">
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-xl w-full p-5 sm:p-8 shadow-2xl space-y-6 max-h-[92vh] my-auto overflow-y-auto border border-slate-100 animate-fade-in font-sans">
             
             <div className="flex items-center justify-between border-b border-slate-100 pb-4">
               <div className="space-y-1">
@@ -589,7 +592,7 @@ export const DeskStaffPortal: React.FC = () => {
                         required
                         value={walkInForm.patientName}
                         onChange={(e) => setWalkInForm({ ...walkInForm, patientName: e.target.value })}
-                        placeholder="e.g. Ramesh Chandra"
+                        placeholder="Enter patient name"
                         className="w-full px-4 py-3 bg-[#5B5588]/5 border border-[#5B5588]/20 rounded-xl font-sans font-medium focus:ring-2 focus:ring-[#5B5588] focus:border-[#5B5588] focus:bg-white outline-none transition"
                       />
                     </div>
@@ -602,7 +605,7 @@ export const DeskStaffPortal: React.FC = () => {
                         maxLength={10}
                         value={walkInForm.patientPhone}
                         onChange={(e) => setWalkInForm({ ...walkInForm, patientPhone: e.target.value.replace(/\D/g, '') })}
-                        placeholder="98260XXXXX"
+                        placeholder="Enter mobile number"
                         className="w-full px-4 py-3 bg-[#5B5588]/5 border border-[#5B5588]/20 rounded-xl font-sans font-medium focus:ring-2 focus:ring-[#5B5588] focus:border-[#5B5588] focus:bg-white outline-none transition font-mono"
                       />
                     </div>
@@ -615,8 +618,9 @@ export const DeskStaffPortal: React.FC = () => {
                         type="number"
                         min={1}
                         max={120}
-                        value={walkInForm.patientAge}
-                        onChange={(e) => setWalkInForm({ ...walkInForm, patientAge: Number(e.target.value) })}
+                        value={walkInForm.patientAge || ''}
+                        onChange={(e) => setWalkInForm({ ...walkInForm, patientAge: e.target.value ? Number(e.target.value) : '' as any })}
+                        placeholder="Enter age"
                         className="w-full px-4 py-3 bg-[#5B5588]/5 border border-[#5B5588]/20 rounded-xl font-sans font-medium focus:ring-2 focus:ring-[#5B5588] focus:border-[#5B5588] focus:bg-white outline-none transition"
                       />
                     </div>
@@ -626,6 +630,8 @@ export const DeskStaffPortal: React.FC = () => {
                         label="Gender"
                         value={walkInForm.patientGender}
                         onChange={(val) => setWalkInForm({ ...walkInForm, patientGender: val as any })}
+                        placeholder="Select Gender"
+                        showPlaceholderOption={true}
                         themeColor="purple"
                         options={[
                           { value: 'Male', label: 'Male' },

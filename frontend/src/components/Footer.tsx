@@ -3,8 +3,7 @@ import {
   Phone, 
   Smartphone,
   ShieldAlert,
-  ShieldCheck,
-  Heart
+  ShieldCheck
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 
@@ -16,7 +15,7 @@ export const Footer: React.FC<FooterProps> = ({ setCurrentTab }) => {
   const { openBookingModal, setSelectedSpecialtyFilter, language, openAppDownloadModal } = useApp();
 
   return (
-    <footer className="bg-slate-900 text-slate-300 pt-14 pb-8 border-t border-slate-800 shadow-2xl font-sans">
+    <footer className="bg-slate-900 text-slate-300 pt-14 pb-8 shadow-2xl font-sans">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         
         {/* 1. TOP SECTION: MOBILE APP DOWNLOAD & EMERGENCY HELPLINE BANNER */}
@@ -93,7 +92,7 @@ export const Footer: React.FC<FooterProps> = ({ setCurrentTab }) => {
               <p className="text-[10px] text-slate-400 font-normal">Sarangpur • Shujalpur • Rajgarh Network</p>
             </div>
 
-            <div className="pt-2 flex items-center gap-2 border-t border-white/10 font-sans">
+            <div className="pt-2 flex items-center gap-2 font-sans">
               <a
                 href="tel:1800-7382-723"
                 className="bg-linear-to-r from-[#10B981] to-[#0D9488] hover:opacity-95 text-white font-heading font-extrabold px-3.5 py-2 rounded-xl text-xs flex items-center gap-1.5 transition shadow-sm"
@@ -113,7 +112,7 @@ export const Footer: React.FC<FooterProps> = ({ setCurrentTab }) => {
         </div>
 
         {/* 2. MAIN 4-COLUMN CORPORATE FOOTER LINKS */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-xs pb-8 border-b border-slate-800 font-sans">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-xs pb-8 font-sans">
           
           {/* Column 1: Company Overview */}
           <div className="space-y-3">
@@ -188,7 +187,7 @@ export const Footer: React.FC<FooterProps> = ({ setCurrentTab }) => {
               </li>
             </ul>
 
-            <div className="pt-3 space-y-1 border-t border-slate-800">
+            <div className="pt-3 space-y-1">
               <p className="font-heading font-extrabold text-white text-xs">{language === 'en' ? 'Helpdesk Helpline' : 'हेल्पडेस्क हेल्पलाइन'}</p>
               <p className="text-xs font-mono text-[#5EAAF0] font-bold">1800-JANSEVA-CLINIC (7382-723)</p>
               <p className="text-[11px] text-slate-400">support@jansevarogyam.com</p>
@@ -197,32 +196,9 @@ export const Footer: React.FC<FooterProps> = ({ setCurrentTab }) => {
 
         </div>
 
-        {/* 3. BOTTOM COPYRIGHT BAR WITH ASG SOLUTIONS LOGO CREDIT */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400 pt-2 font-sans">
-          
-          <p className="flex items-center gap-1.5">
-            <span>© 2026 Jansevarogyam Health Care Network. {language === 'en' ? 'All rights reserved.' : 'सर्वाधिकार सुरक्षित।'}</span>
-            <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500 inline" />
-          </p>
-
-          {/* Authentic Built by ASG Solutions Logo */}
-          <div className="flex items-center gap-2.5">
-            <span className="text-slate-400 text-xs font-medium">Built by</span>
-            <a 
-              href="https://asgsolutions.in" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="inline-flex items-center hover:opacity-90 transition cursor-pointer"
-              title="ASG Solutions"
-            >
-              <img 
-                src="/asg-solutions-logo.svg" 
-                alt="ASG Solutions Logo" 
-                className="h-9 sm:h-10 w-auto object-contain" 
-              />
-            </a>
-          </div>
-
+        {/* 3. BOTTOM COPYRIGHT BAR */}
+        <div className="text-xs text-slate-400 pt-3 font-sans text-left">
+          <p>© 2026 Jansevarogyam Health Care Network. {language === 'en' ? 'All rights reserved.' : 'सर्वाधिकार सुरक्षित।'}</p>
         </div>
 
       </div>

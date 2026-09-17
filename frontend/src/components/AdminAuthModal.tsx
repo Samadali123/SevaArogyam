@@ -80,8 +80,8 @@ export const AdminAuthModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-99999 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-slate-200/80">
+    <div className="fixed inset-0 z-99999 flex items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-200 overflow-y-auto">
+      <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-slate-200/80 max-h-[92vh] my-auto flex flex-col">
         
         {/* Header: Orange Admin Brand Security Banner */}
         <div className="bg-gradient-to-r from-[#9A5B3C] via-[#B37046] to-[#9A5B3C] text-white p-6 relative">

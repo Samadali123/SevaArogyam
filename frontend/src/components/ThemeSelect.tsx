@@ -14,6 +14,7 @@ export interface ThemeSelectProps {
   onChange: (val: string) => void;
   options: ThemeSelectOption[];
   placeholder?: string;
+  showPlaceholderOption?: boolean;
   className?: string;
   buttonClassName?: string;
   variant?: 'light' | 'dark' | 'glass';

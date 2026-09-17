@@ -93,6 +93,18 @@
   summary {
     cursor: pointer !important;
     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    min-height: 44px;
+  }
+
+  input[type="text"],
+  input[type="number"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="password"],
+  input[type="date"],
+  select,
+  textarea {
+    min-height: 44px;
   }
 
   button:disabled,
@@ -101,6 +113,19 @@
     cursor: not-allowed !important;
     opacity: 0.6;
   }
+}
+
+/* Mobile Table & Scroll Utilities */
+.responsive-table-container {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 1rem;
+}
+
+.responsive-table-container table {
+  min-width: 600px;
 }
 
 /* Custom Font Utilities for explicit use */
@@ -265,6 +290,7 @@
 .gradient-text-teal {
   background: linear-gradient(135deg, #0B2545 0%, #0F4C81 50%, #0D9488 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 

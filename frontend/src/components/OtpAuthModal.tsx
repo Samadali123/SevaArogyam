@@ -81,8 +81,8 @@ export const OtpAuthModal: React.FC = () => {
 
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
-      <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-slate-100">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in overflow-y-auto">
+      <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-slate-100 max-h-[92vh] my-auto flex flex-col">
         
         {/* Header */}
         <div className="bg-[#0F4C81] text-white p-5 flex items-center justify-between relative">

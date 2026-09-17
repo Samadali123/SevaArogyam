@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { 
-  Building2, 
   Stethoscope, 
-  ShieldAlert, 
   Calendar, 
   LogOut,
   ChevronDown,
@@ -12,11 +10,6 @@ import {
   X,
   User,
   ShieldCheck,
-  Home,
-  Info,
-  Award,
-  Share2,
-  ArrowRight,
   Loader2
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
@@ -32,7 +25,6 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
     activeRole, 
     language,
     setLanguage,
-    openAuthModal,
     openAdminAuthModal,
     openStaffAuthModal,
     isAdminAuthenticated, 
@@ -47,6 +39,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
 
   const isStaffOrAdminOrDoctor = Boolean(
     (currentUser && (
@@ -66,9 +59,9 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
     }
   };
 
-  // Prevent background scrolling (hero section bleed) when sidebar menu is open
+  // Prevent background scrolling (hero section bleed) when sidebar menu or login modal is open
   useEffect(() => {
-    if (mobileMenuOpen) {
+    if (mobileMenuOpen || loginModalOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
@@ -76,62 +69,34 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
     return () => {
       document.body.style.overflow = '';
     };
-  }, [mobileMenuOpen]);
+  }, [mobileMenuOpen, loginModalOpen]);
 
   return (
     <header className="sticky top-0 z-40 glass-nav shadow-xs">
       
-      {/* Top Banner: Emergency Helpline (Only shown for Public/Patients) */}
-      {!isStaffOrAdminOrDoctor && (
-        <div className="hidden sm:block bg-linear-to-r from-[#0B1F3A] via-[#0D2B4E] to-[#132D4D] text-white text-xs py-1.5 px-3 border-b border-white/10">
-          <div className="w-full px-4 sm:px-6 lg:px-8 flex flex-wrap justify-between items-center gap-2">
-            
-            {/* Emergency & Branches */}
-            <div className="flex flex-wrap items-center gap-3">
-              <span className="flex items-center gap-1.5 font-semibold bg-[#C2410C]/20 text-orange-200 px-2.5 py-0.5 rounded-full border border-[#C2410C]/40">
-                <ShieldAlert className="w-3.5 h-3.5 text-orange-300 animate-pulse" />
-                <span>{language === 'en' ? '24x7 Emergency Line:' : '24x7 हेल्पलाइन:'}</span>
-                <a href="tel:1800-7382-723" className="font-extrabold underline text-[#5EAAF0] hover:text-sky-200">
-                  1800-SEVA-CLINIC (1800-7382-723)
-                </a>
-              </span>
-
-              <span className="hidden lg:flex items-center gap-2 text-sky-100/90 text-[11px] font-medium">
-                <ShieldCheck className="w-3.5 h-3.5 text-[#2DD4BF]" />
-                <span>NABH Accredited Healthcare Network • Sarangpur • Shujalpur • Rajgarh</span>
-              </span>
-            </div>
-
-          </div>
-        </div>
-      )}
-
       {/* Main Navbar */}
       <div className="w-full px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
         
-        {/* Brand Logo */}
+        {/* Brand Text Logo on Extreme Left */}
         <div 
           onClick={() => {
             if (!isStaffOrAdminOrDoctor) setCurrentTab('home');
           }}
-          className="flex items-center gap-3 cursor-pointer group shrink-0"
+          className="flex items-center cursor-pointer group shrink-0"
         >
-          <div className="w-10 h-10 rounded-xl bg-linear-to-tr from-[#10B981] to-[#0D9488] flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-all glow-teal">
-            <Stethoscope className="w-5.5 h-5.5 text-white" />
-          </div>
-          <span className="font-outfit font-extrabold text-2xl bg-linear-to-r from-[#0B1F3A] via-[#0D2B4E] to-[#0D9488] bg-clip-text text-transparent tracking-tight">
-            Jansevarogyam
+          <span className="font-outfit font-extrabold text-2xl sm:text-3xl bg-linear-to-r from-[#0B1F3A] via-[#0D2B4E] to-[#0D9488] bg-clip-text text-transparent tracking-tight">
+            Jansevaarogyam
           </span>
         </div>
 
         {/* Doctor, Admin & Staff Panel Header: Brand Logo on Left, Language Toggle & Logout on Right */}
         {isStaffOrAdminOrDoctor ? (
-          <div className="flex items-center gap-3 shrink-0 ml-auto">
+          <div className="flex items-center gap-2 shrink-0 ml-auto">
             {/* Hindi / English Language Toggle */}
-            <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-heading font-extrabold shadow-inner shrink-0">
+            <div className="flex items-center bg-slate-100 p-0.5 rounded-full border border-slate-200 text-[11px] font-heading font-extrabold shadow-inner shrink-0">
               <button
                 onClick={() => setLanguage('hi')}
-                className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${
+                className={`px-3 py-[2px] rounded-full transition-all cursor-pointer ${
                   language === 'hi' 
                     ? 'bg-emerald-600 text-white shadow-xs font-bold' 
                     : 'text-slate-600 hover:text-slate-900'
@@ -141,7 +106,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
               </button>
               <button
                 onClick={() => setLanguage('en')}
-                className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${
+                className={`px-3 py-[2px] rounded-full transition-all cursor-pointer ${
                   language === 'en' 
                     ? 'bg-[#0F4C81] text-white shadow-xs font-bold' 
                     : 'text-slate-600 hover:text-slate-900'
@@ -154,16 +119,16 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
             <button
               onClick={handleLogout}
               disabled={isLoggingOut}
-              className="bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 font-extrabold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 transition cursor-pointer shadow-xs disabled:opacity-60 disabled:cursor-not-allowed"
+              className="bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 font-extrabold px-3 py-[3px] rounded-full text-[11px] flex items-center gap-1 transition cursor-pointer shadow-xs disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {isLoggingOut ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin text-rose-600" />
-                  <span>{language === 'en' ? 'Logging out...' : 'लॉग आउट हो रहा है...'}</span>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin text-rose-600" />
+                  <span>{language === 'en' ? 'Logging out...' : 'लॉग आउट...'}</span>
                 </>
               ) : (
                 <>
-                  <LogOut className="w-4 h-4" />
+                  <LogOut className="w-3.5 h-3.5" />
                   <span>{language === 'en' ? 'Logout' : 'लॉग आउट'}</span>
                 </>
               )}
@@ -171,14 +136,14 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
           </div>
         ) : (
           <>
-            {/* Desktop Navigation Links - Segmented Pill Bar for Patients/Public */}
-            <nav className="hidden lg:flex items-center gap-1.5 bg-slate-100/90 p-1.5 rounded-2xl border border-slate-200/80 shadow-inner">
+            {/* Desktop Navigation Links - Centered, Compact Padding, Dark Navy Active Color, Teal Hover */}
+            <nav className="hidden lg:flex items-center justify-center gap-1.5 flex-1 mx-2">
               <button
                 onClick={() => setCurrentTab('home')}
-                className={`px-4 py-2 rounded-xl text-xs font-black transition-all whitespace-nowrap flex items-center gap-1.5 ${
+                className={`px-2.5 py-1 text-xs transition-colors whitespace-nowrap cursor-pointer ${
                   currentTab === 'home' 
-                    ? 'bg-linear-to-r from-[#0B1F3A] to-[#0D2B4E] text-white shadow-md' 
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/90'
+                    ? 'text-[#0B1F3A] font-black text-sm' 
+                    : 'text-slate-600 hover:text-[#0D9488] font-bold'
                 }`}
               >
                 <span>{language === 'en' ? 'Home' : 'मुख्य पृष्ठ'}</span>
@@ -187,10 +152,10 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
               {/* About Us (Single Direct Button) */}
               <button
                 onClick={() => setCurrentTab('about')}
-                className={`px-4 py-2 rounded-xl text-xs font-black transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
+                className={`px-2.5 py-1 text-xs transition-colors whitespace-nowrap cursor-pointer ${
                   currentTab === 'about' 
-                    ? 'bg-linear-to-r from-[#0B1F3A] to-[#0D2B4E] text-white shadow-md' 
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/90'
+                    ? 'text-[#0B1F3A] font-black text-sm' 
+                    : 'text-slate-600 hover:text-[#0D9488] font-bold'
                 }`}
               >
                 <span>{language === 'en' ? 'About Us' : 'हमारे बारे में'}</span>
@@ -200,10 +165,10 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
               <div className="relative" onMouseEnter={() => setOpenDropdown('specialties')} onMouseLeave={() => setOpenDropdown(null)}>
                 <button
                   onClick={() => { setSelectedSpecialtyFilter('all'); setCurrentTab('specialties'); setOpenDropdown(null); }}
-                  className={`px-4 py-2 rounded-xl text-xs font-black transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
+                  className={`px-2.5 py-1 text-xs transition-colors whitespace-nowrap flex items-center gap-1 cursor-pointer ${
                     currentTab === 'specialties' 
-                      ? 'bg-linear-to-r from-[#0B1F3A] to-[#0D2B4E] text-white shadow-md' 
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/90'
+                      ? 'text-[#0B1F3A] font-black text-sm' 
+                      : 'text-slate-600 hover:text-[#0D9488] font-bold'
                   }`}
                 >
                   <span>{language === 'en' ? 'Specialties' : 'विशेषज्ञताएँ'}</span>
@@ -217,10 +182,10 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
                       <button
                         key={sp.id}
                         onClick={() => { setSelectedSpecialtyFilter(sp.category || sp.id); setCurrentTab('specialties'); setOpenDropdown(null); }}
-                        className="w-full text-left px-3 py-2 rounded-xl hover:bg-teal-50 hover:text-[#0D9488] text-xs font-bold text-slate-800 flex items-center justify-between transition cursor-pointer"
+                        className="w-full text-left px-3 py-2 rounded-xl hover:bg-teal-50 hover:text-[#0D9488] text-xs font-bold text-slate-800 flex items-center justify-between transition cursor-pointer group"
                       >
-                        <span className="truncate">{language === 'en' ? sp.nameEn : (sp.nameHi || sp.nameEn)}</span>
-                        <ChevronRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                        <span className="truncate group-hover:text-[#0D9488] transition-colors">{language === 'en' ? sp.nameEn : (sp.nameHi || sp.nameEn)}</span>
+                        <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#0D9488] transition-colors shrink-0" />
                       </button>
                     ))}
                   </div>
@@ -231,10 +196,10 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
               <div className="relative" onMouseEnter={() => setOpenDropdown('locations')} onMouseLeave={() => setOpenDropdown(null)}>
                 <button
                   onClick={() => { setActiveBranchId('all'); setCurrentTab('locations'); setOpenDropdown(null); }}
-                  className={`px-4 py-2 rounded-xl text-xs font-black transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
+                  className={`px-2.5 py-1 text-xs transition-colors whitespace-nowrap flex items-center gap-1 cursor-pointer ${
                     currentTab === 'locations' 
-                      ? 'bg-linear-to-r from-[#0B1F3A] to-[#0D2B4E] text-white shadow-md' 
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/90'
+                      ? 'text-[#0B1F3A] font-black text-sm' 
+                      : 'text-slate-600 hover:text-[#0D9488] font-bold'
                   }`}
                 >
                   <span>{language === 'en' ? 'Locations & Facilities' : 'शाखाएँ एवं सुविधाएं'}</span>
@@ -250,10 +215,10 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
                         <button
                           key={c.id}
                           onClick={() => { setActiveBranchId(c.id); setCurrentTab('locations'); setOpenDropdown(null); }}
-                          className="w-full text-left px-3 py-2 rounded-xl hover:bg-teal-50 hover:text-[#0D9488] text-xs font-bold text-slate-800 flex items-center justify-between transition cursor-pointer"
+                          className="w-full text-left px-3 py-2 rounded-xl hover:bg-teal-50 hover:text-[#0D9488] text-xs font-bold text-slate-800 flex items-center justify-between transition cursor-pointer group"
                         >
-                          <span className="truncate">{language === 'en' ? c.name : branchNameHi}</span>
-                          <ChevronRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                          <span className="truncate group-hover:text-[#0D9488] transition-colors">{language === 'en' ? c.name : branchNameHi}</span>
+                          <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#0D9488] transition-colors shrink-0" />
                         </button>
                       );
                     })}
@@ -265,10 +230,10 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
               <div className="relative" onMouseEnter={() => setOpenDropdown('services')} onMouseLeave={() => setOpenDropdown(null)}>
                 <button
                   onClick={() => setOpenDropdown(openDropdown === 'services' ? null : 'services')}
-                  className={`px-4 py-2 rounded-xl text-xs font-black transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
+                  className={`px-2.5 py-1 text-xs transition-colors whitespace-nowrap flex items-center gap-1 cursor-pointer ${
                     ['pharmacy', 'diagnostics', 'laboratory'].includes(currentTab)
-                      ? 'bg-linear-to-r from-[#0B1F3A] to-[#0D2B4E] text-white shadow-md'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/90'
+                      ? 'text-[#0B1F3A] font-black text-sm'
+                      : 'text-slate-600 hover:text-[#0D9488] font-bold'
                   }`}
                 >
                   <span>{language === 'en' ? 'Care Services' : 'देखभाल सेवाएं'}</span>
@@ -284,26 +249,25 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
                       <button 
                         key={tab} 
                         onClick={() => { setCurrentTab(tab); setOpenDropdown(null); }} 
-                        className="w-full text-left px-3 py-2 rounded-xl hover:bg-teal-50 hover:text-[#0D9488] text-xs font-bold text-slate-800 flex items-center justify-between transition cursor-pointer"
+                        className="w-full text-left px-3 py-2 rounded-xl hover:bg-teal-50 hover:text-[#0D9488] text-xs font-bold text-slate-800 flex items-center justify-between transition cursor-pointer group"
                       >
-                        <span className="truncate">{label}</span>
-                        <ChevronRight className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                        <span className="truncate group-hover:text-[#0D9488] transition-colors">{label}</span>
+                        <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#0D9488] transition-colors shrink-0" />
                       </button>
                     ))}
                   </div>
                 </div>
               </div>
 
-              {/* Refer & Earn Tab (Added right before My Dashboard) */}
+              {/* Refer & Earn Tab */}
               <button
                 onClick={() => setCurrentTab('referrals')}
-                className={`px-4 py-2 rounded-xl text-xs font-black transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
+                className={`px-2.5 py-1 text-xs transition-colors whitespace-nowrap flex items-center gap-1 cursor-pointer ${
                   currentTab === 'referrals' 
-                    ? 'bg-linear-to-r from-[#0B1F3A] to-[#0D2B4E] text-white shadow-md' 
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/90'
+                    ? 'text-[#0B1F3A] font-black text-sm' 
+                    : 'text-slate-600 hover:text-[#0D9488] font-bold'
                 }`}
               >
-                <Share2 className="w-3.5 h-3.5 text-amber-500" />
                 <span>{language === 'en' ? 'Refer & Earn' : 'रेफर करें और कमाएं'}</span>
               </button>
 
@@ -311,10 +275,10 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
               {Boolean(currentUser && activeRole === 'PATIENT') && (
                 <button
                   onClick={() => setCurrentTab('patient-dashboard')}
-                  className={`px-4 py-2 rounded-xl text-xs font-black transition-all whitespace-nowrap flex items-center gap-1.5 cursor-pointer ${
+                  className={`px-2.5 py-1 text-xs transition-colors whitespace-nowrap flex items-center gap-1 cursor-pointer ${
                     currentTab === 'patient-dashboard' 
-                      ? 'bg-linear-to-r from-[#0B1F3A] to-[#0D2B4E] text-white shadow-md' 
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/90'
+                      ? 'text-[#0B1F3A] font-black text-sm' 
+                      : 'text-slate-600 hover:text-[#0D9488] font-bold'
                   }`}
                 >
                   <Calendar className="w-3.5 h-3.5 text-[#2DD4BF]" />
@@ -323,194 +287,108 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
               )}
             </nav>
 
-            {/* Language Toggle Control (Desktop & Tablet) */}
-            <div className="hidden sm:flex items-center bg-slate-100/90 p-1 rounded-xl border border-slate-200/90 text-xs font-heading font-extrabold shadow-inner shrink-0">
-              <button
-                onClick={() => setLanguage('hi')}
-                className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
-                  language === 'hi' 
-                    ? 'bg-[#0D9488] text-white shadow-xs font-bold' 
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
-                }`}
-                title="हिन्दी में वेबसाइट देखें"
-              >
-                हिंदी
-              </button>
-              <button
-                onClick={() => setLanguage('en')}
-                className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
-                  language === 'en' 
-                    ? 'bg-[#0B1F3A] text-white shadow-xs font-bold' 
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
-                }`}
-                title="View website in English"
-              >
-                English
-              </button>
-            </div>
-
-            {/* Desktop Auth Section (Direct Logout when logged in, or Login dropdown when guest) */}
-            {(currentUser || isAdminAuthenticated) ? (
-              <button
-                onClick={handleLogout}
-                disabled={isLoggingOut}
-                className="hidden lg:flex shrink-0 bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 font-extrabold px-4 py-2 rounded-xl text-xs items-center gap-1.5 transition cursor-pointer shadow-xs disabled:opacity-60 disabled:cursor-not-allowed"
-              >
-                {isLoggingOut ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin text-rose-600" />
-                    <span>{language === 'en' ? 'Logging out...' : 'लॉग आउट हो रहा है...'}</span>
-                  </>
-                ) : (
-                  <>
-                    <LogOut className="w-4 h-4" />
-                    <span>{language === 'en' ? 'Logout' : 'लॉग आउट'}</span>
-                  </>
-                )}
-              </button>
-            ) : (
-              <div className="hidden lg:relative lg:block shrink-0" onMouseEnter={() => setOpenDropdown('login')} onMouseLeave={() => setOpenDropdown(null)}>
-                <button
-                  onClick={() => setOpenDropdown(openDropdown === 'login' ? null : 'login')}
-                  className="bg-linear-to-r from-[#10B981] to-[#0D9488] hover:opacity-95 text-white font-black px-4 py-2 rounded-xl text-xs flex items-center gap-2 transition-all cursor-pointer shadow-md"
-                >
-                  <User className="w-4 h-4 text-white" />
-                  <span>{language === 'en' ? 'Login' : 'लॉगइन'}</span>
-                  <ChevronDown className={`w-3.5 h-3.5 text-white transition-transform ${openDropdown === 'login' ? 'rotate-180' : ''}`} />
-                </button>
-
-                {/* Dropdown Menu */}
-                <div className={`${openDropdown === 'login' ? 'block' : 'hidden'} absolute top-full right-0 pt-2 w-56 z-50 animate-in fade-in slide-in-from-top-2 duration-150`}>
-                  <div className="bg-white/95 backdrop-blur-xl rounded-2xl p-2 shadow-2xl border border-slate-200/90 space-y-1">
-                    
-                    {/* Option 1: Patient */}
-                    <button
-                      onClick={() => {
-                        setOpenDropdown(null);
-                        openAuthModal();
-                      }}
-                      className="w-full text-left px-3.5 py-2.5 rounded-xl hover:bg-teal-50 text-xs font-extrabold text-slate-800 flex items-center justify-between transition cursor-pointer group"
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-7 h-7 rounded-lg bg-teal-100 flex items-center justify-center text-[#0D9488] group-hover:bg-[#0D9488] group-hover:text-white transition">
-                          <User className="w-3.5 h-3.5" />
-                        </div>
-                        <span>{language === 'en' ? 'Patient' : 'मरीज़'}</span>
-                      </div>
-                      <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#0D9488]" />
-                    </button>
-
-                    {/* Option 2: Doctor & Staff */}
-                    <button
-                      onClick={() => {
-                        setOpenDropdown(null);
-                        openStaffAuthModal();
-                      }}
-                      className="w-full text-left px-3.5 py-2.5 rounded-xl hover:bg-emerald-50 text-xs font-extrabold text-slate-800 flex items-center justify-between transition cursor-pointer group"
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-7 h-7 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-700 group-hover:bg-emerald-600 group-hover:text-white transition">
-                          <Stethoscope className="w-3.5 h-3.5" />
-                        </div>
-                        <span>{language === 'en' ? 'Doctor & Staff' : 'डॉक्टर एवं स्टाफ'}</span>
-                      </div>
-                      <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-emerald-600" />
-                    </button>
-
-                    {/* Option 3: Admin */}
-                    <button
-                      onClick={() => {
-                        setOpenDropdown(null);
-                        openAdminAuthModal();
-                      }}
-                      className="w-full text-left px-3.5 py-2.5 rounded-xl hover:bg-amber-50 text-xs font-extrabold text-slate-800 flex items-center justify-between transition cursor-pointer group"
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-7 h-7 rounded-lg bg-amber-100 flex items-center justify-center text-amber-700 group-hover:bg-amber-600 group-hover:text-white transition">
-                          <ShieldCheck className="w-3.5 h-3.5" />
-                        </div>
-                        <span>{language === 'en' ? 'Admin' : 'प्रशासक (एडमिन)'}</span>
-                      </div>
-                      <ChevronRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-amber-600" />
-                    </button>
-
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Mobile Header Controls: Language Toggle + Mobile Menu Toggle */}
-            <div className="flex items-center gap-2 shrink-0 lg:hidden">
-              <div className="flex items-center bg-slate-100 p-0.5 rounded-xl border border-slate-200 text-[11px] font-heading font-extrabold shadow-inner">
+            {/* Extreme Right Controls: Language Selector + Login as Button */}
+            <div className="flex items-center gap-2 shrink-0 ml-auto">
+              {/* Language Toggle Control (Desktop & Tablet) */}
+              <div className="hidden sm:flex items-center bg-slate-100 p-0.5 rounded-full border border-slate-200 text-[11px] font-heading font-extrabold shadow-inner shrink-0">
                 <button
                   onClick={() => setLanguage('hi')}
-                  className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                  className={`px-3 py-[2px] rounded-full transition-all cursor-pointer ${
                     language === 'hi' 
-                      ? 'bg-emerald-600 text-white shadow-xs font-bold' 
+                      ? 'bg-[#0D9488] text-white shadow-xs font-bold' 
                       : 'text-slate-600 hover:text-slate-900'
                   }`}
+                  title="हिन्दी में वेबसाइट देखें"
                 >
                   हिंदी
                 </button>
                 <button
                   onClick={() => setLanguage('en')}
-                  className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                  className={`px-3 py-[2px] rounded-full transition-all cursor-pointer ${
                     language === 'en' 
-                      ? 'bg-[#0F4C81] text-white shadow-xs font-bold' 
+                      ? 'bg-[#0B1F3A] text-white shadow-xs font-bold' 
                       : 'text-slate-600 hover:text-slate-900'
                   }`}
+                  title="View website in English"
                 >
-                  Eng
+                  English
                 </button>
               </div>
 
-              <button
-                onClick={() => setMobileMenuOpen(true)}
-                className="bg-linear-to-r from-[#0F4C81] to-[#0B2545] hover:opacity-95 text-white px-3.5 py-2 rounded-xl text-xs font-black shadow-md transition-all hover:scale-105 flex items-center gap-1.5 cursor-pointer"
-              >
-                <Menu className="w-4 h-4 text-emerald-300" />
-                <span>{language === 'en' ? 'Menu' : 'मेनू'}</span>
-              </button>
+              {/* Desktop Auth Section: "Login as" Button opens Popup Modal */}
+              {(currentUser || isAdminAuthenticated) ? (
+                <button
+                  onClick={handleLogout}
+                  disabled={isLoggingOut}
+                  className="hidden lg:flex shrink-0 bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 font-extrabold px-3 py-[3px] rounded-full text-[11px] items-center gap-1 transition cursor-pointer shadow-xs disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {isLoggingOut ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-rose-600" />
+                      <span>{language === 'en' ? 'Logging out...' : 'लॉग आउट...'}</span>
+                    </>
+                  ) : (
+                    <>
+                      <LogOut className="w-3.5 h-3.5" />
+                      <span>{language === 'en' ? 'Logout' : 'लॉग आउट'}</span>
+                    </>
+                  )}
+                </button>
+              ) : (
+                <div className="hidden lg:block shrink-0">
+                  <button
+                    onClick={() => setLoginModalOpen(true)}
+                    className="bg-linear-to-r from-[#0B1F3A] to-[#0D9488] hover:opacity-95 text-white font-extrabold px-3.5 py-[3px] rounded-full text-[11px] flex items-center gap-1.5 transition-all cursor-pointer shadow-xs hover:scale-102"
+                  >
+                    <User className="w-3.5 h-3.5 text-white" />
+                    <span>{language === 'en' ? 'Login as' : 'लॉगइन करें'}</span>
+                  </button>
+                </div>
+              )}
+
+              {/* Mobile/Tablet ONLY Menu Toggle Button (Hidden on Desktop via lg:hidden) */}
+              <div className="lg:hidden flex items-center gap-2 shrink-0 relative group">
+                <button
+                  onClick={() => setMobileMenuOpen(true)}
+                  className="p-2 rounded-xl text-slate-800 hover:text-[#0D9488] hover:bg-teal-50/80 transition-all cursor-pointer flex items-center justify-center"
+                  title={language === 'en' ? 'Menu' : 'मेनू'}
+                  aria-label="Open Menu"
+                >
+                  <Menu className="w-6.5 h-6.5 text-[#0B1F3A] hover:text-[#0D9488] transition-colors" />
+                </button>
+              </div>
             </div>
           </>
         )}
 
       </div>
 
-      {/* REALISTIC HIGH-END HOSPITAL SIDEBAR DRAWER (Rendered via React Portal to document.body) */}
+      {/* SIDEBAR DRAWER (Rendered via React Portal to document.body) */}
       {mobileMenuOpen && createPortal(
-        <div className="fixed inset-0 z-99999 flex justify-end animate-in fade-in duration-150">
-          {/* Opaque Backdrop Blur Overlay (Locks scroll & completely covers viewport) */}
+        <div className="fixed inset-0 z-99999 flex justify-end animate-in fade-in duration-150 font-sans">
+          {/* Opaque Backdrop Overlay */}
           <div 
             onClick={() => setMobileMenuOpen(false)}
-            className="fixed inset-0 bg-slate-900/75 backdrop-blur-sm transition-opacity" 
+            className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" 
           />
 
-          {/* Realistic Clean Sidebar Panel */}
+          {/* Clean Sidebar Panel with Original Jansevaarogyam Theme */}
           <aside className="relative w-full max-w-sm sm:max-w-md h-full bg-white text-slate-800 shadow-2xl flex flex-col justify-between overflow-y-auto z-10 border-l border-slate-200">
             
-            {/* Realistic Top Header: Deep Navy Hospital Branding */}
-            <div className="bg-[#0B2545] text-white p-5 flex items-center justify-between shadow-md shrink-0">
+            {/* Drawer Top Header: Brand Text Logo on Left (No green icon box) + Close (X) on Right */}
+            <div className="p-5 sm:p-6 flex items-center justify-between shrink-0 border-b border-slate-100">
               <div 
                 onClick={() => { setCurrentTab('home'); setMobileMenuOpen(false); }}
-                className="flex items-center gap-3 cursor-pointer group"
+                className="flex items-center cursor-pointer group"
               >
-                <div className="w-10 h-10 rounded-xl bg-linear-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-white shadow-md">
-                  <Stethoscope className="w-5.5 h-5.5 text-white" />
-                </div>
-                <div>
-                  <span className="font-black text-lg text-white tracking-tight block leading-tight">
-                    Jansevarogyam
-                  </span>
-                  <span className="text-[10px] text-emerald-300 font-bold tracking-wider uppercase block">
-                    Multi-Specialty Hospital
-                  </span>
-                </div>
+                <span className="font-outfit font-extrabold text-2xl bg-linear-to-r from-[#0B1F3A] via-[#0D2B4E] to-[#0D9488] bg-clip-text text-transparent tracking-tight block leading-none">
+                  Jansevaarogyam
+                </span>
               </div>
 
               <button
                 onClick={() => setMobileMenuOpen(false)}
-                className="p-2 text-slate-200 hover:text-white hover:bg-white/10 rounded-lg transition cursor-pointer"
+                className="p-2 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition cursor-pointer"
                 title="Close Menu"
               >
                 <X className="w-6 h-6" />
@@ -518,13 +396,40 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
             </div>
 
             {/* Scrollable Main Content Body */}
-            <div className="flex-1 overflow-y-auto p-5 space-y-6">
+            <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6">
 
-              {/* Realistic User Profile Section (If Logged In) */}
+              {/* Language Toggle Bar inside Drawer */}
+              <div className="flex items-center justify-between bg-slate-50 p-1.5 rounded-2xl border border-slate-200 text-xs font-heading font-extrabold shadow-xs max-w-xs mx-auto">
+                <span className="text-slate-500 font-bold px-2">{language === 'en' ? 'Language:' : 'भाषा:'}</span>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => setLanguage('hi')}
+                    className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${
+                      language === 'hi' 
+                        ? 'bg-[#0D9488] text-white shadow-xs font-bold' 
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    हिंदी
+                  </button>
+                  <button
+                    onClick={() => setLanguage('en')}
+                    className={`px-3 py-1.5 rounded-xl transition-all cursor-pointer ${
+                      language === 'en' 
+                        ? 'bg-[#0B1F3A] text-white shadow-xs font-bold' 
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    English
+                  </button>
+                </div>
+              </div>
+
+              {/* User Profile Section (If Logged In) */}
               {currentUser && (
-                <div className="bg-slate-50 border border-slate-200/90 rounded-xl p-3.5 flex items-center justify-between shadow-2xs">
+                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 flex items-center justify-between shadow-2xs max-w-xs mx-auto">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-[#0F4C81] text-white font-bold text-base flex items-center justify-center shadow-xs">
+                    <div className="w-10 h-10 rounded-full bg-[#0B2545] text-white font-bold text-base flex items-center justify-center shadow-xs">
                       {currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U'}
                     </div>
                     <div>
@@ -535,11 +440,6 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
                         <span className="text-[10px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
                           {activeRole || 'Patient'}
                         </span>
-                        {currentUser.phone && (
-                          <span className="text-[11px] text-slate-500 font-medium">
-                            {currentUser.phone}
-                          </span>
-                        )}
                       </div>
                     </div>
                   </div>
@@ -547,116 +447,63 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
                 </div>
               )}
 
-              {/* Main Navigation Links */}
-              <div className="space-y-1">
-                <p className="text-[10px] font-black uppercase tracking-wider text-slate-400 px-2 mb-2">
-                  {language === 'en' ? 'Main Menu' : 'मुख्य मेनू'}
-                </p>
-
+              {/* Main Navigation Links - Centered Clean Jansevaarogyam Style */}
+              <div className="space-y-3 text-center py-2">
                 {[
-                  { id: 'home', labelEn: 'Home', labelHi: 'मुख्य पृष्ठ', icon: Home },
-                  { id: 'about', labelEn: 'About Us', labelHi: 'हमारे बारे में', icon: Info },
-                  { id: 'specialties', labelEn: 'Specialties', labelHi: 'विशेषज्ञताएँ', icon: Award },
-                  { id: 'locations', labelEn: 'Locations & Facilities', labelHi: 'शाखाएँ एवं सुविधाएं', icon: Building2 },
-                  { id: 'referrals', labelEn: 'Refer & Earn', labelHi: 'रेफर करें और कमाएं', icon: Share2 },
+                  { id: 'home', labelEn: 'Home', labelHi: 'मुख्य पृष्ठ' },
+                  { id: 'about', labelEn: 'About Us', labelHi: 'हमारे बारे में' },
+                  { id: 'specialties', labelEn: 'Specialties', labelHi: 'विशेषज्ञताएँ' },
+                  { id: 'locations', labelEn: 'Locations & Facilities', labelHi: 'शाखाएँ एवं सुविधाएं' },
+                  { id: 'referrals', labelEn: 'Refer & Earn', labelHi: 'रेफर करें और कमाएं' },
                 ].map((item) => {
-                  const Icon = item.icon;
                   const isActive = currentTab === item.id;
                   return (
                     <button
                       key={item.id}
                       onClick={() => { setCurrentTab(item.id); setMobileMenuOpen(false); }}
-                      className={`w-full text-left px-3.5 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-between cursor-pointer ${
+                      className={`block w-full py-2.5 text-center font-bold text-base transition-all cursor-pointer ${
                         isActive
-                          ? 'bg-sky-50 text-[#0F4C81] border-l-4 border-[#0F4C81] shadow-2xs'
-                          : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900 border-l-4 border-transparent'
+                          ? 'text-[#0D9488] font-black text-lg scale-105'
+                          : 'text-slate-700 hover:text-[#0D9488]'
                       }`}
                     >
-                      <div className="flex items-center gap-3">
-                        <Icon className={`w-4 h-4 ${isActive ? 'text-[#0F4C81]' : 'text-slate-400'}`} />
-                        <span>{language === 'en' ? item.labelEn : item.labelHi}</span>
-                      </div>
-                      <ChevronRight className={`w-4 h-4 transition-transform ${isActive ? 'text-[#0F4C81] translate-x-1' : 'text-slate-300'}`} />
+                      {language === 'en' ? item.labelEn : item.labelHi}
                     </button>
                   );
                 })}
+
+                {/* My Dashboard (If Patient Logged In) */}
+                {Boolean(currentUser && activeRole === 'PATIENT') && (
+                  <button
+                    onClick={() => { setCurrentTab('patient-dashboard'); setMobileMenuOpen(false); }}
+                    className={`block w-full py-2.5 text-center font-bold text-base transition-all cursor-pointer ${
+                      currentTab === 'patient-dashboard'
+                        ? 'text-[#0D9488] font-black text-lg scale-105'
+                        : 'text-slate-700 hover:text-[#0D9488]'
+                    }`}
+                  >
+                    {language === 'en' ? 'My Dashboard' : 'मेरा डैशबोर्ड'}
+                  </button>
+                )}
               </div>
 
-              {/* Realistic Primary Callout: Book OPD Appointment */}
-              <div>
+              {/* Primary Green Pill CTA Button */}
+              <div className="pt-2 flex justify-center">
                 <button
                   onClick={() => {
                     setMobileMenuOpen(false);
                     openBookingModal();
                   }}
-                  className="w-full bg-linear-to-r from-[#0F4C81] to-[#0B2545] hover:from-[#0B2545] hover:to-[#081B33] text-white p-3.5 rounded-xl font-bold text-sm shadow-md flex items-center justify-between transition cursor-pointer"
+                  className="w-full max-w-xs bg-linear-to-r from-[#10B981] to-[#0D9488] hover:opacity-95 text-white font-extrabold py-3.5 px-6 rounded-full text-sm shadow-md transition-all hover:scale-105 cursor-pointer text-center"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
-                      <Calendar className="w-4 h-4 text-emerald-300" />
-                    </div>
-                    <span>{language === 'en' ? 'Book OPD Appointment' : 'ओपीडी अपॉइंटमेंट बुक करें'}</span>
-                  </div>
-                  <ArrowRight className="w-4 h-4 text-emerald-300" />
+                  {language === 'en' ? 'Book Appointment' : 'अपॉइंटमेंट बुक करें'}
                 </button>
-              </div>
-
-              {/* Realistic Portal Shortcuts Section */}
-              <div className="pt-3 space-y-2 border-t border-slate-100">
-                <p className="text-[10px] font-black uppercase tracking-wider text-slate-400 px-2 mb-1">
-                  {language === 'en' ? 'Hospital Portals' : 'अस्पताल पोर्टल'}
-                </p>
-
-                <div className="grid grid-cols-3 gap-2">
-                  <button
-                    onClick={() => { 
-                      setMobileMenuOpen(false); 
-                      if (activeRole !== 'DOCTOR') {
-                        openStaffAuthModal();
-                      } else {
-                        setCurrentTab('doctor-console');
-                      }
-                    }}
-                    className="p-2.5 rounded-xl bg-slate-50 hover:bg-emerald-50 border border-slate-200 hover:border-emerald-300 text-center transition cursor-pointer"
-                  >
-                    <span className="block text-xs font-bold text-slate-800">Doctor</span>
-                    <span className="block text-[10px] text-slate-500">Portal</span>
-                  </button>
-                  <button
-                    onClick={() => { 
-                      setMobileMenuOpen(false); 
-                      if (activeRole !== 'DESK_STAFF') {
-                        openStaffAuthModal();
-                      } else {
-                        setCurrentTab('desk-staff-dashboard');
-                      }
-                    }}
-                    className="p-2.5 rounded-xl bg-slate-50 hover:bg-purple-50 border border-slate-200 hover:border-purple-300 text-center transition cursor-pointer"
-                  >
-                    <span className="block text-xs font-bold text-slate-800">Desk Staff</span>
-                    <span className="block text-[10px] text-slate-500">Portal</span>
-                  </button>
-                  <button
-                    onClick={() => { 
-                      setMobileMenuOpen(false); 
-                      if (!isAdminAuthenticated) {
-                        openAdminAuthModal();
-                      } else {
-                        setCurrentTab('admin'); 
-                      }
-                    }}
-                    className="p-2.5 rounded-xl bg-slate-50 hover:bg-amber-50 border border-slate-200 hover:border-amber-300 text-center transition cursor-pointer"
-                  >
-                    <span className="block text-xs font-bold text-slate-800">Admin</span>
-                    <span className="block text-[10px] text-slate-500">Panel</span>
-                  </button>
-                </div>
               </div>
 
             </div>
 
-            {/* Bottom Actions & Footer Block */}
-            <div className="p-5 border-t border-slate-200 bg-slate-50/80 space-y-3.5 shrink-0">
+            {/* Bottom Actions Footer Block: Single "Login as" button */}
+            <div className="p-5 border-t border-slate-200 bg-slate-50 shrink-0 space-y-3">
               {(currentUser || isAdminAuthenticated) ? (
                 <button
                   onClick={async () => {
@@ -664,7 +511,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
                     setMobileMenuOpen(false);
                   }}
                   disabled={isLoggingOut}
-                  className="w-full bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 py-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="w-full max-w-xs mx-auto bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {isLoggingOut ? (
                     <>
@@ -679,35 +526,138 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
                   )}
                 </button>
               ) : (
-                <button
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    openAuthModal();
-                  }}
-                  className="w-full bg-[#0F4C81] hover:bg-[#0B2545] text-white py-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer shadow-sm"
-                >
-                  <User className="w-4 h-4" />
-                  <span>{language === 'en' ? 'OTP Login' : 'ओटीपी लॉगिन'}</span>
-                </button>
+                <div className="max-w-xs mx-auto">
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      setLoginModalOpen(true);
+                    }}
+                    className="w-full bg-[#0B1F3A] hover:bg-[#071527] text-white py-3 rounded-2xl text-xs font-black transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md hover:scale-102"
+                  >
+                    <User className="w-4 h-4 text-emerald-400" />
+                    <span>{language === 'en' ? 'Login as' : 'लॉगिन करें'}</span>
+                  </button>
+                </div>
               )}
 
-              {/* 24x7 Helpline Info Badge */}
-              <div className="flex items-center justify-between text-xs text-slate-600 bg-white p-2.5 rounded-xl border border-slate-200/80 shadow-2xs">
-                <span className="flex items-center gap-1.5 text-rose-600 font-semibold">
-                  <ShieldAlert className="w-3.5 h-3.5 animate-pulse" />
-                  <span>24x7 Helpline:</span>
-                </span>
-                <a href="tel:1800-7382-723" className="font-extrabold text-slate-900 hover:text-[#0F4C81] underline">
-                  1800-SEVA-CLINIC
-                </a>
-              </div>
-
-              <div className="text-center text-[11px] text-slate-400 font-medium">
-                NABH Accredited • Sarangpur • Shujalpur • Rajgarh
+              <div className="text-center text-[11px] text-slate-400 font-medium pt-1">
+                Jansevaarogyam Healthcare Network
               </div>
             </div>
 
           </aside>
+        </div>,
+        document.body
+      )}
+
+      {/* POPUP MODAL FOR "LOGIN AS": Doctor, Staff, Admin */}
+      {loginModalOpen && createPortal(
+        <div className="fixed inset-0 z-999999 flex items-center justify-center p-4 font-sans animate-in fade-in duration-150">
+          {/* Backdrop Blur Overlay */}
+          <div 
+            onClick={() => setLoginModalOpen(false)} 
+            className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" 
+          />
+
+          {/* Modal Container */}
+          <div className="relative w-full max-w-sm bg-white rounded-3xl p-6 shadow-2xl z-10 border border-slate-100 animate-in zoom-in-95 duration-150">
+            
+            {/* Modal Header */}
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
+              <div>
+                <h3 className="font-outfit font-extrabold text-xl text-[#0B1F3A]">
+                  {language === 'en' ? 'Login as' : 'लॉगिन करें'}
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  {language === 'en' ? 'Select your portal to continue' : 'जारी रखने के लिए अपना पोर्टल चुनें'}
+                </p>
+              </div>
+              <button 
+                onClick={() => setLoginModalOpen(false)}
+                className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition cursor-pointer"
+                title="Close"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Options */}
+            <div className="space-y-3">
+              
+              {/* Option 1: Doctor */}
+              <button
+                onClick={() => {
+                  setLoginModalOpen(false);
+                  openStaffAuthModal();
+                }}
+                className="w-full p-3.5 rounded-2xl bg-emerald-50/80 hover:bg-emerald-100 border border-emerald-200 text-left flex items-center justify-between transition cursor-pointer group shadow-2xs"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-xs">
+                    <Stethoscope className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h4 className="font-extrabold text-sm text-slate-900">
+                      {language === 'en' ? 'Doctor' : 'डॉक्टर (Doctor)'}
+                    </h4>
+                    <p className="text-[11px] text-emerald-800 font-medium">
+                      {language === 'en' ? 'Doctor OPD Portal Login' : 'डॉक्टर ओपीडी पोर्टल लॉगिन'}
+                    </p>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-emerald-600 group-hover:translate-x-1 transition-transform" />
+              </button>
+
+              {/* Option 2: Staff */}
+              <button
+                onClick={() => {
+                  setLoginModalOpen(false);
+                  openStaffAuthModal();
+                }}
+                className="w-full p-3.5 rounded-2xl bg-purple-50/80 hover:bg-purple-100 border border-purple-200 text-left flex items-center justify-between transition cursor-pointer group shadow-2xs"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center shadow-xs">
+                    <User className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h4 className="font-extrabold text-sm text-slate-900">
+                      {language === 'en' ? 'Staff' : 'स्टाफ (Staff)'}
+                    </h4>
+                    <p className="text-[11px] text-purple-800 font-medium">
+                      {language === 'en' ? 'Desk Staff Portal Login' : 'डेस्क स्टाफ पोर्टल लॉगिन'}
+                    </p>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-purple-600 group-hover:translate-x-1 transition-transform" />
+              </button>
+
+              {/* Option 3: Admin */}
+              <button
+                onClick={() => {
+                  setLoginModalOpen(false);
+                  openAdminAuthModal();
+                }}
+                className="w-full p-3.5 rounded-2xl bg-amber-50/80 hover:bg-amber-100 border border-amber-200 text-left flex items-center justify-between transition cursor-pointer group shadow-2xs"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-amber-600 text-white flex items-center justify-center shadow-xs">
+                    <ShieldCheck className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h4 className="font-extrabold text-sm text-slate-900">
+                      {language === 'en' ? 'Admin' : 'एडमिन (Admin)'}
+                    </h4>
+                    <p className="text-[11px] text-amber-800 font-medium">
+                      {language === 'en' ? 'Hospital Control Panel' : 'अस्पताल कंट्रोल पैनल'}
+                    </p>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-amber-600 group-hover:translate-x-1 transition-transform" />
+              </button>
+
+            </div>
+          </div>
         </div>,
         document.body
       )}

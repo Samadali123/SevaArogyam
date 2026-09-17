@@ -80,8 +80,8 @@ export const StaffAuthModal: React.FC = () => {
   const badgeColor = 'bg-[rgba(255,255,255,0.15)] text-white border border-white/20';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-fade-in font-sans">
-      <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden border border-slate-100/80">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-md animate-fade-in font-sans overflow-y-auto">
+      <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl overflow-hidden border border-slate-100/80 max-h-[92vh] my-auto flex flex-col">
         {/* Header - Role Dynamic Brand Gradient */}
         <div className={`${headerGradient} text-white p-6 flex items-center justify-between relative transition-colors duration-300`}>
           <div>

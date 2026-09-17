@@ -694,36 +694,33 @@ export const PublicPortal: React.FC<PublicPortalProps> = ({ onNavigate }) => {
       </section>
 
       {/* 8. FLOATING STICKY ACTION BAR AT BOTTOM */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-[#0B1F3A]/95 backdrop-blur-xl border-t border-white/10 py-3.5 px-4 shadow-2xl font-sans">
-        <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-[#0B1F3A]/95 backdrop-blur-xl border-t border-white/10 py-2.5 sm:py-3 px-2 sm:px-4 shadow-2xl font-sans">
+        <div className="max-w-6xl mx-auto flex items-center justify-between gap-3">
           
-          <div className="hidden md:flex items-center gap-3 text-white text-xs font-heading font-extrabold">
+          <div className="hidden lg:flex items-center gap-3 text-white text-xs font-heading font-extrabold">
             <span className="w-3 h-3 rounded-full bg-[#2DD4BF] animate-pulse shrink-0"></span>
             <span>{language === 'en' ? 'JANSEVAAROGYAM 24x7 Multi-Specialty Helpdesk' : 'जनसेवा आरोग्यम 24x7 मल्टी-स्पेशलिटी हेल्पडेस्क'}</span>
           </div>
 
-          <div className="flex items-center justify-between w-full md:w-auto gap-3">
+          <div className="grid grid-cols-3 gap-1.5 sm:gap-3 w-full lg:w-auto lg:flex lg:items-center">
             <a
               href="tel:1800-7382-723"
-              className="flex-1 md:flex-initial bg-[#C2410C] hover:bg-[#C2410C]/90 text-white font-heading font-extrabold px-5 py-3 rounded-xl text-xs flex items-center justify-center gap-2 shadow-md transition cursor-pointer"
+              className="bg-[#C2410C] hover:bg-[#A3360A] text-white font-heading font-extrabold px-1.5 sm:px-5 py-2.5 sm:py-3 rounded-xl text-[11px] sm:text-xs md:text-sm text-center flex items-center justify-center transition cursor-pointer shadow-md leading-tight truncate"
             >
-              <PhoneCall className="w-4 h-4" />
-              <span>{language === 'en' ? 'Call Helpline' : 'हेल्पलाइन पर कॉल करें'}</span>
+              <span>{language === 'en' ? 'Call Helpline' : 'हेल्पलाइन कॉल'}</span>
             </a>
 
             <button
               onClick={() => openBookingModal(undefined, undefined)}
-              className="flex-1 md:flex-initial bg-linear-to-r from-[#10B981] to-[#0D9488] hover:opacity-95 text-white font-heading font-extrabold px-6 py-3 rounded-xl text-xs flex items-center justify-center gap-2 shadow-lg transition transform hover:scale-105 cursor-pointer"
+              className="bg-linear-to-r from-[#10B981] to-[#0D9488] hover:opacity-95 text-white font-heading font-extrabold px-1.5 sm:px-6 py-2.5 sm:py-3 rounded-xl text-[11px] sm:text-xs md:text-sm text-center flex items-center justify-center transition transform hover:scale-102 cursor-pointer shadow-lg leading-tight truncate"
             >
-              <Calendar className="w-4 h-4 text-white" />
               <span>{language === 'en' ? 'Book Appointment' : 'अपॉइंटमेंट बुक करें'}</span>
             </button>
 
             <button
               onClick={() => openBookingModal(undefined, undefined, 'VIDEO')}
-              className="flex-1 md:flex-initial bg-[#1E3A5F] hover:bg-[#1E3A5F]/80 text-white font-heading font-extrabold px-5 py-3 rounded-xl text-xs border border-white/10 flex items-center justify-center gap-2 backdrop-blur-md transition cursor-pointer"
+              className="bg-[#1E3A5F] hover:bg-[#162C4A] text-white font-heading font-extrabold px-1.5 sm:px-5 py-2.5 sm:py-3 rounded-xl text-[11px] sm:text-xs md:text-sm text-center border border-white/10 flex items-center justify-center backdrop-blur-md transition cursor-pointer shadow-md leading-tight truncate"
             >
-              <Video className="w-4 h-4 text-[#2DD4BF]" />
               <span>{language === 'en' ? 'Video OPD' : 'वीडियो ओपीडी'}</span>
             </button>
           </div>

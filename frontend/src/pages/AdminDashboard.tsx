@@ -508,7 +508,7 @@ export const AdminDashboard: React.FC = () => {
         </div>
 
         {/* Tab Navigation Segment - Segmented Pill Control */}
-        <div className="flex flex-wrap items-center gap-1.5 bg-[rgba(255,255,255,0.15)] backdrop-blur-md p-1.5 rounded-2xl border border-white/25 text-xs font-heading font-bold w-full lg:w-auto">
+        <div className="flex items-center gap-1.5 bg-[rgba(255,255,255,0.15)] backdrop-blur-md p-1.5 rounded-2xl border border-white/25 text-xs font-heading font-bold w-full lg:w-auto overflow-x-auto whitespace-nowrap shrink-0 max-w-full">
           {(['OVERVIEW', 'BRANCHES', 'DOCTORS', 'STAFF', 'CARE_SERVICES', 'REVENUE', 'EMR'] as const).map(tab => (
             <button
               key={tab}
