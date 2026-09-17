@@ -329,13 +329,14 @@ export const BookingWizardModal: React.FC = () => {
         if (!window.Razorpay) throw new Error('Razorpay Checkout is unavailable');
         await new Promise<void>((resolve, reject) => {
           const checkout = new window.Razorpay!({
-            key: import.meta.env.VITE_RAZORPAY_KEY_ID || '',
+            key: appt.razorpayKeyId || import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_TZzu5HVYFGWBrX',
             amount: appt.razorpayAmount || 0,
             currency: appt.razorpayCurrency || 'INR',
-            name: 'Sevasadan',
-            description: 'Doctor appointment',
-            order_id: appt.razorpayOrderId!,
+            name: 'Jansevaarogyam',
+            description: 'Doctor Consultation OPD Booking',
+            order_id: appt.razorpayOrderId && !appt.razorpayOrderId.startsWith('dummy_') && !appt.razorpayOrderId.startsWith('order_demo_') ? appt.razorpayOrderId : undefined,
             prefill: { name: patientName, email: currentUser?.email, contact: currentUser?.phone },
+            theme: { color: '#0B2545' },
             handler: async (payment) => {
               try {
                 await api.post('/appointments/verify-payment', {

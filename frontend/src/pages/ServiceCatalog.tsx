@@ -109,7 +109,7 @@ export const ServiceCatalog: React.FC<{ kind: Kind }> = ({ kind }) => {
       if (window.Razorpay) {
         await new Promise<void>((resolve, reject) => {
           const checkout = new window.Razorpay!({
-            key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_SevasadanKey',
+            key: orderData?.razorpayKeyId || import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_TZzu5HVYFGWBrX',
             amount: Number(payAmount) * 100,
             currency: 'INR',
             name: 'Jansevarogyam Healthcare',

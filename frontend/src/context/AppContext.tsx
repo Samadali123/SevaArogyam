@@ -813,6 +813,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const newAppointment = {
       ...mapAppointment(response.data.appointment, doctors, clinics),
       razorpayOrderId: response.data.razorpayOrderId,
+      razorpayKeyId: response.data.razorpayKeyId,
       razorpayAmount: response.data.amount,
       razorpayCurrency: response.data.currency,
       patientName: data.patientName || currentUser?.name || 'Patient',

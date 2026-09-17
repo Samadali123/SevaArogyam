@@ -209,6 +209,7 @@ export const createServiceOrder = asyncHandler(async (req: Request, res: Respons
     data: {
       order,
       razorpayOrderId,
+      razorpayKeyId: process.env.RAZORPAY_KEY_ID || '',
       amount: finalAmount,
       currency: 'INR'
     }

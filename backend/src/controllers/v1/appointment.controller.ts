@@ -243,6 +243,7 @@ export const bookAppointment = asyncHandler(async (req: Request, res: Response) 
       data: {
         appointment,
         razorpayOrderId,
+        razorpayKeyId: process.env.RAZORPAY_KEY_ID || '',
         amount: options.amount,
         currency: options.currency,
       }

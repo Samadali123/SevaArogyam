@@ -231,6 +231,7 @@ export interface Appointment {
   createdAt: string;
   prescriptionId?: string;
   razorpayOrderId?: string;
+  razorpayKeyId?: string;
   razorpayAmount?: number;
   razorpayCurrency?: string;
   isRescheduled?: boolean;
