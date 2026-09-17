@@ -163,8 +163,6 @@ export const BookingWizardModal: React.FC = () => {
     }
   }, [preselectedDoctorId, preselectedClinicId, preselectedMode, isBookingModalOpen]);
 
-  if (!isBookingModalOpen) return null;
-
   const currentDoctor = doctors.find(d => d.id === selectedDoctorId) || doctors[0];
   const currentClinic = clinics.find(c => c.id === selectedClinicId) || clinics[0];
 
@@ -207,6 +205,8 @@ export const BookingWizardModal: React.FC = () => {
     const filtered = baseSlots.filter(s => !booked.includes(s.trim().toUpperCase()));
     return filtered.length > 0 ? filtered : ['09:00 AM', '10:00 AM', '11:00 AM', '02:00 PM'];
   }, [currentDoctor, appointmentDate, appointments]);
+
+  if (!isBookingModalOpen) return null;
 
   const commonSymptoms = [
     'Fever / Chills', 'Cold & Cough', 'Diabetes Check', 'Hypertension / BP',
