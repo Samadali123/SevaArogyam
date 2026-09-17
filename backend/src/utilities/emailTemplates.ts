@@ -202,7 +202,7 @@ export const getDoctorCredentialsEmailHTML = (name: string, email: string, rawPa
 
     <!-- CTA Button -->
     <div style="text-align: center; margin: 24px 0 28px 0;">
-      <a href="${baseUrl}/login" style="display: inline-block; background-color: #0d9488; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 800; padding: 14px 32px; border-radius: 12px; box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25);">
+      <a href="${baseUrl}" style="display: inline-block; background-color: #0d9488; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 800; padding: 14px 32px; border-radius: 12px; box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25);">
         Log In to Jansevarogyam
       </a>
     </div>
@@ -250,7 +250,7 @@ export const getStaffCredentialsEmailHTML = (name: string, email: string, rawPas
 
     <!-- CTA Button -->
     <div style="text-align: center; margin: 24px 0 28px 0;">
-      <a href="${baseUrl}/login" style="display: inline-block; background-color: #0d9488; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 800; padding: 14px 32px; border-radius: 12px; box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25);">
+      <a href="${baseUrl}" style="display: inline-block; background-color: #0d9488; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 800; padding: 14px 32px; border-radius: 12px; box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25);">
         Log In to Jansevarogyam
       </a>
     </div>
