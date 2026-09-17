@@ -12,25 +12,10 @@ import {
   Users,
   Loader2
 } from 'lucide-react';
-import type { Appointment, Clinic } from '../types';
+import type { Appointment } from '../types';
 import { useApp, DEFAULT_DOCTOR_AVATAR } from '../context/AppContext';
 import { ThemeSelect } from '../components/ThemeSelect';
-
-const formatAssignedBranches = (clinicsCovered?: string[], clinicsList: Clinic[] = []): string => {
-  if (!clinicsCovered || clinicsCovered.length === 0) return 'No Assigned Branch';
-  const names = clinicsCovered.map(cId => {
-    if (!cId) return '';
-    const found = clinicsList.find(c => c.id.toLowerCase() === String(cId).toLowerCase() || c.name.toLowerCase() === String(cId).toLowerCase() || (c.city && c.city.toLowerCase() === String(cId).toLowerCase()));
-    if (found) return found.name;
-    if (String(cId).toLowerCase() === 'sarangpur') return 'Sarangpur Branch';
-    if (String(cId).toLowerCase() === 'shujalpur') return 'Shujalpur Branch';
-    if (String(cId).toLowerCase() === 'rajgarh') return 'Rajgarh Branch';
-    const clean = String(cId).replace(/\s*Branch\s*/i, '').trim();
-    return clean ? (clean.charAt(0).toUpperCase() + clean.slice(1) + ' Branch') : '';
-  }).filter(Boolean);
-  const uniqueNames = Array.from(new Set(names));
-  return uniqueNames.length > 0 ? uniqueNames.join(', ') : 'No Assigned Branch';
-};
+import { formatAssignedBranches, isDoctorInBranch } from '../utils/branchUtils';
 
 export const DeskStaffPortal: React.FC = () => {
   const { 
@@ -107,22 +92,7 @@ export const DeskStaffPortal: React.FC = () => {
   // Available doctors for selected branch
   const availableBranchDoctors = doctors.filter(d => {
     if (!walkInForm.branchId) return true;
-    const selectedClinic = clinics.find(c => c.id === walkInForm.branchId);
-    const searchTerms = [
-      walkInForm.branchId.toLowerCase(),
-      selectedClinic?.id?.toLowerCase(),
-      selectedClinic?.name?.toLowerCase(),
-      selectedClinic?.city?.toLowerCase()
-    ].filter(Boolean) as string[];
-
-    if (!d.clinicsCovered || d.clinicsCovered.length === 0) return true;
-    return d.clinicsCovered.some(cCovered => {
-      const term = String(cCovered).toLowerCase().replace(/\s*branch\s*/i, '').trim();
-      return searchTerms.some(st => {
-        const cleanSt = st.replace(/\s*branch\s*/i, '').trim();
-        return cleanSt && (term.includes(cleanSt) || cleanSt.includes(term));
-      });
-    });
+    return isDoctorInBranch(d, walkInForm.branchId, clinics);
   });
 
   const handleWalkInSubmit = async (e: React.FormEvent) => {
@@ -719,7 +689,7 @@ export const DeskStaffPortal: React.FC = () => {
               <span className="bg-[#5B5588]/10 text-[#5B5588] text-[10px] font-heading font-extrabold px-3 py-0.5 rounded-full uppercase border border-[#5B5588]/20">
                 OFFICIAL OPD TOKEN RECEIPT
               </span>
-              <h3 className="font-heading font-extrabold text-xl text-slate-900 mt-1">SEVASADAN CLINIC NETWORK</h3>
+              <h3 className="font-heading font-extrabold text-xl text-slate-900 mt-1">JANSEVAAROGYAM CLINIC NETWORK</h3>
               <p className="text-xs text-slate-500 font-sans font-medium">{printedTokenAppt.clinicName || 'Sarangpur Branch'}</p>
             </div>
 
@@ -777,7 +747,7 @@ export const DeskStaffPortal: React.FC = () => {
             <span className="text-[10px] font-bold text-slate-700 uppercase tracking-widest border border-slate-900 px-2 py-0.5 rounded-full">
               OFFICIAL OPD TOKEN RECEIPT
             </span>
-            <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tight mt-1">SEVASADAN CLINIC NETWORK</h2>
+            <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tight mt-1">JANSEVAAROGYAM CLINIC NETWORK</h2>
             <p className="text-xs font-bold text-slate-700">{printedTokenAppt.clinicName || 'Sarangpur Hospital Branch'}</p>
             <p className="text-[10px] text-slate-500">24x7 Emergency OPD & Specialist Healthcare Network</p>
           </div>
@@ -817,7 +787,7 @@ export const DeskStaffPortal: React.FC = () => {
 
           <div className="mt-8 pt-4 border-t border-slate-300 flex items-end justify-between text-[10px] text-slate-600">
             <div>
-              <p className="font-bold text-slate-800">Sevasadan OPD Desk Stamp</p>
+              <p className="font-bold text-slate-800">Jansevarogyam OPD Desk Stamp</p>
               <p>Printed: {new Date().toLocaleString()}</p>
             </div>
             <div className="text-right">

@@ -39,7 +39,7 @@ export const TermsConditions: React.FC<TermsConditionsProps> = ({ onBack }) => {
             <section className="space-y-2">
               <h3 className="text-lg font-black text-slate-900">1. Acceptance of Terms</h3>
               <p className="text-slate-600">
-                By accessing SEVASADAN Health Care Network portals, booking physical OPD tokens, or utilizing our virtual telemedicine platform, you agree to comply with and be bound by these Terms and Conditions.
+                By accessing JANSEVAAROGYAM Health Care Network portals, booking physical OPD tokens, or utilizing our virtual telemedicine platform, you agree to comply with and be bound by these Terms and Conditions.
               </p>
             </section>
 

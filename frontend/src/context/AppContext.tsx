@@ -658,7 +658,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           id: `art-local-${Date.now()}`,
           title: data.title,
           category: data.category || 'General Medicine',
-          authorName: currentUser?.name || 'Dr. JansevaArogyam Medical Team',
+          authorName: currentUser?.name || 'Dr. Jansevarogyam Medical Team',
           authorRole: (currentUser as any)?.specialization || 'Medical Specialist',
           readTimeMinutes: Number(data.readTimeMinutes) || 5,
           date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),

@@ -19,8 +19,8 @@ export const useSEO = ({
 }: SEOOptions) => {
   useEffect(() => {
     // 1. Update Title
-    const defaultTitle = 'JansevaArogyam | Specialist OPD Hospital & Healthcare Network - Sarangpur, Shujalpur, Rajgarh';
-    document.title = title ? `${title} | JansevaArogyam` : defaultTitle;
+    const defaultTitle = 'Jansevarogyam | Specialist OPD Hospital & Healthcare Network - Sarangpur, Shujalpur, Rajgarh';
+    document.title = title ? `${title} | Jansevarogyam` : defaultTitle;
 
     // 2. Helper to set or create meta tag
     const setMetaTag = (name: string, content: string, isProperty = false) => {
@@ -39,7 +39,7 @@ export const useSEO = ({
     };
 
     // 3. Update Meta Description
-    const defaultDesc = 'JansevaArogyam (जनसेवा आरोग्यम) provides specialist doctor OPD appointments, 24x7 ICU emergency, lab tests, pharmacy & regional healthcare across Sarangpur, Shujalpur, and Rajgarh, MP.';
+    const defaultDesc = 'Jansevarogyam (जनसेवा आरोग्यम) provides specialist doctor OPD appointments, 24x7 ICU emergency, lab tests, pharmacy & regional healthcare across Sarangpur, Shujalpur, and Rajgarh, MP.';
     setMetaTag('description', description || defaultDesc);
 
     // 4. Update Meta Keywords

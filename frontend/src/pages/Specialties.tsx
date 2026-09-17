@@ -11,9 +11,9 @@ import { useSEO } from '../hooks/useSEO';
 
 export const Specialties: React.FC = () => {
   useSEO({
-    title: 'Medical Specialties & Specialist OPD Doctors | JansevaArogyam',
-    description: 'Find top specialist doctors in Cardiology, Pediatrics, Gynecology, Orthopedics, General Medicine & ENT at JansevaArogyam clinics in Sarangpur, Shujalpur & Rajgarh.',
-    keywords: 'JansevaArogyam doctors, specialist doctor Sarangpur, cardiologist Shujalpur, gynecologist Rajgarh, pediatrician OPD, orthopedic doctor MP',
+    title: 'Medical Specialties & Specialist OPD Doctors | Jansevarogyam',
+    description: 'Find top specialist doctors in Cardiology, Pediatrics, Gynecology, Orthopedics, General Medicine & ENT at Jansevarogyam clinics in Sarangpur, Shujalpur & Rajgarh.',
+    keywords: 'Jansevarogyam doctors, specialist doctor Sarangpur, cardiologist Shujalpur, gynecologist Rajgarh, pediatrician OPD, orthopedic doctor MP',
     canonical: 'https://jansevaarogyam.com/specialties'
   });
 

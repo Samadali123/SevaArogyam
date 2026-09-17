@@ -20,6 +20,7 @@ import autoTable from 'jspdf-autotable';
 import { useApp, DEFAULT_DOCTOR_AVATAR } from '../context/AppContext';
 import type { Appointment, PrescriptionItem, MealTiming } from '../types';
 import { ConfirmDialog } from '../components/ConfirmDialog';
+import { formatAssignedBranches } from '../utils/branchUtils';
 
 interface ThemeSelectOption {
   value: string;
@@ -401,11 +402,11 @@ export const DoctorConsole: React.FC<DoctorConsoleProps> = ({ onNavigate }) => {
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(18);
       doc.setFont('helvetica', 'bold');
-      doc.text('SEVASADAN HEALTHCARE NETWORK', 14, 15);
+      doc.text('JANSEVAAROGYAM HEALTHCARE NETWORK', 14, 15);
       doc.setFontSize(9);
       doc.setFont('helvetica', 'normal');
       doc.text('Sarangpur • Shujalpur • Rajgarh & Virtual Telemedicine OPD', 14, 22);
-      doc.text('Emergency Helpline: 1800-SEVA-CLINIC | Web: www.sevasadanclinic.in', 14, 27);
+      doc.text('Emergency Helpline: 1800-JANSEVA-CLINIC | Web: www.jansevaarogyam.com', 14, 27);
 
       // Doctor info box (Top right)
       doc.setFontSize(11);
@@ -510,7 +511,7 @@ export const DoctorConsole: React.FC<DoctorConsoleProps> = ({ onNavigate }) => {
       doc.text(`Reg: ${currentDoctor.regNumber}`, 134, 26 + finalY);
 
       // Save PDF file locally
-      doc.save(`SEVASADAN_Rx_${activeAppointment?.tokenNumber || 'SAR014'}.pdf`);
+      doc.save(`JANSEVAAROGYAM_Rx_${activeAppointment?.tokenNumber || 'SAR014'}.pdf`);
 
       // Trigger native browser print preview window for isolated prescription container
       setTimeout(() => {
@@ -582,9 +583,7 @@ export const DoctorConsole: React.FC<DoctorConsoleProps> = ({ onNavigate }) => {
             </div>
             <p className="text-xs text-emerald-100 font-medium mt-0.5">{currentDoctor.specialization}</p>
             <p className="text-[11px] text-emerald-100/80 mt-0.5">
-              Reg: {currentDoctor.regNumber} • {language === 'en' ? 'Assigned Branches:' : 'शाखाएं:'} {currentDoctor.clinicsCovered && currentDoctor.clinicsCovered.length > 0 
-                ? currentDoctor.clinicsCovered.map((cId: string) => clinics.find(c => c.id === cId)?.name || cId).join(', ') 
-                : 'Sarangpur & Tele-OPD'}
+              Reg: {currentDoctor.regNumber} • {language === 'en' ? 'Assigned Branches:' : 'शाखाएं:'} {formatAssignedBranches(currentDoctor.clinicsCovered, clinics)}
             </p>
           </div>
         </div>
@@ -1389,9 +1388,9 @@ export const DoctorConsole: React.FC<DoctorConsoleProps> = ({ onNavigate }) => {
         {/* Header Branding */}
         <div className="bg-gradient-to-r from-[#0B3D2E] via-[#0A2E22] to-[#0B3D2E] text-white p-6 rounded-2xl flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-heading font-extrabold tracking-tight">SEVASADAN HEALTHCARE NETWORK</h1>
+            <h1 className="text-xl font-heading font-extrabold tracking-tight">JANSEVAAROGYAM HEALTHCARE NETWORK</h1>
             <p className="text-xs text-emerald-200 mt-1">Sarangpur • Shujalpur • Rajgarh & Virtual Telemedicine OPD</p>
-            <p className="text-[10px] text-emerald-100/80">Emergency Helpline: 1800-SEVA-CLINIC | www.sevasadanclinic.in</p>
+            <p className="text-[10px] text-emerald-100/80">Emergency Helpline: 1800-JANSEVA-CLINIC | www.jansevaarogyam.com</p>
           </div>
           <div className="text-right">
             <h3 className="font-heading font-extrabold text-sm text-white">{currentDoctor.name}</h3>
@@ -1473,7 +1472,7 @@ export const DoctorConsole: React.FC<DoctorConsoleProps> = ({ onNavigate }) => {
         {/* Footer Signature */}
         <div className="pt-4 border-t border-slate-200 flex justify-between items-end text-xs">
           <div className="text-[10px] text-slate-400">
-            Generated via SEVASADAN Doctor Console • Valid without physical seal
+            Generated via JANSEVAAROGYAM Doctor Console • Valid without physical seal
           </div>
           <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 p-3 rounded-xl text-center">
             <p className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">DIGITALLY SIGNED & VERIFIED</p>

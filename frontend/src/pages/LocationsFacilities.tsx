@@ -12,12 +12,13 @@ import {
 import { useApp, DEFAULT_DOCTOR_AVATAR } from '../context/AppContext';
 import { useSEO } from '../hooks/useSEO';
 import { FACILITIES_DATA, DEFAULT_BRANCH_IMAGES } from '../data/mockData';
+import { getBranchDoctorCount, isDoctorInBranch } from '../utils/branchUtils';
 
 export const LocationsFacilities: React.FC = () => {
   useSEO({
-    title: 'Clinic Locations & Facilities | JansevaArogyam - Sarangpur, Shujalpur, Rajgarh',
-    description: 'Explore JansevaArogyam hospital clinics in Sarangpur, Shujalpur & Rajgarh with NABH accredited OPD, modular OTs, 24x7 ICU emergency, and lab facilities.',
-    keywords: 'JansevaArogyam branches, Sarangpur hospital, Shujalpur clinic, Rajgarh hospital, 24x7 ICU emergency, lab test center',
+    title: 'Clinic Locations & Facilities | Jansevarogyam - Sarangpur, Shujalpur, Rajgarh',
+    description: 'Explore Jansevarogyam hospital clinics in Sarangpur, Shujalpur & Rajgarh with NABH accredited OPD, modular OTs, 24x7 ICU emergency, and lab facilities.',
+    keywords: 'Jansevarogyam branches, Sarangpur hospital, Shujalpur clinic, Rajgarh hospital, 24x7 ICU emergency, lab test center',
     canonical: 'https://jansevaarogyam.com/locations-facilities'
   });
 
@@ -135,7 +136,7 @@ export const LocationsFacilities: React.FC = () => {
                     {c.city}
                   </span>
                   <span className={`text-xs font-bold ${isSelected ? 'text-sky-200' : 'text-slate-500'}`}>
-                    {language === 'en' ? `${c.activeDoctorCount || 0} Doctors` : `${c.activeDoctorCount || 0} डॉक्टर`}
+                    {language === 'en' ? `${getBranchDoctorCount(c, doctors, clinics)} Doctors` : `${getBranchDoctorCount(c, doctors, clinics)} डॉक्टर`}
                   </span>
                 </div>
                 <h3 className="font-sora font-extrabold text-base tracking-tight">
@@ -280,33 +281,8 @@ export const LocationsFacilities: React.FC = () => {
 
         {(() => {
           const branchDoctors = (doctors || []).filter(d => {
-            if (!selectedBranchId) return true;
-            if (!d.clinicsCovered || d.clinicsCovered.length === 0) return true;
-            
-            const searchTerms = [
-              selectedBranchId.toLowerCase(),
-              selectedClinic?.id?.toLowerCase(),
-              selectedClinic?.name?.toLowerCase(),
-              selectedClinic?.city?.toLowerCase(),
-              selectedClinic?.fullName?.toLowerCase(),
-            ].filter(Boolean) as string[];
-
-            const matchesCovered = d.clinicsCovered.some(cCovered => {
-              const term = String(cCovered).toLowerCase().replace(/\s*branch\s*/i, '').trim();
-              return searchTerms.some(st => {
-                const cleanSt = st.replace(/\s*branch\s*/i, '').trim();
-                return cleanSt && (term.includes(cleanSt) || cleanSt.includes(term));
-              });
-            });
-
-            if (matchesCovered) return true;
-
-            const docBranch = String((d as any).branch || (d as any).branchId || '').toLowerCase().trim();
-            if (docBranch && searchTerms.some(st => st.includes(docBranch) || docBranch.includes(st))) {
-              return true;
-            }
-
-            return false;
+            if (!selectedClinic) return true;
+            return isDoctorInBranch(d, selectedClinic, clinics);
           });
 
           return (

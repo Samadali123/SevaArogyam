@@ -1,4 +1,27 @@
-const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+import { Request } from 'express';
+
+/**
+ * Dynamically resolves the Base URL directly from request headers (origin / referer / host).
+ * No environment variables required.
+ */
+export const getFrontendUrl = (req?: Request): string => {
+  if (req) {
+    const origin = req.get('origin') || req.get('referer');
+    if (origin) {
+      try {
+        return new URL(origin).origin;
+      } catch {
+        // ignore parse error
+      }
+    }
+    const host = req.get('host');
+    if (host) {
+      const protocol = req.protocol || 'http';
+      return `${protocol}://${host}`;
+    }
+  }
+  return 'http://localhost:5173';
+};
 
 /**
  * Formats a numeric OTP into spaced characters e.g. "7 7 0 2 9 5"
@@ -17,7 +40,7 @@ const renderEmailWrapper = (headerSubtitle: string, contentHTML: string, subHead
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SevaArogyam Healthcare</title>
+  <title>Jansevarogyam Healthcare</title>
 </head>
 <body style="margin: 0; padding: 0; background-color: #f3f4f6; font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased;">
   <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #f3f4f6; padding: 30px 12px;">
@@ -28,7 +51,7 @@ const renderEmailWrapper = (headerSubtitle: string, contentHTML: string, subHead
           <!-- Header Banner -->
           <tr>
             <td style="background-color: #0d9488; padding: 32px 24px; text-align: center;">
-              <h1 style="color: #ffffff; font-size: 28px; font-weight: 800; margin: 0 0 4px 0; letter-spacing: -0.5px;">SevaArogyam</h1>
+              <h1 style="color: #ffffff; font-size: 28px; font-weight: 800; margin: 0 0 4px 0; letter-spacing: -0.5px;">Jansevarogyam</h1>
               <p style="color: rgba(255, 255, 255, 0.85); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 2.5px; margin: 0;">${headerSubtitle}</p>
             </td>
           </tr>
@@ -52,10 +75,13 @@ const renderEmailWrapper = (headerSubtitle: string, contentHTML: string, subHead
 
               <!-- Footer -->
               <p style="color: #94a3b8; font-size: 12px; text-align: center; line-height: 1.6; margin: 0 0 6px 0;">
-                This is an automated message from SevaArogyam. Please do not reply to this email.
+                This is an automated message from Jansevarogyam. Please do not reply to this email.
+              </p>
+              <p style="color: #94a3b8; font-size: 11px; text-align: center; margin: 0 0 6px 0;">
+                💡 <em>Tip: If this email landed in your <strong>Spam or Junk folder</strong>, please mark it as <strong>"Not Spam"</strong> to ensure you receive future security updates in your inbox.</em>
               </p>
               <p style="color: #94a3b8; font-size: 12px; text-align: center; margin: 0;">
-                © 2026 SevaArogyam Healthcare Platform · All rights reserved.
+                © 2026 Jansevarogyam Healthcare Platform · All rights reserved.
               </p>
             </td>
           </tr>
@@ -85,7 +111,7 @@ export const getAdminOTPEmailHTML = (otp: string): string => {
   const content = `
     <h2 style="color: #0f172a; font-size: 22px; font-weight: 800; margin: 0 0 8px 0; text-align: left;">Admin Login Verification</h2>
     <p style="color: #64748b; font-size: 14px; line-height: 1.6; margin: 0 0 24px 0; text-align: left;">
-      A sign-in attempt was made to the SevaArogyam Admin Console. Use the code below to verify it's you.
+      A sign-in attempt was made to the Jansevarogyam Admin Console. Use the code below to verify it's you.
     </p>
 
     <!-- OTP Box -->
@@ -120,7 +146,7 @@ export const getPatientOTPEmailHTML = (otp: string): string => {
   const content = `
     <h2 style="color: #0f172a; font-size: 22px; font-weight: 800; margin: 0 0 8px 0; text-align: left;">Verify Your Login</h2>
     <p style="color: #64748b; font-size: 14px; line-height: 1.6; margin: 0 0 24px 0; text-align: left;">
-      Hi there 👋 Use the One-Time Password below to securely log in to your SevaArogyam account.
+      Hi there 👋 Use the One-Time Password below to securely log in to your Jansevarogyam account.
     </p>
 
     <!-- OTP Box -->
@@ -132,7 +158,7 @@ export const getPatientOTPEmailHTML = (otp: string): string => {
     </div>
 
     <p style="color: #64748b; font-size: 13px; line-height: 1.5; margin: 0 0 24px 0; text-align: left;">
-      This code is valid for <strong>10 minutes</strong>. Please do not share it with anyone, including SevaArogyam staff.
+      This code is valid for <strong>10 minutes</strong>. Please do not share it with anyone, including Jansevarogyam staff.
     </p>
 
     <!-- Warning Alert Box -->
@@ -149,13 +175,14 @@ export const getPatientOTPEmailHTML = (otp: string): string => {
 /**
  * 3. Doctor Creation Credentials Email
  */
-export const getDoctorCredentialsEmailHTML = (name: string, email: string, rawPassword: string): string => {
+export const getDoctorCredentialsEmailHTML = (name: string, email: string, rawPassword: string, frontendUrl?: string): string => {
   const cleanName = name.replace(/^dr\.?\s*/i, '').trim();
   const displayName = `Dr. ${cleanName}`;
+  const baseUrl = (frontendUrl || 'http://localhost:5173').replace(/\/+$/, '');
   const content = `
     <h2 style="color: #0f172a; font-size: 22px; font-weight: 800; margin: 0 0 8px 0; text-align: left;">Welcome, ${displayName} 🧑‍⚕️</h2>
     <p style="color: #64748b; font-size: 14px; line-height: 1.6; margin: 0 0 24px 0; text-align: left;">
-      An administrator has created your doctor account on the SevaArogyam Portal. Your login credentials are below.
+      An administrator has created your doctor account on the Jansevarogyam Portal. Your login credentials are below.
     </p>
 
     <!-- Credentials Card -->
@@ -175,8 +202,8 @@ export const getDoctorCredentialsEmailHTML = (name: string, email: string, rawPa
 
     <!-- CTA Button -->
     <div style="text-align: center; margin: 24px 0 28px 0;">
-      <a href="${FRONTEND_URL}/login" style="display: inline-block; background-color: #0d9488; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 800; padding: 14px 32px; border-radius: 12px; box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25);">
-        Log In to SevaArogyam
+      <a href="${baseUrl}/login" style="display: inline-block; background-color: #0d9488; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 800; padding: 14px 32px; border-radius: 12px; box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25);">
+        Log In to Jansevarogyam
       </a>
     </div>
 
@@ -198,11 +225,12 @@ export const getDoctorCredentialsEmailHTML = (name: string, email: string, rawPa
 /**
  * 4. Staff Creation Credentials Email
  */
-export const getStaffCredentialsEmailHTML = (name: string, email: string, rawPassword: string): string => {
+export const getStaffCredentialsEmailHTML = (name: string, email: string, rawPassword: string, frontendUrl?: string): string => {
+  const baseUrl = (frontendUrl || 'http://localhost:5173').replace(/\/+$/, '');
   const content = `
     <h2 style="color: #0f172a; font-size: 22px; font-weight: 800; margin: 0 0 8px 0; text-align: left;">Welcome, ${name} 🧑‍⚕️</h2>
     <p style="color: #64748b; font-size: 14px; line-height: 1.6; margin: 0 0 24px 0; text-align: left;">
-      An administrator has created your staff account on the SevaArogyam Portal. Your login credentials are below.
+      An administrator has created your staff account on the Jansevarogyam Portal. Your login credentials are below.
     </p>
 
     <!-- Credentials Card -->
@@ -222,8 +250,8 @@ export const getStaffCredentialsEmailHTML = (name: string, email: string, rawPas
 
     <!-- CTA Button -->
     <div style="text-align: center; margin: 24px 0 28px 0;">
-      <a href="${FRONTEND_URL}/login" style="display: inline-block; background-color: #0d9488; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 800; padding: 14px 32px; border-radius: 12px; box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25);">
-        Log In to SevaArogyam
+      <a href="${baseUrl}/login" style="display: inline-block; background-color: #0d9488; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 800; padding: 14px 32px; border-radius: 12px; box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25);">
+        Log In to Jansevarogyam
       </a>
     </div>
 
@@ -254,7 +282,7 @@ export const getForgotPasswordEmailHTML = (resetURL: string): string => {
 
     <h2 style="color: #0f172a; font-size: 22px; font-weight: 800; margin: 0 0 8px 0; text-align: center;">Reset Your Password</h2>
     <p style="color: #64748b; font-size: 14px; line-height: 1.6; margin: 0 0 24px 0; text-align: center;">
-      We received a request to reset the password for your SevaArogyam account. Click the button below to set a new one.
+      We received a request to reset the password for your Jansevarogyam account. Click the button below to set a new one.
     </p>
 
     <!-- CTA Button -->

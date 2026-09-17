@@ -4,7 +4,7 @@
  */
 export const sendEmail = async (to: string, subject: string, html: string): Promise<boolean> => {
   const resendApiKey = (process.env.RESEND_API_KEY || '').trim();
-  const resendFrom = (process.env.RESEND_FROM || 'JansevaArogyam <otp@jansevaarogyam.com>').trim();
+  const resendFrom = (process.env.RESEND_FROM || 'Jansevarogyam <otp@jansevarogyam.com>').trim();
 
   if (!resendApiKey) {
     console.warn(`[MAILER] RESEND_API_KEY is missing in environment variables. Skipping email send to ${to}.`);

@@ -6,7 +6,7 @@ import { HTTP_STATUS, USER_ROLES } from '@utilities/constants';
 import { asyncHandler } from '@utilities/asyncHandler';
 import { comparePassword, generateTokens, generateOTP, generateResetToken, hashPassword } from '@utilities/auth';
 import { sendEmail } from '@utilities/mailer';
-import { getPatientOTPEmailHTML, getForgotPasswordEmailHTML } from '@utilities/emailTemplates';
+import { getPatientOTPEmailHTML, getForgotPasswordEmailHTML, getFrontendUrl } from '@utilities/emailTemplates';
 
 // ─────────────────────────────────────────────
 // Admin / Doctor / Staff Login (Email + Password)
@@ -127,8 +127,8 @@ export const sendPatientOTP = asyncHandler(async (req: Request, res: Response) =
   });
 
   console.log(`[AUTH] Patient OTP generated for ${user.email}: ${otp}`);
-  await sendEmail(user.email!, 'SevaArogyam Login Verification Code', getPatientOTPEmailHTML(otp));
-  res.status(HTTP_STATUS.OK).json({ status: 'success', message: 'OTP sent to email.' });
+  await sendEmail(user.email!, 'Jansevarogyam Login Verification Code', getPatientOTPEmailHTML(otp));
+  res.status(HTTP_STATUS.OK).json({ status: 'success', message: 'OTP sent to email. If you don\'t see it in your inbox, please check your Spam/Junk folder.' });
 });
 
 export const verifyPatientOTP = asyncHandler(async (req: Request, res: Response) => {
@@ -189,12 +189,13 @@ export const forgotPassword = asyncHandler(async (req: Request, res: Response) =
     },
   });
 
-  const resetURL = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password/${resetToken}`;
-  sendEmail(user.email!, 'SevaArogyam Password Reset Request', getForgotPasswordEmailHTML(resetURL)).catch(err => console.error('[AUTH] Forgot password email error:', err));
+  const baseUrl = getFrontendUrl(req);
+  const resetURL = `${baseUrl}/reset-password/${resetToken}`;
+  sendEmail(user.email!, 'Jansevarogyam Password Reset Request', getForgotPasswordEmailHTML(resetURL)).catch(err => console.error('[AUTH] Forgot password email error:', err));
 
   res.status(HTTP_STATUS.OK).json({
     status: 'success',
-    message: 'Password reset link sent to email',
+    message: 'Password reset link sent to email. If you don\'t see it in your inbox, please check your Spam/Junk folder.',
   });
 });
 

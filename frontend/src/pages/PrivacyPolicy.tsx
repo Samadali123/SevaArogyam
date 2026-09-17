@@ -53,7 +53,7 @@ export const PrivacyPolicy: React.FC<PrivacyPolicyProps> = ({ onBack }) => {
             <section className="space-y-2">
               <h3 className="text-lg font-black text-slate-900">3. Data Sharing & Third Parties</h3>
               <p className="text-slate-600">
-                SEVASADAN does not sell, rent, or trade patient personal health data. Information is shared only with verified diagnostic labs, pharmacy partners, or payment gateways (Razorpay/Cashfree) explicitly required to complete your medical service.
+                JANSEVAAROGYAM does not sell, rent, or trade patient personal health data. Information is shared only with verified diagnostic labs, pharmacy partners, or payment gateways (Razorpay/Cashfree) explicitly required to complete your medical service.
               </p>
             </section>
 

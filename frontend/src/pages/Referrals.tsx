@@ -13,9 +13,9 @@ interface ReferralDashboard {
 
 export const Referrals: React.FC = () => {
   useSEO({
-    title: 'Join Healthcare Network & Referrals | JansevaArogyam',
-    description: 'Partner with JansevaArogyam healthcare network, invite patients and doctors, and earn rewards and care credits across Sarangpur, Shujalpur, and Rajgarh.',
-    keywords: 'JansevaArogyam referral, partner doctor network MP, join healthcare network, medical rewards',
+    title: 'Join Healthcare Network & Referrals | Jansevarogyam',
+    description: 'Partner with Jansevarogyam healthcare network, invite patients and doctors, and earn rewards and care credits across Sarangpur, Shujalpur, and Rajgarh.',
+    keywords: 'Jansevarogyam referral, partner doctor network MP, join healthcare network, medical rewards',
     canonical: 'https://jansevaarogyam.com/join-network'
   });
 
@@ -84,7 +84,7 @@ export const Referrals: React.FC = () => {
           </h1>
           <p className="text-sm sm:text-base text-sky-100/90 font-medium leading-relaxed">
             {text(
-              'Invite your family and friends to JansevaArogyam. Earn wallet cashback and special consultation discounts for every successful booking.',
+              'Invite your family and friends to Jansevarogyam. Earn wallet cashback and special consultation discounts for every successful booking.',
               'अपने परिवार और दोस्तों को जनसेवाआरोग्यम पर आमंत्रित करें और हर सफल बुकिंग पर वॉलेट कैशबैक पाएं।'
             )}
           </p>

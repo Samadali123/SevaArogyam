@@ -38,8 +38,8 @@ interface PublicPortalProps {
 
 export const PublicPortal: React.FC<PublicPortalProps> = ({ onNavigate }) => {
   useSEO({
-    title: 'JansevaArogyam - Specialist OPD Hospital & Healthcare Network',
-    description: 'JansevaArogyam (जनसेवा आरोग्यम) provides specialist doctor OPD appointments, 24x7 ICU emergency, lab tests, pharmacy & regional healthcare across Sarangpur, Shujalpur, and Rajgarh, MP.',
+    title: 'Jansevarogyam - Specialist OPD Hospital & Healthcare Network',
+    description: 'Jansevarogyam (जनसेवा आरोग्यम) provides specialist doctor OPD appointments, 24x7 ICU emergency, lab tests, pharmacy & regional healthcare across Sarangpur, Shujalpur, and Rajgarh, MP.',
     keywords: 'jansevaarogyam, Janseva Arogyam, Janseva, Arogyam, Janseva Arogyam Clinic, Janseva Arogyam Hospital, जनसेवा आरोग्यम, Sarangpur hospital, Shujalpur clinic, Rajgarh doctor booking, OPD appointment online',
     canonical: 'https://jansevaarogyam.com/'
   });
@@ -91,7 +91,7 @@ export const PublicPortal: React.FC<PublicPortalProps> = ({ onNavigate }) => {
         <div className="flex items-center whitespace-nowrap animate-marquee gap-8 text-xs">
           <span className="font-heading font-extrabold text-amber-300 flex items-center gap-2 shrink-0 uppercase tracking-widest text-xs">
             <span className="w-2.5 h-2.5 rounded-full bg-[#2DD4BF] shrink-0 animate-pulse"></span>
-            {language === 'en' ? 'SEVASADAN CLINIC HIGHLIGHTS & FACILITIES:' : 'सेवा सदन क्लीनिक मुख्य बिंदु एवं सुविधाएं:'}
+            {language === 'en' ? 'JANSEVAAROGYAM CLINIC HIGHLIGHTS & FACILITIES:' : 'जनसेवा आरोग्यम क्लीनिक मुख्य बिंदु एवं सुविधाएं:'}
           </span>
 
           <span className="inline-flex items-center gap-2 font-medium text-slate-200">
@@ -656,8 +656,8 @@ export const PublicPortal: React.FC<PublicPortalProps> = ({ onNavigate }) => {
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 font-medium">
             {language === 'en'
-              ? 'Everything you need to know about SEVASADAN physical OPD tokens & telemedicine.'
-              : 'सेवा सदन ओपीडी टोकन और वीडियो टेलीमेडिसिन के बारे में सभी जानकारी।'}
+              ? 'Everything you need to know about JANSEVAAROGYAM physical OPD tokens & telemedicine.'
+              : 'जनसेवा आरोग्यम ओपीडी टोकन और वीडियो टेलीमेडिसिन के बारे में सभी जानकारी।'}
           </p>
         </div>
 
@@ -699,7 +699,7 @@ export const PublicPortal: React.FC<PublicPortalProps> = ({ onNavigate }) => {
           
           <div className="hidden md:flex items-center gap-3 text-white text-xs font-heading font-extrabold">
             <span className="w-3 h-3 rounded-full bg-[#2DD4BF] animate-pulse shrink-0"></span>
-            <span>{language === 'en' ? 'SEVASADAN 24x7 Multi-Specialty Helpdesk' : 'सेवा सदन 24x7 मल्टी-स्पेशलिटी हेल्पडेस्क'}</span>
+            <span>{language === 'en' ? 'JANSEVAAROGYAM 24x7 Multi-Specialty Helpdesk' : 'जनसेवा आरोग्यम 24x7 मल्टी-स्पेशलिटी हेल्पडेस्क'}</span>
           </div>
 
           <div className="flex items-center justify-between w-full md:w-auto gap-3">

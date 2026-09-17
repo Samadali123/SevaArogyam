@@ -25,6 +25,7 @@ import { api } from '../services/api';
 import type { DoctorUser, Clinic, CareService, DeskStaffUser } from '../types';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { CustomSelect } from '../components/ui/CustomSelect';
+import { formatAssignedBranches, getBranchSlug, normalizeClinicsCovered } from '../utils/branchUtils';
 
 export const AdminDashboard: React.FC = () => {
   const { 
@@ -169,28 +170,6 @@ export const AdminDashboard: React.FC = () => {
     a.doctorName.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const formatAssignedBranches = (clinicsCovered?: string[], clinicsList: Clinic[] = []): string => {
-    if (!clinicsCovered || !Array.isArray(clinicsCovered) || clinicsCovered.length === 0) return 'No Assigned Branch';
-    const cleanIds = Array.from(new Set(
-      clinicsCovered.map(item => String(item || '').toLowerCase().replace(/\s*branch\s*/i, '').trim()).filter(Boolean)
-    ));
-    const names = cleanIds.map(cId => {
-      const found = clinicsList.find(c => {
-        const cIdClean = c.id.toLowerCase().replace(/\s*branch\s*/i, '').trim();
-        const cNameClean = c.name.toLowerCase().replace(/\s*branch\s*/i, '').trim();
-        const cCityClean = (c.city || '').toLowerCase().replace(/\s*branch\s*/i, '').trim();
-        return cIdClean === cId || cNameClean === cId || (cCityClean && cCityClean === cId);
-      });
-      if (found) return found.name.includes('Branch') ? found.name : `${found.name} Branch`;
-      if (cId === 'sarangpur') return 'Sarangpur Branch';
-      if (cId === 'shujalpur') return 'Shujalpur Branch';
-      if (cId === 'rajgarh') return 'Rajgarh Branch';
-      return cId.charAt(0).toUpperCase() + cId.slice(1) + ' Branch';
-    });
-    const uniqueNames = Array.from(new Set(names));
-    return uniqueNames.length > 0 ? uniqueNames.join(', ') : 'No Assigned Branch';
-  };
-
   const filteredDoctors = doctors.filter(d => 
     d.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     d.specialization.toLowerCase().includes(searchTerm.toLowerCase())
@@ -201,25 +180,9 @@ export const AdminDashboard: React.FC = () => {
     if (doc) {
       setEditingDoctor(doc);
 
-      let initialClinics: string[] = [];
-      if (Array.isArray(doc.clinicsCovered) && doc.clinicsCovered.length > 0) {
-        initialClinics = [...doc.clinicsCovered];
-      } else if (typeof (doc as any).clinicsCovered === 'string' && ((doc as any).clinicsCovered as string).trim()) {
-        try {
-          const parsed = JSON.parse((doc as any).clinicsCovered);
-          if (Array.isArray(parsed) && parsed.length > 0) initialClinics = parsed;
-          else initialClinics = ((doc as any).clinicsCovered as string).split(',').map((s: string) => s.trim()).filter(Boolean);
-        } catch {
-          initialClinics = ((doc as any).clinicsCovered as string).split(',').map((s: string) => s.trim()).filter(Boolean);
-        }
-      } else if ((doc as any).clinicId) {
-        initialClinics = [(doc as any).clinicId];
-      } else if ((doc as any).branch) {
-        initialClinics = [(doc as any).branch];
-      }
-
+      let initialClinics = normalizeClinicsCovered(doc.clinicsCovered || (doc as any).branch || (doc as any).clinicId, clinics);
       if (initialClinics.length === 0) {
-        initialClinics = ['sarangpur'];
+        initialClinics = ['sarangpur', 'shujalpur', 'rajgarh'];
       }
 
       setDoctorFormData({
@@ -1375,19 +1338,10 @@ export const AdminDashboard: React.FC = () => {
                 </label>
                 <div className="flex flex-wrap gap-2 pt-1">
                   {clinics.map(c => {
-                    const cIdClean = c.id.toLowerCase().replace(/\s*branch\s*/i, '').trim();
-                    const cNameClean = c.name.toLowerCase().replace(/\s*branch\s*/i, '').trim();
-                    const cCityClean = (c.city || '').toLowerCase().replace(/\s*branch\s*/i, '').trim();
+                    const branchSlug = getBranchSlug(c, clinics);
+                    const currentNormalized = normalizeClinicsCovered(doctorFormData.clinicsCovered, clinics);
+                    const isChecked = currentNormalized.includes(branchSlug);
 
-                    const isChecked = doctorFormData.clinicsCovered.some(item => {
-                      if (!item) return false;
-                      const itemClean = String(item).toLowerCase().replace(/\s*branch\s*/i, '').trim();
-                      return itemClean === cIdClean || 
-                             itemClean === cNameClean || 
-                             itemClean === cCityClean ||
-                             cIdClean.includes(itemClean) ||
-                             itemClean.includes(cIdClean);
-                    });
                     return (
                       <label 
                         key={c.id} 
@@ -1403,13 +1357,9 @@ export const AdminDashboard: React.FC = () => {
                           onChange={(e) => {
                             let updated: string[];
                             if (e.target.checked) {
-                              updated = Array.from(new Set([...doctorFormData.clinicsCovered, c.id]));
+                              updated = Array.from(new Set([...currentNormalized, branchSlug]));
                             } else {
-                              updated = doctorFormData.clinicsCovered.filter(item => {
-                                if (!item) return false;
-                                const itemClean = String(item).toLowerCase().replace(/\s*branch\s*/i, '').trim();
-                                return itemClean !== cIdClean && itemClean !== cNameClean && itemClean !== cCityClean && !cIdClean.includes(itemClean) && !itemClean.includes(cIdClean);
-                              });
+                              updated = currentNormalized.filter(slug => slug !== branchSlug);
                             }
                             setDoctorFormData({ ...doctorFormData, clinicsCovered: updated });
                           }}

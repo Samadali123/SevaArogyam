@@ -57,9 +57,9 @@ import { useSEO } from '../hooks/useSEO';
 
 export const ServiceCatalog: React.FC<{ kind: Kind }> = ({ kind }) => {
   useSEO({
-    title: `${kind.charAt(0).toUpperCase() + kind.slice(1)} Care Services | JansevaArogyam Diagnostics & Pharmacy`,
-    description: `Book online ${kind} services, diagnostic lab tests, pathology packages, and verified medicines with JansevaArogyam in Sarangpur, Shujalpur, and Rajgarh.`,
-    keywords: `JansevaArogyam ${kind}, lab test booking Sarangpur, diagnostic center Shujalpur, pharmacy Rajgarh, blood test online MP`,
+    title: `${kind.charAt(0).toUpperCase() + kind.slice(1)} Care Services | Jansevarogyam Diagnostics & Pharmacy`,
+    description: `Book online ${kind} services, diagnostic lab tests, pathology packages, and verified medicines with Jansevarogyam in Sarangpur, Shujalpur, and Rajgarh.`,
+    keywords: `Jansevarogyam ${kind}, lab test booking Sarangpur, diagnostic center Shujalpur, pharmacy Rajgarh, blood test online MP`,
     canonical: `https://jansevaarogyam.com/services?kind=${kind}`
   });
 
@@ -112,7 +112,7 @@ export const ServiceCatalog: React.FC<{ kind: Kind }> = ({ kind }) => {
             key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_SevasadanKey',
             amount: Number(payAmount) * 100,
             currency: 'INR',
-            name: 'SEVASADAN Healthcare',
+            name: 'Jansevarogyam Healthcare',
             description: `${selected.name} (${selected.category})`,
             order_id: rOrderId.startsWith('dummy_') || rOrderId.startsWith('order_demo_') ? undefined : rOrderId,
             prefill: {

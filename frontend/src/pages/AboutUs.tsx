@@ -23,9 +23,9 @@ interface AboutUsProps {
 
 export const AboutUs: React.FC<AboutUsProps> = () => {
   useSEO({
-    title: 'About Us | JansevaArogyam - Vision, Mission & Specialist Network',
-    description: 'Learn about JansevaArogyam (जनसेवा आरोग्यम) - Madhya Pradesh’s premier regional healthcare network connecting specialist doctor OPDs, 24x7 emergency & modern hospitals.',
-    keywords: 'About JansevaArogyam, Janseva Arogyam mission, Janseva Arogyam founders, healthcare network MP, NABH accredited OPD Sarangpur Shujalpur Rajgarh',
+    title: 'About Us | Jansevarogyam - Vision, Mission & Specialist Network',
+    description: 'Learn about Jansevarogyam (जनसेवा आरोग्यम) - Madhya Pradesh’s premier regional healthcare network connecting specialist doctor OPDs, 24x7 emergency & modern hospitals.',
+    keywords: 'About Jansevarogyam, Janseva Arogyam mission, Janseva Arogyam founders, healthcare network MP, NABH accredited OPD Sarangpur Shujalpur Rajgarh',
     canonical: 'https://jansevaarogyam.com/about'
   });
 

@@ -46,7 +46,9 @@ export const StaffAuthModal: React.FC = () => {
     try {
       await api.post('/auth/forgot-password', { email: forgotEmail });
       setLoading(false);
-      setMessage('If an account matches that email, a password reset link has been sent.');
+      setMessage(language === 'en'
+        ? `Password reset link sent to ${forgotEmail}. If you don't see it in your inbox, please check your Spam / Junk folder.`
+        : `पासवर्ड रीसेट लिंक ${forgotEmail} पर भेजा गया। यदि यह इनबॉक्स में न मिले, तो कृपया अपना Spam / Junk फोल्डर चेक करें।`);
     } catch (err: any) {
       setLoading(false);
       setError(getApiErrorMessage(err, 'Unable to send the reset link. Please try again.'));
@@ -67,7 +69,7 @@ export const StaffAuthModal: React.FC = () => {
   const headerLabel = isDoctor 
     ? (language === 'en' ? 'Doctor Portal' : 'डॉक्टर पोर्टल')
     : (language === 'en' ? 'Staff Portal' : 'स्टाफ पोर्टल');
-  const headerTitle = isDoctor ? 'SEVASADAN Doctor Login' : 'SEVASADAN Staff Login';
+  const headerTitle = isDoctor ? 'JANSEVAAROGYAM Doctor Login' : 'JANSEVAAROGYAM Staff Login';
 
   const themePrimaryBg = isDoctor ? 'bg-gradient-to-r from-[#0B7A56] to-[#0F9D6D] hover:opacity-95' : 'bg-gradient-to-r from-[#5B5588] to-[#6E6B9E] hover:opacity-95';
   const themeRing = isDoctor ? 'focus:ring-[#0F9D6D] focus:border-[#0F9D6D]' : 'focus:ring-[#6E6B9E] focus:border-[#6E6B9E]';
@@ -156,7 +158,7 @@ export const StaffAuthModal: React.FC = () => {
                     type="text"
                     value={emailOrLoginId}
                     onChange={(e) => setEmailOrLoginId(e.target.value)}
-                    placeholder={isDoctor ? "dr.name@sevasadanclinic.in" : "staff-login-id or email"}
+                    placeholder={isDoctor ? "dr.name@jansevaarogyam.com" : "staff-login-id or email"}
                     className={`w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-900 focus:outline-none focus:ring-2 ${themeRing} transition`}
                     required
                   />

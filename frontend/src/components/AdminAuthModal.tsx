@@ -63,8 +63,8 @@ export const AdminAuthModal: React.FC = () => {
       await api.post('/auth/forgot-password', { email });
       setLoading(false);
       setSuccessMsg(language === 'en' 
-        ? `Password reset link sent to ${email}. Please check your inbox.` 
-        : `पासवर्ड रीसेट लिंक ${email} पर भेजा गया। कृपया अपना इनबॉक्स जांचें।`);
+        ? `Password reset link sent to ${email}. If you don't see it in your inbox, please check your Spam / Junk folder.` 
+        : `पासवर्ड रीसेट लिंक ${email} पर भेजा गया। यदि यह इनबॉक्स में न मिले, तो कृपया अपना Spam / Junk फोल्डर चेक करें।`);
     } catch (err: any) {
       setLoading(false);
       setError(getApiErrorMessage(err, 'Failed to send password reset link.'));
@@ -95,7 +95,7 @@ export const AdminAuthModal: React.FC = () => {
                   {language === 'en' ? 'Admin Access Portal' : 'सुरक्षित एडमिन लॉगिन'}
                 </span>
                 <h3 className="font-extrabold text-lg text-white tracking-tight mt-0.5">
-                  SEVASADAN Central Hub
+                  JANSEVAAROGYAM Central Hub
                 </h3>
               </div>
             </div>
@@ -141,7 +141,7 @@ export const AdminAuthModal: React.FC = () => {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="admin@sevasadanclinic.in"
+                    placeholder="admin@jansevaarogyam.com"
                     className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#9A5B3C] focus:border-[#9A5B3C] transition"
                     required
                   />
@@ -213,7 +213,7 @@ export const AdminAuthModal: React.FC = () => {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="admin@sevasadanclinic.in"
+                    placeholder="admin@jansevaarogyam.com"
                     className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#9A5B3C] focus:border-[#9A5B3C] transition"
                     required
                   />

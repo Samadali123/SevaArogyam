@@ -90,7 +90,7 @@ export const OtpAuthModal: React.FC = () => {
             <span className="bg-emerald-400/20 text-emerald-300 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">
               {language === 'en' ? 'Passwordless Mobile Auth' : 'पासवर्ड-रहित मोबाइल साइन इन'}
             </span>
-            <h3 className="font-extrabold text-xl tracking-tight mt-1">SEVASADAN Portal</h3>
+            <h3 className="font-extrabold text-xl tracking-tight mt-1">JANSEVAAROGYAM Portal</h3>
           </div>
           <button 
             onClick={() => { closeAuthModal(); resetForm(); }}
@@ -192,6 +192,11 @@ export const OtpAuthModal: React.FC = () => {
                     {language === 'en' ? 'Edit' : 'बदलें'}
                   </button>
                 </p>
+                <div className="bg-amber-50 border border-amber-200 text-amber-900 text-[11px] p-2.5 rounded-xl font-medium text-center leading-tight">
+                  📧 {language === 'en' 
+                    ? "If you don't see the OTP in your inbox, please check your Spam / Junk folder."
+                    : "यदि इनबॉक्स में ओटीपी न मिले, तो कृपया अपना Spam / Junk फोल्डर भी चेक करें।"}
+                </div>
               </div>
 
               <div>

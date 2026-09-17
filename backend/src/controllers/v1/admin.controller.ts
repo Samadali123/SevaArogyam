@@ -6,7 +6,7 @@ import { HTTP_STATUS, USER_ROLES } from '@utilities/constants';
 import { asyncHandler } from '@utilities/asyncHandler';
 import { generateRandomPassword, hashPassword } from '@utilities/auth';
 import { sendEmail } from '@utilities/mailer';
-import { getDoctorCredentialsEmailHTML, getStaffCredentialsEmailHTML } from '@utilities/emailTemplates';
+import { getDoctorCredentialsEmailHTML, getStaffCredentialsEmailHTML, getFrontendUrl } from '@utilities/emailTemplates';
 import { uploadToR2 } from '@utilities/upload';
 import { Prisma } from '@prisma/client';
 
@@ -58,6 +58,15 @@ export const createDoctor = asyncHandler(async (req: Request, res: Response) => 
   } else if (Array.isArray(clinicsCovered)) {
     parsedClinicsCovered = clinicsCovered;
   }
+  const normalizeBranchSlugServer = (item: any): string => {
+    if (!item) return '';
+    const clean = String(item).toLowerCase().replace(/\s*branch\s*/i, '').trim();
+    if (clean.includes('sarangpur')) return 'sarangpur';
+    if (clean.includes('shujalpur')) return 'shujalpur';
+    if (clean.includes('rajgarh')) return 'rajgarh';
+    return clean;
+  };
+  parsedClinicsCovered = Array.from(new Set(parsedClinicsCovered.map(normalizeBranchSlugServer).filter(Boolean)));
 
   const doctor = await prisma.user.create({
     data: {
@@ -80,7 +89,8 @@ export const createDoctor = asyncHandler(async (req: Request, res: Response) => 
     },
   });
 
-  await sendEmail(email, 'Welcome to SevaArogyam - Doctor Portal Credentials', getDoctorCredentialsEmailHTML(name, email, rawPassword));
+  const frontendUrl = getFrontendUrl(req);
+  await sendEmail(email, 'Welcome to Jansevarogyam - Doctor Portal Credentials', getDoctorCredentialsEmailHTML(name, email, rawPassword, frontendUrl));
 
   res.status(HTTP_STATUS.CREATED).json({
     status: 'success',
@@ -158,6 +168,17 @@ export const updateDoctor = asyncHandler(async (req: Request, res: Response) => 
       }
     } else if (Array.isArray(clinicsCovered)) {
       parsedClinicsCovered = clinicsCovered;
+    }
+    const normalizeBranchSlugServer = (item: any): string => {
+      if (!item) return '';
+      const clean = String(item).toLowerCase().replace(/\s*branch\s*/i, '').trim();
+      if (clean.includes('sarangpur')) return 'sarangpur';
+      if (clean.includes('shujalpur')) return 'shujalpur';
+      if (clean.includes('rajgarh')) return 'rajgarh';
+      return clean;
+    };
+    if (Array.isArray(parsedClinicsCovered)) {
+      parsedClinicsCovered = Array.from(new Set(parsedClinicsCovered.map(normalizeBranchSlugServer).filter(Boolean)));
     }
   }
 
@@ -242,7 +263,8 @@ export const createStaff = asyncHandler(async (req: Request, res: Response) => {
     },
   });
 
-  await sendEmail(email, 'Welcome to SevaArogyam - Staff Portal Credentials', getStaffCredentialsEmailHTML(name, email, rawPassword));
+  const frontendUrl = getFrontendUrl(req);
+  await sendEmail(email, 'Welcome to Jansevarogyam - Staff Portal Credentials', getStaffCredentialsEmailHTML(name, email, rawPassword, frontendUrl));
 
   res.status(HTTP_STATUS.CREATED).json({
     status: 'success',

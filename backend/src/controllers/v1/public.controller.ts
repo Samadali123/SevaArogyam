@@ -30,8 +30,12 @@ export const getDoctors = asyncHandler(async (req: Request, res: Response) => {
   // If a specific branch is selected, we filter by doctors who have an active Staff/Branch assignment
   // OR we can assume doctors have `branch` field (Wait, the user model has `branch` for staff, does it apply to doctors? 
   // Let's assume doctors might have `branch` populated if they are assigned, or we just fetch all for now, but to be accurate we filter by branch)
-  if (branchId) {
-    whereClause.branch = branchId;
+  if (branchId && typeof branchId === 'string') {
+    const cleanBranch = branchId.toLowerCase().replace(/\s*branch\s*/i, '').trim();
+    whereClause.OR = [
+      { clinicsCovered: { has: cleanBranch } },
+      { branch: { contains: cleanBranch, mode: 'insensitive' } }
+    ];
   }
 
   const doctors = await prisma.user.findMany({

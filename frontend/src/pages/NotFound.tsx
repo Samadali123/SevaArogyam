@@ -51,7 +51,7 @@ export const NotFound: React.FC<NotFoundProps> = ({ onNavigate }) => {
             </div>
             <div>
               <h3 className="font-bold text-sm text-white">{isHi ? 'मुख्य पृष्ठ' : 'Home Portal'}</h3>
-              <p className="text-xs text-sky-200/70 mt-1">{isHi ? 'सेवा सदन के मुख्य पृष्ठ पर जाएं' : 'Return to main homepage'}</p>
+              <p className="text-xs text-sky-200/70 mt-1">{isHi ? 'जनसेवा आरोग्यम के मुख्य पृष्ठ पर जाएं' : 'Return to main homepage'}</p>
             </div>
           </button>
 

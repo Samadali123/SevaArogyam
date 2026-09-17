@@ -44,7 +44,7 @@ export const createArticle = asyncHandler(async (req: Request, res: Response) =>
     throw new AppError('Title, category, and excerpt are required', HTTP_STATUS.BAD_REQUEST, ERROR_CODES.VALIDATION_ERROR, true);
   }
 
-  const finalAuthorName = authorName || (user?.name ? (user.name.startsWith('Dr.') ? user.name : `Dr. ${user.name}`) : 'Dr. SevaArogyam Medical Team');
+  const finalAuthorName = authorName || (user?.name ? (user.name.startsWith('Dr.') ? user.name : `Dr. ${user.name}`) : 'Dr. Jansevarogyam Medical Team');
   const finalAuthorRole = authorRole || user?.specialization || 'Consultant Specialist';
 
   const article = await prisma.article.create({

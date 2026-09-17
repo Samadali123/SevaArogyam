@@ -20,7 +20,7 @@ export const generateTokenPDF = (appointment: PopulatedAppointment, res: Respons
   doc.pipe(res);
 
   // Header
-  doc.fontSize(20).text('Sevasadan Hospital', { align: 'center' });
+  doc.fontSize(20).text('Jansevarogyam Hospital', { align: 'center' });
   doc.moveDown();
   
   if (appointment.bookingMode === 'PHYSICAL') {
@@ -67,7 +67,7 @@ export const generatePrescriptionPDF = (appointment: PopulatedAppointment, res: 
   doc.pipe(res);
 
   // Header
-  doc.fontSize(20).text('Sevasadan Hospital - Digital Prescription', { align: 'center' });
+  doc.fontSize(20).text('Jansevarogyam Hospital - Digital Prescription', { align: 'center' });
   doc.moveDown(2);
 
   // Patient Details

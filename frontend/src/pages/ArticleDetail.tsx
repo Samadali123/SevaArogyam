@@ -136,7 +136,7 @@ export const ArticleDetail: React.FC<ArticleDetailProps> = ({ onBack }) => {
                   <UserCheck className="w-4 h-4 text-emerald-600" />
                 </div>
                 <p className="text-xs text-[#0F4C81] font-bold">
-                  {doctorAuthor.specialization} • {language === 'en' ? 'SEVASADAN Senior Specialist' : 'सेवासदन वरिष्ठ विशेषज्ञ'}
+                  {doctorAuthor.specialization} • {language === 'en' ? 'Jansevarogyam Senior Specialist' : 'जनसेवा आरोग्यम वरिष्ठ विशेषज्ञ'}
                 </p>
               </div>
             </div>

@@ -120,7 +120,7 @@ export const Footer: React.FC<FooterProps> = ({ setCurrentTab }) => {
             <h4 className="font-heading font-extrabold text-white text-sm tracking-wide">{language === 'en' ? 'Overview' : 'अवलोकन'}</h4>
             <ul className="space-y-2 text-slate-400 font-medium">
               <li>
-                <button onClick={() => setCurrentTab('about')} className="hover:text-sky-300 transition cursor-pointer">{language === 'en' ? 'About JansevaArogyam' : 'जनसेवा आरोग्यम के बारे में'}</button>
+                <button onClick={() => setCurrentTab('about')} className="hover:text-sky-300 transition cursor-pointer">{language === 'en' ? 'About Jansevarogyam' : 'जनसेवा आरोग्यम के बारे में'}</button>
               </li>
               <li>
                 <button onClick={() => setCurrentTab('locations')} className="hover:text-sky-300 transition cursor-pointer">{language === 'en' ? 'Hospital Branches' : 'अस्पताल शाखाएँ'}</button>
@@ -190,8 +190,8 @@ export const Footer: React.FC<FooterProps> = ({ setCurrentTab }) => {
 
             <div className="pt-3 space-y-1 border-t border-slate-800">
               <p className="font-heading font-extrabold text-white text-xs">{language === 'en' ? 'Helpdesk Helpline' : 'हेल्पडेस्क हेल्पलाइन'}</p>
-              <p className="text-xs font-mono text-[#5EAAF0] font-bold">1800-SEVA-CLINIC (7382-723)</p>
-              <p className="text-[11px] text-slate-400">support@sevasadanclinic.in</p>
+              <p className="text-xs font-mono text-[#5EAAF0] font-bold">1800-JANSEVA-CLINIC (7382-723)</p>
+              <p className="text-[11px] text-slate-400">support@jansevarogyam.com</p>
             </div>
           </div>
 
@@ -201,7 +201,7 @@ export const Footer: React.FC<FooterProps> = ({ setCurrentTab }) => {
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400 pt-2 font-sans">
           
           <p className="flex items-center gap-1.5">
-            <span>© 2026 JansevaArogyam Health Care Network. {language === 'en' ? 'All rights reserved.' : 'सर्वाधिकार सुरक्षित।'}</span>
+            <span>© 2026 Jansevarogyam Health Care Network. {language === 'en' ? 'All rights reserved.' : 'सर्वाधिकार सुरक्षित।'}</span>
             <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500 inline" />
           </p>
 

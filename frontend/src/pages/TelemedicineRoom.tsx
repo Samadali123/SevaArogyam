@@ -122,7 +122,7 @@ export const TelemedicineRoom: React.FC = () => {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-extrabold text-base">SEVASADAN HD Video Room</span>
+              <span className="font-extrabold text-base">JANSEVAAROGYAM HD Video Room</span>
               <span className="bg-emerald-500/20 text-emerald-300 text-[10px] font-bold px-2 py-0.5 rounded border border-emerald-500/40">
                 Live WebRTC
               </span>
@@ -227,7 +227,7 @@ export const TelemedicineRoom: React.FC = () => {
                   <ShieldCheck className="w-5 h-5 text-emerald-600" />
                   <span>Telemedicine Practice Guidelines 2020 Informed Consent</span>
                 </div>
-                <p>1. I hereby give explicit informed consent to undergo a virtual medical consultation with SEVASADAN medical practitioners.</p>
+                <p>1. I hereby give explicit informed consent to undergo a virtual medical consultation with JANSEVAAROGYAM medical practitioners.</p>
                 <p>2. I understand that video consultations rely on remote audio-visual assessment and that physical in-person examination at Sarangpur, Shujalpur, or Rajgarh branches may be recommended if necessary.</p>
                 <p>3. Standard digital prescriptions provided post-call carry equal medical validity.</p>
               </div>
@@ -448,7 +448,7 @@ export const TelemedicineRoom: React.FC = () => {
 
           <div>
             <h3 className="font-black text-2xl text-slate-900">Consultation Completed</h3>
-            <p className="text-xs text-slate-500 mt-1">Thank you for consulting via SEVASADAN Telemedicine.</p>
+            <p className="text-xs text-slate-500 mt-1">Thank you for consulting via JANSEVAAROGYAM Telemedicine.</p>
           </div>
 
           <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 text-xs text-left space-y-2">
