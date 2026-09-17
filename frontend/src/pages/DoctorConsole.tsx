@@ -353,15 +353,6 @@ export const DoctorConsole: React.FC<DoctorConsoleProps> = ({ onNavigate }) => {
     }
   };
 
-  const handleMarkDone = async (apptId: string) => {
-    setMarkingDoneApptId(apptId);
-    try {
-      await updateAppointmentStatus(apptId, 'COMPLETED');
-    } finally {
-      setMarkingDoneApptId(null);
-    }
-  };
-
   const handleAddMedicine = () => {
     if (!medName.trim()) return;
     const newItem: PrescriptionItem = {
@@ -555,9 +546,46 @@ export const DoctorConsole: React.FC<DoctorConsoleProps> = ({ onNavigate }) => {
     }
   };
 
+  const handleMarkDone = async (apptId: string) => {
+    setMarkingDoneApptId(apptId);
+    try {
+      await updateAppointmentStatus(apptId, 'COMPLETED');
+      const targetAppt = appointments.find(a => a.id === apptId) || activeAppointment;
+      if (targetAppt) {
+        try {
+          await createPrescription({
+            appointmentId: targetAppt.id,
+            patientId: targetAppt.patientId,
+            doctorId: currentDoctor.id,
+            doctorName: currentDoctor.name,
+            doctorSpecialization: currentDoctor.specialization,
+            doctorRegNumber: currentDoctor.regNumber,
+            patientName: targetAppt.patientName,
+            patientAge: targetAppt.patientAge,
+            patientGender: targetAppt.patientGender,
+            patientPhone: targetAppt.patientPhone,
+            clinicName: targetAppt.clinicName,
+            diagnosis,
+            symptoms: symptomsInput.split(',').map(s => s.trim()).filter(Boolean),
+            clinicalNotes,
+            investigationsOrdered: [investigationsInput].filter(Boolean),
+            adviceList: [adviceInput].filter(Boolean),
+            items: medicineItems,
+            nextFollowUpDate
+          });
+          handleExportPdf();
+        } catch (rxErr) {
+          console.warn('Auto-prescription dispatch warning:', rxErr);
+        }
+      }
+    } finally {
+      setMarkingDoneApptId(null);
+    }
+  };
+
   const filteredAppointments = appointments.filter(a => {
-    if (selectedQueueFilter === 'PENDING') return a.status === 'PENDING';
-    if (selectedQueueFilter === 'RESCHEDULED') return (a.status as string) === 'RESCHEDULED';
+    if (selectedQueueFilter === 'PENDING') return a.status === 'PENDING' || a.status === 'CONFIRMED' || a.status === 'IN_PROGRESS';
+    if (selectedQueueFilter === 'RESCHEDULED') return (a.status as string) === 'RESCHEDULED' || a.isRescheduled;
     if (selectedQueueFilter === 'CANCELLED') return a.status === 'CANCELLED';
     if (selectedQueueFilter === 'ALL') return true;
     return true;
@@ -820,11 +848,13 @@ export const DoctorConsole: React.FC<DoctorConsoleProps> = ({ onNavigate }) => {
                 )}
 
                 <div className="flex items-center justify-between text-[11px] text-slate-600 pt-1.5 border-t border-slate-100">
-                  <span className="flex items-center gap-1 font-medium">
-                    {appt.appointmentMode === 'VIDEO' ? <Video className="w-3.5 h-3.5 text-emerald-600" /> : <Building2 className="w-3.5 h-3.5 text-[#0F4C81]" />}
-                    {appt.clinicName}
+                  <span className="flex items-center gap-1 font-medium truncate max-w-[55%]">
+                    {appt.appointmentMode === 'VIDEO' ? <Video className="w-3.5 h-3.5 text-emerald-600 shrink-0" /> : <Building2 className="w-3.5 h-3.5 text-[#0F4C81] shrink-0" />}
+                    <span className="truncate">{appt.clinicName}</span>
                   </span>
-                  <span className="font-bold text-slate-700">{appt.timeSlot}</span>
+                  <span className="font-bold text-slate-700 shrink-0 text-right">
+                    {new Date(appt.appointmentDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} • {appt.timeSlot}
+                  </span>
                 </div>
 
                 {/* Section 9.1: Doctor Confirmation Prompt (Yes / No) for Pending Appointments */}

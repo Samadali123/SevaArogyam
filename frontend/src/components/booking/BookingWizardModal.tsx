@@ -64,7 +64,7 @@ export const BookingWizardModal: React.FC = () => {
     new Date().toISOString().split('T')[0]
   );
   const [timeSlot, setTimeSlot] = useState<string>('10:00 AM');
-  const [patientType, setPatientType] = useState<PatientType>('EXISTING');
+  const [patientType, setPatientType] = useState<PatientType>('NEW');
   const [patientName, setPatientName] = useState<string>('');
   const [patientId, setPatientId] = useState<string>('');
   const [patientAge, setPatientAge] = useState<number | string>('');
@@ -137,29 +137,51 @@ export const BookingWizardModal: React.FC = () => {
   const [createdAppointment, setCreatedAppointment] = useState<Appointment | null>(null);
 
   useEffect(() => {
-    if (preselectedMode) {
-      setAppointmentMode(preselectedMode);
-    }
+    if (isBookingModalOpen) {
+      setStep(1);
+      setCreatedAppointment(null);
+      setUploadedFiles([]);
+      setPreviewFile(null);
+      setVoiceNoteUrl(null);
+      setVoiceNoteFile(null);
+      setPatientNotes('');
+      setSelectedSymptoms([]);
+      setPatientType('NEW');
 
-    if (preselectedDoctorId) {
-      setSelectedDoctorId(preselectedDoctorId);
-      const doc = doctors.find(d => d.id === preselectedDoctorId);
-      if (doc && doc.clinicsCovered.length > 0) {
-        setSelectedClinicId(doc.clinicsCovered[0]);
+      if (preselectedMode) {
+        setAppointmentMode(preselectedMode);
       }
-    } else if (doctors.length > 0) {
-      setSelectedDoctorId(doctors[0].id);
-    }
 
-    if (preselectedClinicId) {
-      setSelectedClinicId(preselectedClinicId);
-    }
+      if (preselectedDoctorId) {
+        setSelectedDoctorId(preselectedDoctorId);
+        const doc = doctors.find(d => d.id === preselectedDoctorId);
+        if (doc && doc.clinicsCovered.length > 0) {
+          setSelectedClinicId(doc.clinicsCovered[0]);
+        }
+      } else if (doctors.length > 0) {
+        setSelectedDoctorId(doctors[0].id);
+      }
 
-    if (currentUser && currentUser.role === 'PATIENT') {
-      setPatientName((currentUser as any).name || '');
-      setPatientId((currentUser as any).patientId || '');
-      setPatientAge((currentUser as any).age || '');
-      setPatientGender((currentUser as any).gender || '');
+      if (preselectedClinicId) {
+        setSelectedClinicId(preselectedClinicId);
+      }
+
+      if (currentUser && currentUser.role === 'PATIENT') {
+        const cName = (currentUser as any).name;
+        if (cName && String(cName).trim().toLowerCase() !== 'patient') {
+          setPatientName(cName);
+        } else {
+          setPatientName('');
+        }
+        setPatientId((currentUser as any).patientId || '');
+        setPatientAge((currentUser as any).age || '');
+        setPatientGender((currentUser as any).gender || '');
+      } else {
+        setPatientName('');
+        setPatientId('');
+        setPatientAge('');
+        setPatientGender('');
+      }
     }
   }, [preselectedDoctorId, preselectedClinicId, preselectedMode, isBookingModalOpen]);
 
@@ -797,7 +819,16 @@ export const BookingWizardModal: React.FC = () => {
                   </label>
                   <CustomSelect
                     value={patientType}
-                    onChange={(val) => setPatientType(val as PatientType)}
+                    onChange={(val) => {
+                      const newType = val as PatientType;
+                      setPatientType(newType);
+                      if (newType === 'NEW') {
+                        setPatientId('');
+                        setPatientName('');
+                        setPatientAge('');
+                        setPatientGender('');
+                      }
+                    }}
                     themeColor="teal"
                     options={[
                       { value: 'NEW', label: 'New Patient (First Visit)' },

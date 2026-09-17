@@ -22,13 +22,29 @@ export const bookAppointment = asyncHandler(async (req: Request, res: Response) 
   const {
     doctorId, branchId, bookingMode,
     appointmentDate, timeSlot, symptoms, medicalConcerns,
-    couponCode, useWalletBalance, paymentMode
+    couponCode, useWalletBalance, paymentMode,
+    patientName, patientAge
   } = req.body;
 
   const patientId = req.user!.id;
 
   if (!doctorId || !bookingMode || !appointmentDate || !timeSlot || !symptoms || !paymentMode) {
     throw new AppError('Missing required booking details (including paymentMode)', HTTP_STATUS.BAD_REQUEST, ERROR_CODES.VALIDATION_ERROR, true);
+  }
+
+  // Update patient's actual name & age if provided
+  if (patientName && String(patientName).trim() && String(patientName).trim().toLowerCase() !== 'patient') {
+    try {
+      await prisma.user.update({
+        where: { id: patientId },
+        data: {
+          name: String(patientName).trim(),
+          ...(patientAge ? { age: Number(patientAge) } : {})
+        }
+      });
+    } catch (err) {
+      console.warn('Could not update patient user details:', err);
+    }
   }
 
   if (paymentMode !== 'CASH' && paymentMode !== 'ONLINE') {
@@ -140,8 +156,6 @@ export const bookAppointment = asyncHandler(async (req: Request, res: Response) 
     }
   }
 
-
-
   let tokenNumber = null;
   if (bookingMode === 'PHYSICAL') {
     const startOfDay = new Date(appointmentDate);
@@ -184,10 +198,24 @@ export const bookAppointment = asyncHandler(async (req: Request, res: Response) 
     }
   }
 
-  if (!validBranchId && bookingMode === 'PHYSICAL') {
-    const firstBranch = await prisma.branch.findFirst();
-    if (firstBranch) {
-      validBranchId = firstBranch.id;
+  // Fallback: If no branch specified or virtual mode, assign doctor's primary branch or first hospital branch
+  if (!validBranchId) {
+    if (doctor.clinicsCovered && doctor.clinicsCovered.length > 0) {
+      const docBranch = await prisma.branch.findFirst({
+        where: {
+          OR: [
+            { id: doctor.clinicsCovered[0] },
+            { name: { equals: doctor.clinicsCovered[0], mode: 'insensitive' } }
+          ]
+        }
+      });
+      if (docBranch) validBranchId = docBranch.id;
+    }
+    if (!validBranchId) {
+      const firstBranch = await prisma.branch.findFirst();
+      if (firstBranch) {
+        validBranchId = firstBranch.id;
+      }
     }
   }
 
@@ -211,6 +239,10 @@ export const bookAppointment = asyncHandler(async (req: Request, res: Response) 
       fee,
       platformFee,
       tokenNumber,
+    },
+    include: {
+      patient: { select: { id: true, name: true, phone: true, age: true } },
+      branch: { select: { id: true, name: true, city: true } }
     }
   });
 

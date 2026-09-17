@@ -29,21 +29,27 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ onNavigate }
   const [rescheduleSlot, setRescheduleSlot] = React.useState('');
   const [copiedCode, setCopiedCode] = React.useState(false);
   const [selectedPrescription, setSelectedPrescription] = React.useState<any>(null);
+  const [apptFilter, setApptFilter] = React.useState<'ALL' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED'>('ALL');
 
-  const rawName = (currentUser as any)?.name;
-  const patientName = (rawName && rawName.trim().toLowerCase() !== 'patient') ? rawName : 'Samad';
-  const patientPhone = (currentUser as any)?.phone || '9826198261';
+  const patientPhone = (currentUser as any)?.phone || '';
 
   // Filter patient appointments
-  const myAppointments = appointments.filter(a => a.patientPhone === patientPhone || a.patientId === currentUser?.id);
-  const myPrescriptions = prescriptions.filter(p => p.patientPhone === patientPhone || p.patientId === currentUser?.id);
+  const myAppointments = appointments.filter(a => (patientPhone && a.patientPhone === patientPhone) || a.patientId === currentUser?.id);
+  const myPrescriptions = prescriptions.filter(p => (patientPhone && p.patientPhone === patientPhone) || p.patientId === currentUser?.id);
+
+  const displayedAppointments = myAppointments.filter(a => {
+    if (apptFilter === 'ACTIVE') return a.status === 'CONFIRMED' || a.status === 'PENDING' || a.status === 'IN_PROGRESS';
+    if (apptFilter === 'COMPLETED') return a.status === 'COMPLETED';
+    if (apptFilter === 'CANCELLED') return a.status === 'CANCELLED';
+    return true;
+  });
 
   const [referralInfo, setReferralInfo] = React.useState<{
     referralCode: string;
     referralCount: number;
     rewardAmount: number;
   }>({
-    referralCode: (currentUser as any)?.referralCode || `SEVA-${patientName.toUpperCase().replace(/[^A-Z]/g, '')}-24`,
+    referralCode: (currentUser as any)?.referralCode || `SEVA-HEALTH-${(currentUser?.id || '24').slice(-4).toUpperCase()}`,
     referralCount: (currentUser as any)?.referralsCount || (currentUser as any)?.referralCount || 0,
     rewardAmount: (currentUser as any)?.walletBalance || 0,
   });
@@ -107,11 +113,8 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ onNavigate }
             {language === 'en' ? 'PATIENT PORTAL DASHBOARD' : 'मरीज़ पोर्टल डैशबोर्ड'}
           </span>
           <h1 className="text-3xl sm:text-4xl font-sora font-extrabold tracking-tight text-white">
-            {language === 'en' ? 'Welcome back, ' : 'स्वागत है, '}
-            <span className="bg-gradient-to-r from-[#2DD4BF] via-teal-200 to-sky-200 bg-clip-text text-transparent font-black">
-              {patientName}
-            </span>
-            <span className="inline-block animate-bounce ml-1.5">👋</span>
+            {language === 'en' ? 'Welcome Back' : 'वापसी पर स्वागत है'}
+            <span className="inline-block animate-bounce ml-2">👋</span>
           </h1>
           
           <p className="text-xs sm:text-sm text-slate-300 max-w-xl font-medium leading-relaxed">
@@ -141,19 +144,36 @@ export const PatientDashboard: React.FC<PatientDashboardProps> = ({ onNavigate }
               {language === 'en' ? 'Live queue tokens, physical OPD bookings, and completed video calls.' : 'लाइव लाइन टोकन, ओपीडी बुकिंग और पूर्ण वीडियो कॉल।'}
             </p>
           </div>
-          <span className="bg-sky-50 text-[#0F4C81] border border-sky-200 text-xs font-sora font-bold px-3 py-1.5 rounded-xl self-start sm:self-auto">
-            {myAppointments.length} {language === 'en' ? 'Total Records' : 'कुल रिकॉर्ड'}
-          </span>
+          
+          {/* Status Filter Tabs */}
+          <div className="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-2xl text-xs font-sora font-bold">
+            {[
+              { id: 'ALL', label: language === 'en' ? 'All' : 'सभी' },
+              { id: 'ACTIVE', label: language === 'en' ? 'Active / Confirmed' : 'सक्रिय / सत्यापित' },
+              { id: 'COMPLETED', label: language === 'en' ? 'Completed' : 'पूर्ण' },
+              { id: 'CANCELLED', label: language === 'en' ? 'Cancelled' : 'रद्द' }
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setApptFilter(tab.id as any)}
+                className={`px-3 py-1.5 rounded-xl transition cursor-pointer ${
+                  apptFilter === tab.id ? 'bg-white text-[#0B1F3A] shadow-xs font-black' : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
         </div>
 
-        {myAppointments.length === 0 ? (
+        {displayedAppointments.length === 0 ? (
           <div className="py-12 text-center text-slate-400 text-xs font-semibold bg-slate-50/80 rounded-2xl border border-dashed border-slate-200 space-y-2">
             <Calendar className="w-8 h-8 text-slate-300 mx-auto" />
-            <p>{language === 'en' ? 'No appointments found. Book your first consultation today!' : 'कोई अपॉइंटमेंट नहीं मिला। आज ही परामर्श बुक करें!'}</p>
+            <p>{language === 'en' ? 'No appointments found under this section.' : 'इस सेक्शन में कोई अपॉइंटमेंट नहीं मिला।'}</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {myAppointments.map(appt => {
+            {displayedAppointments.map(appt => {
               const statusLabelHi = 
                 appt.status === 'CONFIRMED' ? 'सत्यापित' :
                 appt.status === 'COMPLETED' ? 'पूर्ण' :

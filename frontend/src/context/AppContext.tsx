@@ -272,7 +272,7 @@ const mapAppointment = (appointment: any, doctors: DoctorUser[], clinics: Clinic
     doctorName: appointment.doctor?.name || appointment.doctorName || doctor?.name || '',
     doctorSpecialization: appointment.doctor?.specialization || appointment.doctorSpecialization || doctor?.specialization || '',
     clinicId: appointment.branchId || null,
-    clinicName: appointment.branch?.name || appointment.branch?.title || appointment.clinicName || clinic?.name || 'Virtual Clinic',
+    clinicName: appointment.branch?.name || appointment.branch?.title || appointment.clinicName || clinic?.name || (doctor?.clinicsCovered?.[0] ? clinics.find(c => c.id === doctor.clinicsCovered[0])?.name : '') || 'Jansevaarogyam Sarangpur Clinic',
     appointmentMode: appointment.bookingMode === 'VIRTUAL' ? 'VIDEO' : 'IN_CLINIC',
     tokenNumber: appointment.tokenNumber == null ? '' : String(appointment.tokenNumber),
     tokenSequence: Number(appointment.tokenNumber ?? 0),
@@ -798,6 +798,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     formData.append('appointmentDate', data.appointmentDate);
     formData.append('timeSlot', data.timeSlot);
     formData.append('symptoms', JSON.stringify(data.symptoms || []));
+    if (data.patientName) formData.append('patientName', data.patientName);
+    if (data.patientAge) formData.append('patientAge', String(data.patientAge));
+    if (data.patientGender) formData.append('patientGender', data.patientGender);
     if (data.patientNotes) formData.append('medicalConcerns', data.patientNotes);
     formData.append('paymentMode', data.paymentMethod === 'CASH_AT_CLINIC' ? 'CASH' : 'ONLINE');
 
@@ -810,15 +813,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const response = await api.post('/appointments/book', formData);
     
+    const resolvedDoc = doctors.find(d => d.id === data.doctorId) || doctors[0];
+    const resolvedClinic = clinics.find(c => c.id === data.clinicId) || (resolvedDoc?.clinicsCovered?.[0] ? clinics.find(c => c.id === resolvedDoc.clinicsCovered[0]) : null) || clinics[0];
+
     const newAppointment = {
       ...mapAppointment(response.data.appointment, doctors, clinics),
       razorpayOrderId: response.data.razorpayOrderId,
       razorpayKeyId: response.data.razorpayKeyId,
       razorpayAmount: response.data.amount,
       razorpayCurrency: response.data.currency,
-      patientName: data.patientName || currentUser?.name || 'Patient',
-      doctorName: doctors.find(d => d.id === data.doctorId)?.name || 'Doctor',
-      clinicName: clinics.find(c => c.id === data.clinicId)?.name || 'Virtual Clinic',
+      patientName: data.patientName || response.data.appointment?.patient?.name || currentUser?.name || 'Patient',
+      doctorName: resolvedDoc?.name || 'Doctor',
+      clinicName: resolvedClinic?.name || 'Jansevaarogyam Hospital',
     };
 
     const doc = doctors.find(d => d.id === data.doctorId) || doctors[0];
