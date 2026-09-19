@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   Users, 
   Stethoscope, 
@@ -9,13 +10,16 @@ import {
   Building2,
   Volume2,
   BookOpen,
-  Edit3,
   X,
   Clock,
   Loader2,
   ChevronDown,
-  FileText
+  FileText,
+  ArrowRight,
+  ArrowLeft,
+  ClipboardList
 } from 'lucide-react';
+import { HiPencilSquare, HiTrash, HiPlus } from 'react-icons/hi2';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { useApp, DEFAULT_DOCTOR_AVATAR } from '../context/AppContext';
@@ -169,6 +173,23 @@ export const DoctorConsole: React.FC<DoctorConsoleProps> = ({ onNavigate }) => {
   const [rescheduleTargetAppt, setRescheduleTargetAppt] = useState<Appointment | null>(null);
   const [rescheduleDate, setRescheduleDate] = useState<string>('');
   const [rescheduleTimeSlot, setRescheduleTimeSlot] = useState<string>('10:00 AM');
+
+  // Consultation Wizard State
+  const [wizardOpen, setWizardOpen] = useState(false);
+  const [wizardStep, setWizardStep] = useState<1 | 2 | 3>(1);
+  const [wizardPatient, setWizardPatient] = useState<Appointment | null>(null);
+
+  const openWizard = (appt?: Appointment) => {
+    setWizardPatient(appt || null);
+    setWizardStep(appt ? 2 : 1);
+    setWizardOpen(true);
+  };
+
+  const closeWizard = () => {
+    setWizardOpen(false);
+    setWizardStep(1);
+    setWizardPatient(null);
+  };
 
   const fallbackDoctor = {
     id: 'doc-default',
@@ -631,44 +652,43 @@ export const DoctorConsole: React.FC<DoctorConsoleProps> = ({ onNavigate }) => {
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-1.5 bg-[rgba(255,255,255,0.15)] p-1.5 rounded-2xl border border-white/20 text-xs font-bold font-heading backdrop-blur-md">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 w-full lg:w-auto">
+          <div className="grid grid-cols-2 w-full sm:w-auto p-1.5 gap-1.5 bg-[rgba(255,255,255,0.15)] rounded-2xl border border-white/20 text-xs font-bold font-heading backdrop-blur-md">
             <button
               onClick={() => setActiveConsoleTab('OPD')}
-              className={`px-4 py-2 rounded-xl transition flex items-center gap-2 cursor-pointer ${
-                activeConsoleTab === 'OPD' ? 'bg-gradient-to-r from-[#0B7A56] to-[#0F9D6D] text-white shadow-md font-extrabold border border-white/20' : 'text-emerald-100 hover:text-white'
+              className={`w-full flex items-center justify-center py-2 px-3 sm:px-4 rounded-xl transition cursor-pointer text-center whitespace-nowrap ${
+                activeConsoleTab === 'OPD' ? 'bg-gradient-to-r from-[#0B7A56] to-[#0F9D6D] text-white shadow-md font-extrabold border border-white/20' : 'text-emerald-100 hover:text-white hover:bg-white/10'
               }`}
             >
-              <Stethoscope className="w-4 h-4 text-white" />
               <span>{language === 'en' ? 'OPD & Queue' : 'ओपीडी एवं कतार'}</span>
             </button>
             <button
               onClick={() => setActiveConsoleTab('ARTICLES')}
-              className={`px-4 py-2 rounded-xl transition flex items-center gap-2 cursor-pointer ${
-                activeConsoleTab === 'ARTICLES' ? 'bg-emerald-600 text-white shadow-md font-extrabold' : 'text-slate-200 hover:text-white'
+              className={`w-full flex items-center justify-center py-2 px-3 sm:px-4 rounded-xl transition cursor-pointer text-center whitespace-nowrap ${
+                activeConsoleTab === 'ARTICLES' ? 'bg-gradient-to-r from-[#0B7A56] to-[#0F9D6D] text-white shadow-md font-extrabold border border-white/20' : 'text-emerald-100 hover:text-white hover:bg-white/10'
               }`}
             >
-              <BookOpen className="w-4 h-4 text-white" />
               <span>{language === 'en' ? 'My Health Articles' : 'मेरे स्वास्थ्य लेख'}</span>
             </button>
           </div>
 
-          <div className="flex items-center gap-3 bg-white/10 p-3 rounded-2xl border border-white/10 text-xs font-sans">
-            <div className="text-center px-3 border-r border-white/20">
-              <p className="text-lg font-heading font-extrabold text-amber-300">{appointments.length}</p>
-              <p className="text-[10px] text-slate-300">{language === 'en' ? 'Total Today' : 'आज के कुल'}</p>
+          {/* Stats Box - Equal 3-column Grid with Evenly Distributed Spacing */}
+          <div className="grid grid-cols-3 w-full sm:w-auto bg-white/10 p-2.5 sm:p-3 rounded-2xl border border-white/10 text-xs font-sans backdrop-blur-md">
+            <div className="text-center px-2 sm:px-4 py-0.5 border-r border-white/20 flex flex-col items-center justify-center">
+              <p className="text-lg font-heading font-extrabold text-amber-300 leading-none mb-1">{appointments.length}</p>
+              <p className="text-[10px] text-slate-300 whitespace-nowrap">{language === 'en' ? 'Total Today' : 'आज के कुल'}</p>
             </div>
-            <div className="text-center px-3 border-r border-white/20">
-              <p className="text-lg font-heading font-extrabold text-emerald-400">
+            <div className="text-center px-2 sm:px-4 py-0.5 border-r border-white/20 flex flex-col items-center justify-center">
+              <p className="text-lg font-heading font-extrabold text-emerald-400 leading-none mb-1">
                 {appointments.filter(a => a.status === 'COMPLETED').length}
               </p>
-              <p className="text-[10px] text-slate-300">{language === 'en' ? 'Completed' : 'पूर्ण हुए'}</p>
+              <p className="text-[10px] text-slate-300 whitespace-nowrap">{language === 'en' ? 'Completed' : 'पूर्ण हुए'}</p>
             </div>
-            <div className="text-center px-3">
-              <p className="text-lg font-heading font-extrabold text-sky-300">
+            <div className="text-center px-2 sm:px-4 py-0.5 flex flex-col items-center justify-center">
+              <p className="text-lg font-heading font-extrabold text-sky-300 leading-none mb-1">
                 {appointments.filter(a => a.status === 'IN_PROGRESS' || a.status === 'CONFIRMED').length}
               </p>
-              <p className="text-[10px] text-slate-300">{language === 'en' ? 'In Queue' : 'कतार में'}</p>
+              <p className="text-[10px] text-slate-300 whitespace-nowrap">{language === 'en' ? 'In Queue' : 'कतार में'}</p>
             </div>
           </div>
         </div>
@@ -680,7 +700,7 @@ export const DoctorConsole: React.FC<DoctorConsoleProps> = ({ onNavigate }) => {
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100 pb-5">
             <div>
               <span className="bg-emerald-50 text-emerald-800 border border-emerald-200/60 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-                {language === 'en' ? 'Doctor Knowledge Publishing' : 'चिकित्सा लेख प्रकाशन'}
+                {language === 'en' ? 'Doctor Knowledge Base' : 'चिकित्सा ज्ञान केंद्र'}
               </span>
               <h3 className="text-2xl font-heading font-extrabold text-slate-900 mt-2">
                 {language === 'en' ? 'Health Articles & Medical Advice' : 'स्वास्थ्य लेख एवं चिकित्सा सलाह'}
@@ -695,8 +715,8 @@ export const DoctorConsole: React.FC<DoctorConsoleProps> = ({ onNavigate }) => {
               onClick={openCreateArticleModal}
               className="bg-emerald-600 hover:bg-emerald-700 text-white font-heading font-extrabold px-5 py-2.5 rounded-xl text-xs flex items-center gap-2 shadow-md transition cursor-pointer shrink-0"
             >
-              <Plus className="w-4 h-4" />
-              <span>{language === 'en' ? 'Publish New Article' : 'नया लेख प्रकाशित करें'}</span>
+              <HiPlus className="w-4 h-4 text-white stroke-[0.5]" />
+              <span>{language === 'en' ? 'Add New Article' : 'नया लेख जोड़ें'}</span>
             </button>
           </div>
 
@@ -705,7 +725,7 @@ export const DoctorConsole: React.FC<DoctorConsoleProps> = ({ onNavigate }) => {
               <div className="col-span-full py-12 text-center text-slate-500 font-medium bg-slate-50 rounded-2xl border border-dashed border-slate-200">
                 <BookOpen className="w-8 h-8 text-slate-400 mx-auto mb-2" />
                 <p className="font-heading font-bold text-slate-800 text-sm">No Health Articles Published Yet</p>
-                <p className="text-xs text-slate-500 mt-1">Click "Publish New Article" above to share medical advice with patients.</p>
+                <p className="text-xs text-slate-500 mt-1">Click "Add New Article" above to share medical advice with patients.</p>
               </div>
             ) : (
               healthBlogs.map(art => (
@@ -738,15 +758,15 @@ export const DoctorConsole: React.FC<DoctorConsoleProps> = ({ onNavigate }) => {
                       onClick={() => openEditArticleModal(art)}
                       className="flex-1 bg-slate-100 hover:bg-slate-200 text-[#0F4C81] font-bold py-2 rounded-xl text-xs transition flex items-center justify-center gap-1.5 cursor-pointer"
                     >
-                      <Edit3 className="w-3.5 h-3.5" />
+                      <HiPencilSquare className="w-4 h-4 text-[#0F4C81]" />
                       <span>Edit</span>
                     </button>
                     <button
                       onClick={() => setPendingArticleDeleteId(art.id)}
-                      className="bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white font-bold p-2 rounded-xl text-xs transition cursor-pointer"
+                      className="bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white font-bold p-2.5 rounded-xl text-xs transition cursor-pointer flex items-center justify-center group/del"
                       title="Delete Article"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <HiTrash className="w-4 h-4 text-rose-600 group-hover/del:text-white transition-colors" />
                     </button>
                   </div>
                 </div>
@@ -759,7 +779,7 @@ export const DoctorConsole: React.FC<DoctorConsoleProps> = ({ onNavigate }) => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
         {/* Left Col: Live Queue Manager */}
-        <div className="lg:col-span-4 bg-white rounded-3xl border border-slate-200/80 p-5 shadow-xs space-y-4 flex flex-col max-h-210">
+        <div className="lg:col-span-4 bg-white rounded-3xl border border-slate-200/80 p-4 sm:p-5 shadow-xs space-y-4 flex flex-col min-h-[400px] max-h-[85vh]">
           <div className="flex items-center justify-between">
             <h3 className="font-heading font-extrabold text-base text-slate-900 flex items-center gap-2">
               <Users className="w-5 h-5 text-[#0F4C81]" />
@@ -769,17 +789,17 @@ export const DoctorConsole: React.FC<DoctorConsoleProps> = ({ onNavigate }) => {
           </div>
 
           {/* Queue Filter Buttons (Section 8: Pending, Rescheduled, Cancelled, All) */}
-          <div className="flex items-center gap-1 bg-slate-100 p-1.5 rounded-2xl text-[11px] font-heading font-bold overflow-x-auto whitespace-nowrap shrink-0 max-w-full">
+          <div className="grid grid-cols-4 gap-1 bg-slate-100 p-1.5 rounded-2xl text-[10px] sm:text-[11px] font-heading font-bold shrink-0">
             {[
               { id: 'PENDING', label: 'Pending' },
-              { id: 'RESCHEDULED', label: 'Rescheduled' },
+              { id: 'RESCHEDULED', label: 'Reschd.' },
               { id: 'CANCELLED', label: 'Cancelled' },
               { id: 'ALL', label: 'All' },
             ].map(f => (
               <button
                 key={f.id}
                 onClick={() => setSelectedQueueFilter(f.id as any)}
-                className={`flex-1 py-1.5 rounded-xl transition cursor-pointer ${
+                className={`py-1.5 rounded-xl transition cursor-pointer text-center truncate ${
                   selectedQueueFilter === f.id ? 'bg-white text-[#0F4C81] shadow-xs font-extrabold' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
@@ -878,6 +898,7 @@ export const DoctorConsole: React.FC<DoctorConsoleProps> = ({ onNavigate }) => {
                   </div>
                 )}
 
+                {/* Video start consultation button */}
                 {appt.appointmentMode === 'VIDEO' && appt.status !== 'CANCELLED' && appt.status !== 'COMPLETED' && (
                   <button
                     onClick={(e) => {
@@ -889,9 +910,20 @@ export const DoctorConsole: React.FC<DoctorConsoleProps> = ({ onNavigate }) => {
                         window.location.href = '/telemedicine';
                       }
                     }}
-                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-heading font-extrabold py-2 rounded-xl text-xs flex items-center justify-center gap-1.5 transition shadow-sm cursor-pointer"
+                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-heading font-extrabold py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 transition shadow-sm cursor-pointer"
                   >
                     <Video className="w-4 h-4 animate-pulse" />
+                    <span>Start Video Call</span>
+                  </button>
+                )}
+
+                {/* In-clinic Start Consultation wizard button for CONFIRMED / IN_PROGRESS */}
+                {appt.appointmentMode !== 'VIDEO' && (appt.status === 'CONFIRMED' || appt.status === 'IN_PROGRESS') && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); openWizard(appt); }}
+                    className="w-full bg-gradient-to-r from-[#0B1F3A] to-[#0F4C81] hover:opacity-90 text-white font-heading font-extrabold py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 transition shadow-sm cursor-pointer"
+                  >
+                    <ClipboardList className="w-4 h-4" />
                     <span>Start Consultation</span>
                   </button>
                 )}
@@ -1263,17 +1295,404 @@ export const DoctorConsole: React.FC<DoctorConsoleProps> = ({ onNavigate }) => {
       </div>
       )}
 
+      {/* ===== CONSULTATION WIZARD MODAL ===== */}
+      {wizardOpen && (
+        <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-in fade-in duration-150">
+          <div className="bg-white rounded-3xl w-full max-w-2xl shadow-2xl border border-slate-100 flex flex-col max-h-[92vh] my-auto overflow-hidden">
+
+            {/* Wizard Header */}
+            <div className="bg-gradient-to-r from-[#0B1F3A] to-[#0F4C81] text-white px-5 sm:px-7 py-4 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-3">
+                <ClipboardList className="w-5 h-5 text-emerald-300 shrink-0" />
+                <div>
+                  <h3 className="font-heading font-extrabold text-base sm:text-lg leading-tight">
+                    {language === 'en' ? 'Patient Consultation' : 'रोगी परामर्श'}
+                  </h3>
+                  <p className="text-[11px] text-slate-300 mt-0.5">
+                    {language === 'en'
+                      ? `Step ${wizardStep} of 3 — ${wizardStep === 1 ? 'Select Patient' : wizardStep === 2 ? 'Diagnosis & Medicines' : 'Prescription Review'}`
+                      : `चरण ${wizardStep} / 3`}
+                  </p>
+                </div>
+              </div>
+              <button onClick={closeWizard} className="p-1.5 rounded-xl hover:bg-white/10 transition cursor-pointer">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Step Indicators */}
+            <div className="flex items-center gap-0 px-5 sm:px-7 py-3 bg-slate-50 border-b border-slate-100 shrink-0">
+              {[
+                { n: 1, label: language === 'en' ? 'Select Patient' : 'रोगी चुनें' },
+                { n: 2, label: language === 'en' ? 'Diagnosis & Rx' : 'निदान और दवाएं' },
+                { n: 3, label: language === 'en' ? 'Review & Sign' : 'समीक्षा करें' },
+              ].map((s, i) => (
+                <React.Fragment key={s.n}>
+                  <div className={`flex items-center gap-1.5 ${wizardStep === s.n ? 'opacity-100' : wizardStep > s.n ? 'opacity-70' : 'opacity-35'}`}>
+                    <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 ${wizardStep >= s.n ? 'bg-[#0F4C81] text-white' : 'bg-slate-200 text-slate-600'}`}>
+                      {wizardStep > s.n ? <CheckCircle2 className="w-3.5 h-3.5" /> : s.n}
+                    </span>
+                    <span className="text-[10px] font-bold text-slate-700 hidden sm:block">{s.label}</span>
+                  </div>
+                  {i < 2 && <div className="flex-1 h-px bg-slate-200 mx-1.5" />}
+                </React.Fragment>
+              ))}
+            </div>
+
+            {/* Wizard Body — scrollable */}
+            <div className="flex-1 overflow-y-auto px-5 sm:px-7 py-5 space-y-5">
+
+              {/* ---- STEP 1: Select Confirmed Patient ---- */}
+              {wizardStep === 1 && (
+                <div className="space-y-4">
+                  <p className="text-xs text-slate-500 font-medium">
+                    {language === 'en'
+                      ? 'Select a confirmed patient from the queue to start consultation.'
+                      : 'परामर्श शुरू करने के लिए कतार से एक पुष्टिकृत रोगी चुनें।'}
+                  </p>
+                  <div className="space-y-2">
+                    {filteredAppointments.filter(a => a.status === 'CONFIRMED' || a.status === 'IN_PROGRESS').length === 0 ? (
+                      <div className="py-10 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                        <Users className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                        <p className="text-xs font-bold text-slate-500">
+                          {language === 'en' ? 'No confirmed patients in queue.' : 'कतार में कोई पुष्टिकृत रोगी नहीं है।'}
+                        </p>
+                      </div>
+                    ) : (
+                      filteredAppointments
+                        .filter(a => a.status === 'CONFIRMED' || a.status === 'IN_PROGRESS')
+                        .map(appt => (
+                          <button
+                            key={appt.id}
+                            onClick={() => { setWizardPatient(appt); setWizardStep(2); }}
+                            className={`w-full p-4 rounded-2xl border text-left transition-all cursor-pointer flex items-center justify-between gap-3 group ${
+                              wizardPatient?.id === appt.id
+                                ? 'border-[#0F4C81] bg-sky-50/60 ring-2 ring-[#0F4C81]/20'
+                                : 'border-slate-200 hover:border-[#0F4C81]/40 bg-white hover:bg-sky-50/30'
+                            }`}
+                          >
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div className="w-10 h-10 rounded-xl bg-[#0B1F3A] text-white font-black text-sm flex items-center justify-center shrink-0">
+                                {appt.tokenNumber?.replace(/[^0-9]/g, '').slice(-2) || '—'}
+                              </div>
+                              <div className="min-w-0">
+                                <p className="font-heading font-extrabold text-sm text-slate-900 truncate">{appt.patientName || 'Patient'}</p>
+                                <p className="text-xs text-slate-500 font-medium">
+                                  {appt.patientAge ? `${appt.patientAge} Yrs` : ''}{appt.patientGender ? ` • ${appt.patientGender}` : ''} • {appt.timeSlot}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${appt.status === 'CONFIRMED' ? 'bg-teal-100 text-teal-800' : 'bg-sky-100 text-sky-800'}`}>
+                                {appt.status}
+                              </span>
+                              <ArrowRight className="w-4 h-4 text-[#0F4C81] opacity-0 group-hover:opacity-100 transition" />
+                            </div>
+                          </button>
+                        ))
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* ---- STEP 2: Diagnosis, Symptoms & Medicines ---- */}
+              {wizardStep === 2 && (
+                <div className="space-y-5">
+                  {/* Selected Patient mini-banner */}
+                  {wizardPatient && (
+                    <div className="bg-[#0B1F3A]/5 border border-[#0F4C81]/20 rounded-2xl p-3 flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-xl bg-[#0B1F3A] text-white font-black text-xs flex items-center justify-center shrink-0">
+                        {wizardPatient.tokenNumber?.replace(/[^0-9]/g, '').slice(-2) || '—'}
+                      </div>
+                      <div>
+                        <p className="font-heading font-extrabold text-sm text-slate-900">{wizardPatient.patientName}</p>
+                        <p className="text-xs text-slate-500">{wizardPatient.patientAge ? `${wizardPatient.patientAge} Yrs` : ''}{wizardPatient.patientGender ? ` • ${wizardPatient.patientGender}` : ''}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Diagnosis */}
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                      {language === 'en' ? 'Clinical Diagnosis' : 'नैदानिक निदान'}
+                    </label>
+                    <input
+                      type="text"
+                      value={diagnosis}
+                      onChange={e => setDiagnosis(e.target.value)}
+                      placeholder="e.g. Type-2 Diabetes Mellitus"
+                      className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0F4C81]/30 focus:border-[#0F4C81]/50 transition"
+                    />
+                  </div>
+
+                  {/* Symptoms */}
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                      {language === 'en' ? 'Symptoms & Complaints' : 'लक्षण एवं शिकायतें'}
+                    </label>
+                    <input
+                      type="text"
+                      value={symptomsInput}
+                      onChange={e => setSymptomsInput(e.target.value)}
+                      placeholder="e.g. Fatigue, high sugar, frequent urination"
+                      className="w-full px-3.5 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0F4C81]/30 focus:border-[#0F4C81]/50 transition"
+                    />
+                  </div>
+
+                  {/* Quick Medicine Pills */}
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+                      {language === 'en' ? 'Quick Add Medicine' : 'त्वरित दवा जोड़ें'}
+                    </label>
+                    <div className="flex flex-wrap gap-1.5">
+                      {quickMedicines.map(qm => (
+                        <button
+                          key={qm}
+                          type="button"
+                          onClick={() => setMedName(qm)}
+                          className="text-[11px] bg-slate-100 hover:bg-[#0F4C81] hover:text-white px-3 py-1.5 rounded-lg font-medium text-slate-700 transition cursor-pointer"
+                        >
+                          + {qm}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Add Medicine Form */}
+                  <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-4 space-y-3">
+                    <h4 className="font-heading font-extrabold text-sm text-slate-900 flex items-center gap-1.5">
+                      <Stethoscope className="w-4 h-4 text-[#0F4C81]" />
+                      <span>{language === 'en' ? 'Add Medicine' : 'दवा जोड़ें'}</span>
+                    </h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-600 mb-1">
+                          {language === 'en' ? 'Medicine Name' : 'दवा का नाम'}
+                        </label>
+                        <input
+                          type="text"
+                          value={medName}
+                          onChange={e => setMedName(e.target.value)}
+                          placeholder="e.g. Tab. Metformin 500mg"
+                          className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-600 mb-1">
+                          {language === 'en' ? 'Dosage' : 'खुराक'}
+                        </label>
+                        <input
+                          type="text"
+                          value={medDosage}
+                          onChange={e => setMedDosage(e.target.value)}
+                          className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-600 mb-1">
+                          {language === 'en' ? 'Frequency' : 'आवृत्ति'}
+                        </label>
+                        <select
+                          value={medFreq}
+                          onChange={e => setMedFreq(e.target.value)}
+                          className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500 cursor-pointer"
+                        >
+                          <option value="1-0-1">1-0-1 (Morning & Night)</option>
+                          <option value="1-0-0">1-0-0 (Morning Only)</option>
+                          <option value="0-0-1">0-0-1 (Night Only)</option>
+                          <option value="1-1-1">1-1-1 (Thrice Daily)</option>
+                          <option value="Once Weekly">Once Weekly</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-bold text-slate-600 mb-1">
+                          {language === 'en' ? 'Duration (Days)' : 'अवधि (दिन)'}
+                        </label>
+                        <input
+                          type="number"
+                          value={medDays}
+                          onChange={e => setMedDays(Number(e.target.value))}
+                          className="w-full px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                        />
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleAddMedicine}
+                      className="w-full bg-[#0F4C81] hover:bg-[#0B2545] text-white py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
+                    >
+                      <Plus className="w-4 h-4" />
+                      <span>{language === 'en' ? 'Add to Prescription' : 'प्रिस्क्रिप्शन में जोड़ें'}</span>
+                    </button>
+                  </div>
+
+                  {/* Medicine List */}
+                  {medicineItems.length > 0 && (
+                    <div className="overflow-x-auto border border-slate-200/80 rounded-xl bg-white">
+                      <table className="w-full text-left text-xs min-w-[420px]">
+                        <thead className="bg-slate-100/80 text-slate-700 font-bold border-b border-slate-200/80">
+                          <tr>
+                            <th className="p-2.5">Medicine</th>
+                            <th className="p-2.5">Dosage</th>
+                            <th className="p-2.5">Freq.</th>
+                            <th className="p-2.5">Days</th>
+                            <th className="p-2.5 text-right">Remove</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                          {medicineItems.map(item => (
+                            <tr key={item.id} className="hover:bg-slate-50">
+                              <td className="p-2.5 font-bold text-slate-900 max-w-[140px] truncate">{item.medicineName}</td>
+                              <td className="p-2.5 text-slate-600">{item.dosage}</td>
+                              <td className="p-2.5 font-mono font-bold text-[#0F4C81]">{item.frequency}</td>
+                              <td className="p-2.5 text-slate-600">{item.durationDays}d</td>
+                              <td className="p-2.5 text-right">
+                                <button onClick={() => handleRemoveMedicine(item.id)} className="p-1 text-slate-400 hover:text-rose-600 rounded transition cursor-pointer">
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ---- STEP 3: Prescription Review + Follow-up Date ---- */}
+              {wizardStep === 3 && (
+                <div className="space-y-5">
+                  <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 space-y-3">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+                      <h4 className="font-heading font-extrabold text-sm text-emerald-900">
+                        {language === 'en' ? 'Prescription Preview' : 'प्रिस्क्रिप्शन पूर्वावलोकन'}
+                      </h4>
+                    </div>
+
+                    {/* Patient */}
+                    <div className="bg-white border border-emerald-100 rounded-xl p-3 text-xs space-y-1">
+                      <p className="font-extrabold text-slate-900">{wizardPatient?.patientName || activeAppointment?.patientName || '—'}</p>
+                      <p className="text-slate-500">{wizardPatient?.patientAge ? `${wizardPatient.patientAge} Yrs` : ''}{wizardPatient?.patientGender ? ` • ${wizardPatient.patientGender}` : ''}</p>
+                    </div>
+
+                    {/* Diagnosis */}
+                    <div className="space-y-1">
+                      <p className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">Diagnosis</p>
+                      <p className="text-xs text-slate-800 font-medium bg-white border border-emerald-100 rounded-lg p-2.5">{diagnosis || '—'}</p>
+                    </div>
+
+                    {/* Symptoms */}
+                    <div className="space-y-1">
+                      <p className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">Symptoms</p>
+                      <p className="text-xs text-slate-800 font-medium bg-white border border-emerald-100 rounded-lg p-2.5">{symptomsInput || '—'}</p>
+                    </div>
+
+                    {/* Medicines */}
+                    {medicineItems.length > 0 && (
+                      <div className="space-y-1">
+                        <p className="text-[10px] font-bold text-emerald-700 uppercase tracking-wider">
+                          Rx — {medicineItems.length} Medicine{medicineItems.length > 1 ? 's' : ''}
+                        </p>
+                        <div className="bg-white border border-emerald-100 rounded-lg overflow-hidden">
+                          {medicineItems.map((item, idx) => (
+                            <div key={item.id} className={`px-3 py-2 text-xs ${idx % 2 === 0 ? '' : 'bg-slate-50'}`}>
+                              <span className="font-bold text-slate-900">{item.medicineName}</span>
+                              <span className="text-slate-500 ml-2">{item.dosage} • {item.frequency} • {item.durationDays} Days</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Follow-up Date */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-sky-50 border border-sky-200 p-4 rounded-2xl">
+                    <div>
+                      <p className="text-xs font-bold text-sky-900">
+                        {language === 'en' ? 'Next Follow-up Date' : 'अगली फॉलो-अप तारीख'}
+                      </p>
+                      <p className="text-[11px] text-sky-700 mt-0.5">
+                        {language === 'en' ? 'Optional — leave blank if not required' : 'वैकल्पिक — यदि आवश्यक न हो तो खाली छोड़ें'}
+                      </p>
+                    </div>
+                    <input
+                      type="date"
+                      value={nextFollowUpDate}
+                      onChange={e => setNextFollowUpDate(e.target.value)}
+                      className="px-3 py-2 bg-white border border-sky-300 rounded-xl text-xs font-bold text-sky-900 focus:outline-none focus:ring-2 focus:ring-sky-400 w-full sm:w-auto"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Wizard Footer — Next / Back / Submit */}
+            <div className="px-5 sm:px-7 py-4 border-t border-slate-100 bg-slate-50/50 shrink-0 flex items-center justify-between gap-3">
+              <button
+                onClick={() => {
+                  if (wizardStep === 1) closeWizard();
+                  else setWizardStep((prev) => (prev - 1) as 1 | 2 | 3);
+                }}
+                className="flex items-center gap-1.5 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition cursor-pointer"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span>{wizardStep === 1 ? (language === 'en' ? 'Cancel' : 'रद्द करें') : (language === 'en' ? 'Back' : 'वापस')}</span>
+              </button>
+
+              {wizardStep < 3 ? (
+                <button
+                  onClick={() => {
+                    if (wizardStep === 1 && !wizardPatient) return;
+                    if (wizardStep === 1 && wizardPatient) { setActiveAppointment(wizardPatient); }
+                    setWizardStep((prev) => (prev + 1) as 2 | 3);
+                  }}
+                  disabled={wizardStep === 1 && !wizardPatient}
+                  className="flex items-center gap-1.5 px-6 py-2.5 bg-gradient-to-r from-[#0B1F3A] to-[#0F4C81] hover:opacity-90 text-white font-extrabold rounded-xl text-xs transition cursor-pointer shadow-md disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  <span>{language === 'en' ? 'Next' : 'आगे'}</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              ) : (
+                <button
+                  onClick={async () => {
+                    if (wizardPatient) setActiveAppointment(wizardPatient);
+                    await handleSavePrescription();
+                    closeWizard();
+                  }}
+                  disabled={isSavingPrescription}
+                  className="flex items-center gap-1.5 px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:opacity-90 text-white font-extrabold rounded-xl text-xs transition cursor-pointer shadow-md disabled:opacity-75"
+                >
+                  {isSavingPrescription ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>{language === 'en' ? 'Saving...' : 'सहेजा जा रहा है...'}</span>
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="w-4 h-4" />
+                      <span>{language === 'en' ? 'Sign & Issue Rx' : 'हस्ताक्षर करें और जारी करें'}</span>
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ARTICLE PUBLISH / EDIT MODAL */}
-      {isArticleModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl border border-slate-100 space-y-5 animate-fade-in font-sans">
+      {isArticleModalOpen && createPortal(
+        <div className="fixed inset-0 min-h-screen w-screen bg-slate-900/60 backdrop-blur-md z-999999 flex items-center justify-center p-3 sm:p-4 overflow-y-auto font-sans">
+          <div className="bg-white rounded-3xl max-w-xl w-full p-5 sm:p-6 shadow-2xl border border-slate-100 space-y-4 sm:space-y-5 animate-fade-in font-sans max-h-[92vh] overflow-y-auto my-auto relative z-10">
             <div className="flex items-center justify-between border-b border-slate-100 pb-4">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
                   <BookOpen className="w-4 h-4" />
                 </div>
                 <h3 className="font-heading font-extrabold text-slate-900 text-lg">
-                  {editingArticleId ? 'Edit Health Article' : 'Publish New Health Article'}
+                  {editingArticleId ? 'Edit Health Article' : 'Add New Health Article'}
                 </h3>
               </div>
               <button
@@ -1329,24 +1748,24 @@ export const DoctorConsole: React.FC<DoctorConsoleProps> = ({ onNavigate }) => {
                   <input
                     type="number"
                     min={1}
-                    max={30}
                     value={articleReadTime}
                     onChange={(e) => setArticleReadTime(Number(e.target.value))}
                     className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
+                    required
                   />
                 </div>
               </div>
 
               <div>
                 <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1.5 text-[11px]">
-                  Summary Excerpt (Card Subtitle) *
+                  Short Excerpt / Summary *
                 </label>
-                <textarea
-                  rows={2}
+                <input
+                  type="text"
                   value={articleExcerpt}
                   onChange={(e) => setArticleExcerpt(e.target.value)}
-                  placeholder="Short 2-line summary visible on cards..."
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
+                  placeholder="Brief 1-2 sentence preview for patient cards..."
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
                   required
                 />
               </div>
@@ -1410,7 +1829,8 @@ export const DoctorConsole: React.FC<DoctorConsoleProps> = ({ onNavigate }) => {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* ARTICLE DELETE CONFIRMATION POPUP MODAL */}
@@ -1434,9 +1854,9 @@ export const DoctorConsole: React.FC<DoctorConsoleProps> = ({ onNavigate }) => {
       />
 
       {/* RESCHEDULE APPOINTMENT MODAL */}
-      {rescheduleTargetAppt && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-5 animate-fade-in font-sans">
+      {rescheduleTargetAppt && createPortal(
+        <div className="fixed inset-0 min-h-screen w-screen bg-slate-900/60 backdrop-blur-md z-999999 flex items-center justify-center p-4 font-sans">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-5 animate-fade-in font-sans relative z-10">
             <div className="flex items-center justify-between border-b border-slate-100 pb-4">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold">
@@ -1508,7 +1928,8 @@ export const DoctorConsole: React.FC<DoctorConsoleProps> = ({ onNavigate }) => {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* HIDDEN PRINT CONTAINER FOR NATIVE BROWSER PRINT DIALOG */}

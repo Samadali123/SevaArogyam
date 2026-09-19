@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Lock, CheckCircle2, User, AlertCircle, ShieldCheck } from 'lucide-react';
+import { X, Lock, User, AlertCircle, ShieldCheck } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { getApiErrorMessage } from '../services/api';
 
@@ -184,13 +184,6 @@ export const OtpAuthModal: React.FC = () => {
                 </h4>
                 <p className="text-xs text-slate-500">
                   {language === 'en' ? 'Sent to' : 'पर भेजा गया:'} <strong className="text-slate-800">{patientEmail}</strong>
-                  <button 
-                    type="button" 
-                    onClick={() => setStep('EMAIL')}
-                    className="ml-2 text-xs font-bold text-[#0F4C81] hover:underline"
-                  >
-                    {language === 'en' ? 'Edit' : 'बदलें'}
-                  </button>
                 </p>
                 <div className="bg-amber-50 border border-amber-200 text-amber-900 text-[11px] p-2.5 rounded-xl font-medium text-center leading-tight">
                   📧 {language === 'en' 
@@ -209,10 +202,7 @@ export const OtpAuthModal: React.FC = () => {
                   className="w-full text-center text-2xl font-mono tracking-widest py-3 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#0F4C81] focus:bg-white"
                   autoFocus
                 />
-                <p className="text-center text-[11px] text-emerald-600 font-semibold mt-2 flex items-center justify-center gap-1">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>{language === 'en' ? 'Demo Code:' : 'डेमो कोड:'} <strong>123456</strong></span>
-                </p>
+
               </div>
 
               <button

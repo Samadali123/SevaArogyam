@@ -64,30 +64,32 @@ export const ArticleDetail: React.FC<ArticleDetailProps> = ({ onBack }) => {
       
       {/* 1. ARTICLE TOP NAVIGATION BAR */}
       <div className="bg-white border-b border-slate-200 sticky top-16 z-30 shadow-xs">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between">
+        <div className="max-w-5xl mx-auto px-3 sm:px-6 py-3 flex items-center justify-between gap-2 flex-wrap">
           <button
             onClick={onBack}
-            className="inline-flex items-center gap-2 text-xs font-black text-[#0F4C81] hover:text-[#0A365C] bg-sky-50 hover:bg-sky-100 px-3.5 py-2 rounded-xl transition cursor-pointer"
+            className="inline-flex items-center gap-1.5 text-xs font-black text-[#0F4C81] hover:text-[#0A365C] bg-sky-50 hover:bg-sky-100 px-3 py-2 rounded-xl transition cursor-pointer shrink-0"
           >
-            <ArrowLeft className="w-4 h-4" />
-            <span>{language === 'en' ? 'Back to Health Tips' : 'स्वास्थ्य सुझावों पर वापस लौटें'}</span>
+            <ArrowLeft className="w-4 h-4 shrink-0" />
+            <span className="hidden sm:inline">{language === 'en' ? 'Back to Health Tips' : 'वापस लौटें'}</span>
+            <span className="sm:hidden">{language === 'en' ? 'Back' : 'वापस'}</span>
           </button>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 shrink-0">
             <button
               onClick={handleShare}
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-xl transition cursor-pointer"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-2.5 py-2 rounded-xl transition cursor-pointer"
+              title={language === 'en' ? 'Share' : 'शेयर करें'}
             >
-              <Share2 className="w-3.5 h-3.5" />
-              <span>{language === 'en' ? 'Share' : 'शेयर करें'}</span>
+              <Share2 className="w-3.5 h-3.5 shrink-0" />
+              <span className="hidden sm:inline">{language === 'en' ? 'Share' : 'शेयर करें'}</span>
             </button>
             
             <button
               onClick={() => openBookingModal(doctorAuthor.id, undefined)}
-              className="inline-flex items-center gap-1.5 bg-[#10B981] hover:bg-emerald-600 text-slate-950 text-xs font-black px-4 py-2 rounded-xl shadow-xs transition cursor-pointer"
+              className="inline-flex items-center gap-1.5 bg-[#10B981] hover:bg-emerald-600 text-slate-950 text-xs font-black px-3 sm:px-4 py-2 rounded-xl shadow-xs transition cursor-pointer"
             >
-              <Stethoscope className="w-3.5 h-3.5" />
-              <span>{language === 'en' ? 'Consult Author Doctor' : 'लेखक डॉक्टर से परामर्श लें'}</span>
+              <Stethoscope className="w-3.5 h-3.5 shrink-0" />
+              <span className="hidden xs:inline sm:inline">{language === 'en' ? 'Consult Doctor' : 'परामर्श लें'}</span>
             </button>
           </div>
         </div>
@@ -99,7 +101,7 @@ export const ArticleDetail: React.FC<ArticleDetailProps> = ({ onBack }) => {
         {/* Article Header Details */}
         <div className="space-y-4 text-center sm:text-left">
           
-          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3">
+          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 sm:gap-3">
             <span className="bg-[#0B2545] text-emerald-400 font-black text-xs px-3.5 py-1 rounded-full uppercase tracking-wider">
               {currentArticle.category}
             </span>
@@ -113,30 +115,30 @@ export const ArticleDetail: React.FC<ArticleDetailProps> = ({ onBack }) => {
             </span>
           </div>
 
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 leading-[1.2] tracking-tight">
+          <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black text-slate-900 leading-[1.2] tracking-tight">
             {currentArticle.title}
           </h1>
 
-          <p className="text-lg text-slate-600 font-medium leading-relaxed">
+          <p className="text-base sm:text-lg text-slate-600 font-medium leading-relaxed">
             {currentArticle.excerpt}
           </p>
 
           {/* Author Card */}
-          <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
+          <div className="bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0">
               <img 
                 src={doctorAuthor.avatarUrl || DEFAULT_DOCTOR_AVATAR} 
                 alt={doctorAuthor.name}
                 onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_DOCTOR_AVATAR; }}
-                className="w-12 h-12 rounded-xl object-cover border border-slate-200 shrink-0" 
+                className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl object-cover border border-slate-200 shrink-0" 
               />
-              <div>
+              <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <h4 className="font-black text-sm text-slate-900">{currentArticle.authorName}</h4>
-                  <UserCheck className="w-4 h-4 text-emerald-600" />
+                  <h4 className="font-black text-sm text-slate-900 truncate">{currentArticle.authorName}</h4>
+                  <UserCheck className="w-4 h-4 text-emerald-600 shrink-0" />
                 </div>
-                <p className="text-xs text-[#0F4C81] font-bold">
-                  {doctorAuthor.specialization} • {language === 'en' ? 'Jansevarogyam Senior Specialist' : 'जनसेवा आरोग्यम वरिष्ठ विशेषज्ञ'}
+                <p className="text-xs text-[#0F4C81] font-bold truncate">
+                  {doctorAuthor.specialization}
                 </p>
               </div>
             </div>
@@ -152,7 +154,7 @@ export const ArticleDetail: React.FC<ArticleDetailProps> = ({ onBack }) => {
         </div>
 
         {/* Hero Cover Image */}
-        <div className="rounded-3xl overflow-hidden border border-slate-200 shadow-lg relative h-72 sm:h-96">
+        <div className="rounded-2xl sm:rounded-3xl overflow-hidden border border-slate-200 shadow-lg relative h-52 sm:h-72 lg:h-96">
           <img 
             src={currentArticle.imageUrl} 
             alt={currentArticle.title}
@@ -162,7 +164,7 @@ export const ArticleDetail: React.FC<ArticleDetailProps> = ({ onBack }) => {
         </div>
 
         {/* Article Body Content */}
-        <div className="bg-white p-6 sm:p-10 rounded-3xl border border-slate-200 shadow-sm space-y-6 text-slate-800 text-base leading-relaxed">
+        <div className="bg-white p-4 sm:p-8 lg:p-10 rounded-2xl sm:rounded-3xl border border-slate-200 shadow-sm space-y-6 text-slate-800 text-sm sm:text-base leading-relaxed">
           
           <h2 className="text-2xl font-black text-slate-900 border-b border-slate-200 pb-3">
             {language === 'en' ? 'Overview & Clinical Perspective' : 'अवलोकन एवं क्लिनिकल दृष्टिकोण'}
@@ -231,24 +233,24 @@ export const ArticleDetail: React.FC<ArticleDetailProps> = ({ onBack }) => {
         </div>
 
         {/* Doctor Consultation Card Footer */}
-        <div className="bg-linear-to-r from-[#0B2545] via-[#0F4C81] to-[#0D1F38] text-white p-6 sm:p-8 rounded-3xl shadow-xl flex flex-col sm:flex-row items-center justify-between gap-6 border border-blue-900/50">
+        <div className="bg-linear-to-r from-[#0B2545] via-[#0F4C81] to-[#0D1F38] text-white p-5 sm:p-8 rounded-2xl sm:rounded-3xl shadow-xl flex flex-col sm:flex-row items-center justify-between gap-5 border border-blue-900/50">
           <div className="space-y-1 text-center sm:text-left">
             <span className="text-[10px] uppercase font-black text-emerald-400 tracking-wider">
               {language === 'en' ? 'Need Expert Care?' : 'विशेषज्ञ देखभाल चाहिए?'}
             </span>
-            <h3 className="text-xl font-black">
+            <h3 className="text-lg sm:text-xl font-black">
               {language === 'en' ? `Consult ${currentArticle.authorName}` : `${currentArticle.authorName} से परामर्श लें`}
             </h3>
             <p className="text-xs text-slate-300">
               {language === 'en'
-                ? 'In-clinic OPD tokens at Sarangpur, Shujalpur & Rajgarh or Virtual Video consult.'
-                : 'सारंगपुर, शुजालपुर और राजगढ़ में क्लिनिक ओपीडी टोकन या ऑनलाइन वीडियो परामर्श उपलब्ध है।'}
+                ? 'In-clinic OPD tokens or Virtual Video consult.'
+                : 'क्लिनिक ओपीडी टोकन या ऑनलाइन वीडियो परामर्श।'}
             </p>
           </div>
 
           <button
             onClick={() => openBookingModal(doctorAuthor.id, undefined)}
-            className="bg-[#10B981] hover:bg-emerald-500 text-slate-950 font-black px-6 py-3 rounded-2xl text-xs shadow-lg transition flex items-center gap-2 cursor-pointer shrink-0"
+            className="w-full sm:w-auto bg-[#10B981] hover:bg-emerald-500 text-slate-950 font-black px-6 py-3 rounded-2xl text-xs shadow-lg transition flex items-center justify-center gap-2 cursor-pointer shrink-0"
           >
             <Stethoscope className="w-4 h-4" />
             <span>{language === 'en' ? 'Book Doctor Consultation' : 'डॉक्टर परामर्श बुक करें'}</span>
@@ -266,7 +268,7 @@ export const ArticleDetail: React.FC<ArticleDetailProps> = ({ onBack }) => {
             </h3>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {relatedArticles.map(rel => (
               <div
                 key={rel.id}

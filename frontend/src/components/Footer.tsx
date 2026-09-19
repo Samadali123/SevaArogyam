@@ -190,7 +190,6 @@ export const Footer: React.FC<FooterProps> = ({ setCurrentTab }) => {
             <div className="pt-3 space-y-1">
               <p className="font-heading font-extrabold text-white text-xs">{language === 'en' ? 'Helpdesk Helpline' : 'हेल्पडेस्क हेल्पलाइन'}</p>
               <p className="text-xs font-mono text-[#5EAAF0] font-bold">1800-JANSEVA-CLINIC (7382-723)</p>
-              <p className="text-[11px] text-slate-400">support@jansevarogyam.com</p>
             </div>
           </div>
 

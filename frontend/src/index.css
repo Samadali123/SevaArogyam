@@ -128,6 +128,91 @@
   min-width: 600px;
 }
 
+/* Minimal Auto-Hide Theme-Colored Scrollbar Utilities for Admin Panel */
+.admin-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 0.3s ease;
+  -webkit-overflow-scrolling: touch;
+}
+
+.admin-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.admin-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.admin-scrollbar::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 9999px;
+  transition: background-color 0.25s ease;
+}
+
+.admin-scrollbar:hover {
+  scrollbar-color: rgba(154, 91, 60, 0.45) transparent;
+}
+
+.admin-scrollbar:hover::-webkit-scrollbar-thumb {
+  background: rgba(154, 91, 60, 0.45);
+}
+
+.admin-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #7E452B;
+}
+
+.admin-scrollbar:active,
+.admin-scrollbar:focus-within {
+  scrollbar-color: rgba(154, 91, 60, 0.65) transparent;
+}
+
+.admin-scrollbar:active::-webkit-scrollbar-thumb,
+.admin-scrollbar:focus-within::-webkit-scrollbar-thumb {
+  background: rgba(154, 91, 60, 0.65);
+}
+
+/* Tab Bar Auto-Hide Minimal Scrollbar (Translucent On-Dark Header) */
+.admin-scrollbar-tabs {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 0.3s ease;
+  -webkit-overflow-scrolling: touch;
+}
+
+.admin-scrollbar-tabs::-webkit-scrollbar {
+  height: 4px;
+}
+
+.admin-scrollbar-tabs::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.admin-scrollbar-tabs::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 9999px;
+  transition: background-color 0.25s ease;
+}
+
+.admin-scrollbar-tabs:hover {
+  scrollbar-color: rgba(255, 255, 255, 0.4) transparent;
+}
+
+.admin-scrollbar-tabs:hover::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.admin-scrollbar-tabs:active,
+.admin-scrollbar-tabs:focus-within {
+  scrollbar-color: rgba(255, 255, 255, 0.65) transparent;
+}
+
+.admin-scrollbar-tabs:active::-webkit-scrollbar-thumb,
+.admin-scrollbar-tabs:focus-within::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.65);
+}
+
 /* Custom Font Utilities for explicit use */
 .font-sora {
   font-family: 'Sora', sans-serif !important;

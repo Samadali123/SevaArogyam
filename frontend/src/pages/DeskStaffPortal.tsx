@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   UserCheck, 
   Plus, 
@@ -184,8 +185,8 @@ export const DeskStaffPortal: React.FC = () => {
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center gap-3 relative z-10 shrink-0">
-            <div className="w-full sm:w-auto">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 relative z-10 shrink-0 w-full md:w-auto">
+            <div className="w-full sm:w-60">
               <ThemeSelect
                 value={selectedBranchFilter}
                 onChange={setSelectedBranchFilter}
@@ -199,7 +200,7 @@ export const DeskStaffPortal: React.FC = () => {
                     label: `${c.name} OPD Desk`
                   }))
                 ]}
-                className="w-full sm:w-60"
+                className="w-full"
               />
             </div>
 
@@ -207,95 +208,95 @@ export const DeskStaffPortal: React.FC = () => {
               onClick={() => setIsWalkInModalOpen(true)}
               className="w-full sm:w-auto bg-gradient-to-r from-[#5B5588] to-[#6E6B9E] hover:opacity-95 text-white font-heading font-extrabold px-5 py-3 rounded-xl text-xs shadow-lg shadow-purple-600/20 transition cursor-pointer flex items-center justify-center gap-2 shrink-0 border border-white/20"
             >
-              <Plus className="w-4 h-4 text-white stroke-[3]" />
+              <Plus className="w-4 h-4 text-white" />
               <span>Book Walk-in Patient (Cash)</span>
             </button>
           </div>
         </div>
 
         {/* METRICS OVERVIEW CARDS */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           
-          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between transition hover:border-slate-300">
+          <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between transition hover:border-slate-300">
             <div className="space-y-1">
-              <p className="text-[11px] font-heading font-bold text-slate-500 uppercase tracking-wider">Waiting Queue</p>
+              <p className="text-[10px] sm:text-[11px] font-heading font-bold text-slate-500 uppercase tracking-wider">Waiting Queue</p>
               <p className="text-2xl sm:text-3xl font-heading font-extrabold text-[#0F4C81]">{pendingQueue.length}</p>
-              <p className="text-[11px] text-slate-500 font-sans">Patients waiting in lobby</p>
+              <p className="text-[10px] sm:text-[11px] text-slate-500 font-sans">Patients waiting in lobby</p>
             </div>
-            <div className="w-12 h-12 rounded-2xl bg-sky-50 border border-sky-100 flex items-center justify-center text-sky-600 shrink-0">
-              <Clock className="w-6 h-6" />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-sky-50 border border-sky-100 flex items-center justify-center text-sky-600 shrink-0">
+              <Clock className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
           </div>
 
-          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between transition hover:border-slate-300">
+          <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between transition hover:border-slate-300">
             <div className="space-y-1">
-              <p className="text-[11px] font-heading font-bold text-emerald-600 uppercase tracking-wider">Inside Consultation</p>
+              <p className="text-[10px] sm:text-[11px] font-heading font-bold text-emerald-600 uppercase tracking-wider">Inside Consultation</p>
               <p className="text-2xl sm:text-3xl font-heading font-extrabold text-emerald-600">{inProgressQueue.length}</p>
-              <p className="text-[11px] text-slate-500 font-sans">Currently with doctor</p>
+              <p className="text-[10px] sm:text-[11px] text-slate-500 font-sans">Currently with doctor</p>
             </div>
-            <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 shrink-0">
-              <Stethoscope className="w-6 h-6" />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 shrink-0">
+              <Stethoscope className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
           </div>
 
-          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between transition hover:border-slate-300">
+          <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between transition hover:border-slate-300">
             <div className="space-y-1">
-              <p className="text-[11px] font-heading font-bold text-purple-600 uppercase tracking-wider">Completed Today</p>
+              <p className="text-[10px] sm:text-[11px] font-heading font-bold text-purple-600 uppercase tracking-wider">Completed Today</p>
               <p className="text-2xl sm:text-3xl font-heading font-extrabold text-purple-600">{completedQueue.length}</p>
-              <p className="text-[11px] text-slate-500 font-sans">Finished OPD visits</p>
+              <p className="text-[10px] sm:text-[11px] text-slate-500 font-sans">Finished OPD visits</p>
             </div>
-            <div className="w-12 h-12 rounded-2xl bg-purple-50 border border-purple-100 flex items-center justify-center text-purple-600 shrink-0">
-              <CheckCircle2 className="w-6 h-6" />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-purple-50 border border-purple-100 flex items-center justify-center text-purple-600 shrink-0">
+              <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
           </div>
 
-          <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between transition hover:border-slate-300">
+          <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs flex items-center justify-between transition hover:border-slate-300">
             <div className="space-y-1">
-              <p className="text-[11px] font-heading font-bold text-amber-600 uppercase tracking-wider">Active Doctors</p>
+              <p className="text-[10px] sm:text-[11px] font-heading font-bold text-amber-600 uppercase tracking-wider">Active Doctors</p>
               <p className="text-2xl sm:text-3xl font-heading font-extrabold text-amber-600">{doctors.length}</p>
-              <p className="text-[11px] text-slate-500 font-sans">OPD chambers open</p>
+              <p className="text-[10px] sm:text-[11px] text-slate-500 font-sans">OPD chambers open</p>
             </div>
-            <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600 shrink-0">
-              <Users className="w-6 h-6" />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600 shrink-0">
+              <Users className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
           </div>
 
         </div>
 
         {/* NAVIGATION TAB PILLS */}
-        <div className="bg-slate-200/60 p-1.5 rounded-2xl inline-flex gap-1.5 border border-slate-200/80">
+        <div className="bg-slate-200/70 p-1.5 rounded-2xl flex flex-col sm:flex-row w-full sm:w-auto gap-1.5 border border-slate-200">
           <button
             onClick={() => setActiveTab('queue')}
-            className={`px-5 py-2.5 rounded-xl text-xs font-heading font-bold transition cursor-pointer flex items-center gap-2 ${
+            className={`flex-1 sm:flex-initial px-5 py-2.5 rounded-xl text-xs font-heading font-bold transition cursor-pointer flex items-center justify-center gap-2 ${
               activeTab === 'queue' 
-                ? 'bg-white text-[#0F4C81] shadow-xs' 
+                ? 'bg-white text-[#5B5588] shadow-xs' 
                 : 'text-slate-600 hover:text-slate-900 font-medium hover:bg-white/50'
             }`}
           >
-            <Clock className="w-4 h-4 text-emerald-600" />
+            <Clock className="w-4 h-4 text-emerald-600 shrink-0" />
             <span>Live OPD Queue ({filteredQueue.length})</span>
           </button>
 
           <button
             onClick={() => setActiveTab('doctors')}
-            className={`px-5 py-2.5 rounded-xl text-xs font-heading font-bold transition cursor-pointer flex items-center gap-2 ${
+            className={`flex-1 sm:flex-initial px-5 py-2.5 rounded-xl text-xs font-heading font-bold transition cursor-pointer flex items-center justify-center gap-2 ${
               activeTab === 'doctors' 
-                ? 'bg-white text-[#0F4C81] shadow-xs' 
+                ? 'bg-white text-[#5B5588] shadow-xs' 
                 : 'text-slate-600 hover:text-slate-900 font-medium hover:bg-white/50'
             }`}
           >
-            <Stethoscope className="w-4 h-4 text-[#0F4C81]" />
+            <Stethoscope className="w-4 h-4 text-[#5B5588] shrink-0" />
             <span>Doctor Chamber Availability</span>
           </button>
         </div>
 
-        {/* LIVE QUEUE TABLE VIEW */}
+        {/* LIVE QUEUE VIEW */}
         {activeTab === 'queue' && (
-          <div className="bg-white rounded-3xl border border-slate-200/80 shadow-xs p-6 space-y-5">
+          <div className="bg-white rounded-3xl border border-slate-200/80 shadow-xs p-4 sm:p-6 space-y-5">
             
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
-                <h3 className="font-heading font-extrabold text-base text-slate-900">Today's In-Clinic OPD Token Queue</h3>
+                <h3 className="font-heading font-extrabold text-base sm:text-lg text-slate-900">Today's In-Clinic OPD Token Queue</h3>
                 <p className="text-xs text-slate-500 font-sans">Real-time status updates and walk-in token details</p>
               </div>
               
@@ -306,12 +307,109 @@ export const DeskStaffPortal: React.FC = () => {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search token #, patient name or phone..."
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 text-slate-900 placeholder:text-slate-400 rounded-xl text-xs font-sans border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#0F4C81] transition"
+                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 text-slate-900 placeholder:text-slate-400 rounded-xl text-xs font-sans border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#5B5588] transition"
                 />
               </div>
             </div>
 
-            <div className="overflow-x-auto rounded-2xl border border-slate-100">
+            {/* MOBILE VIEW: Stacked Cards Per Patient/Token */}
+            <div className="block md:hidden space-y-3">
+              {filteredQueue.length === 0 ? (
+                <div className="text-center py-12 bg-slate-50 rounded-2xl border border-dashed border-slate-200 p-6">
+                  <UserCheck className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                  <p className="font-heading font-extrabold text-slate-700 text-xs">
+                    {searchQuery ? `No tokens or patients matched "${searchQuery}".` : 'No Patient Available in queue currently'}
+                  </p>
+                  <p className="text-[11px] text-slate-400 mt-1">Click "Book Walk-in Patient" to register ground walk-ins.</p>
+                </div>
+              ) : (
+                filteredQueue.map(appt => {
+                  const doc = doctors.find(d => d.id === appt.doctorId);
+                  return (
+                    <div key={appt.id} className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-3 hover:border-slate-300 transition">
+                      <div className="flex items-center justify-between">
+                        <span className="font-mono font-extrabold text-sm text-[#5B5588] bg-purple-50 px-2.5 py-1 rounded-xl border border-purple-100">
+                          #{appt.tokenNumber || 'TK-101'}
+                        </span>
+                        <div>
+                          {appt.status === 'PENDING' || appt.status === 'CONFIRMED' ? (
+                            <span className="bg-amber-50 text-amber-800 border border-amber-200 text-[10px] font-heading font-extrabold px-2.5 py-1 rounded-full inline-flex items-center gap-1">
+                              <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                              Waiting in Lobby
+                            </span>
+                          ) : appt.status === 'IN_PROGRESS' ? (
+                            <span className="bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-heading font-extrabold px-2.5 py-1 rounded-full inline-flex items-center gap-1 animate-pulse">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                              Inside Chamber
+                            </span>
+                          ) : (
+                            <span className="bg-slate-100 text-slate-600 border border-slate-200 text-[10px] font-heading font-extrabold px-2.5 py-1 rounded-full">
+                              Completed
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div>
+                        <h4 className="font-heading font-bold text-slate-900 text-sm">{appt.patientName || 'Walk-in Patient'}</h4>
+                        <p className="text-xs text-slate-500 mt-0.5">
+                          {appt.patientPhone ? `+91 ${appt.patientPhone}` : 'No Phone'} • {appt.patientGender || 'Male'}, {appt.patientAge || 35} yrs
+                        </p>
+                      </div>
+
+                      <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 text-xs space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-500">Doctor:</span>
+                          <span className="font-heading font-bold text-slate-800">{doc ? doc.name : 'Duty Doctor'}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-500">Slot:</span>
+                          <span className="font-mono text-slate-700 font-medium">{appt.timeSlot}</span>
+                        </div>
+                        <div className="flex items-center justify-between pt-1 border-t border-slate-200/60">
+                          <span className="text-slate-500">Payment:</span>
+                          <span className="bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-heading font-extrabold px-2 py-0.5 rounded-md uppercase">
+                            Cash Paid (₹{appt.amountPaid || doc?.consultationFeeClinic || 300})
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 pt-1">
+                        <button
+                          onClick={() => openPrintModal(appt)}
+                          className={`py-2.5 px-3 bg-purple-50 hover:bg-purple-100 text-[#5B5588] border border-purple-200 rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5 text-xs font-heading font-bold shadow-2xs ${
+                            appt.status === 'COMPLETED' ? 'w-full' : 'shrink-0'
+                          }`}
+                          title="View OPD Pass"
+                        >
+                          <Printer className="w-3.5 h-3.5 text-[#5B5588]" />
+                          <span>View OPD Pass</span>
+                        </button>
+                        {(appt.status === 'PENDING' || appt.status === 'CONFIRMED') && (
+                          <button
+                            onClick={() => handleCheckIn(appt.id)}
+                            className="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-heading font-bold shadow-xs transition cursor-pointer text-center"
+                          >
+                            Call to Chamber
+                          </button>
+                        )}
+                        {appt.status === 'IN_PROGRESS' && (
+                          <button
+                            onClick={() => handleComplete(appt.id)}
+                            className="flex-1 py-2.5 bg-[#5B5588] hover:bg-[#484270] text-white rounded-xl text-xs font-heading font-bold shadow-xs transition cursor-pointer text-center"
+                          >
+                            Finish Visit
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            {/* DESKTOP / TABLET VIEW: Spacious Table */}
+            <div className="hidden md:block overflow-x-auto rounded-2xl border border-slate-100">
               <table className="w-full text-left border-collapse text-xs font-sans">
                 <thead>
                   <tr className="bg-slate-50/80 border-b border-slate-200/80 text-slate-500 font-heading font-extrabold uppercase text-[10px] tracking-wider">
@@ -342,8 +440,8 @@ export const DeskStaffPortal: React.FC = () => {
                       const doc = doctors.find(d => d.id === appt.doctorId);
                       return (
                         <tr key={appt.id} className="hover:bg-slate-50/80 transition">
-                          <td className="p-4 font-mono font-extrabold text-[#0F4C81] text-sm">
-                            {appt.tokenNumber || 'TK-101'}
+                          <td className="p-4 font-mono font-extrabold text-[#5B5588] text-sm">
+                            #{appt.tokenNumber || 'TK-101'}
                           </td>
                           <td className="p-4">
                             <p className="font-heading font-bold text-slate-900 text-xs">{appt.patientName || 'Walk-in Patient'}</p>
@@ -370,7 +468,7 @@ export const DeskStaffPortal: React.FC = () => {
                                 Waiting in Lobby
                               </span>
                             ) : appt.status === 'IN_PROGRESS' ? (
-                              <span className="bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-heading font-extrabold px-2.5 py-1 rounded-full inline-flex items-center gap-1.5 animate-pulse">
+                              <span className="bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-heading font-extrabold px-2.5 py-1 rounded-full inline-flex items-center gap-1 animate-pulse">
                                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                                 Inside Chamber
                               </span>
@@ -384,10 +482,10 @@ export const DeskStaffPortal: React.FC = () => {
                             <div className="flex items-center justify-end gap-2">
                               <button
                                 onClick={() => openPrintModal(appt)}
-                                className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition cursor-pointer"
-                                title="Print Token Pass"
+                                className="p-2 bg-purple-50 hover:bg-purple-100 text-[#5B5588] border border-purple-200 rounded-xl transition cursor-pointer shadow-2xs"
+                                title="Print / View Token Pass"
                               >
-                                <Printer className="w-4 h-4" />
+                                <Printer className="w-4 h-4 text-[#5B5588]" />
                               </button>
                               
                               {(appt.status === 'PENDING' || appt.status === 'CONFIRMED') && (
@@ -402,7 +500,7 @@ export const DeskStaffPortal: React.FC = () => {
                               {appt.status === 'IN_PROGRESS' && (
                                 <button
                                   onClick={() => handleComplete(appt.id)}
-                                  className="px-3 py-1.5 bg-[#0F4C81] hover:bg-[#0B2545] text-white rounded-xl text-xs font-heading font-bold shadow-xs transition cursor-pointer"
+                                  className="px-3 py-1.5 bg-[#5B5588] hover:bg-[#484270] text-white rounded-xl text-xs font-heading font-bold shadow-xs transition cursor-pointer"
                                 >
                                   Finish Visit
                                 </button>
@@ -422,33 +520,44 @@ export const DeskStaffPortal: React.FC = () => {
 
         {/* DOCTOR AVAILABILITY TAB VIEW */}
         {activeTab === 'doctors' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {doctors.map(doc => (
-              <div key={doc.id} className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs space-y-4 hover:border-slate-300 transition">
-                <div className="flex items-center gap-4">
-                  <img
-                    src={doc.avatarUrl || DEFAULT_DOCTOR_AVATAR}
-                    alt={doc.name}
-                    onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_DOCTOR_AVATAR; }}
-                    className="w-14 h-14 rounded-2xl object-cover border border-slate-200 shadow-xs"
-                  />
-                  <div>
-                    <h4 className="font-heading font-extrabold text-base text-slate-900">{doc.name}</h4>
-                    <p className="text-xs text-[#0F4C81] font-heading font-bold">{doc.specialization}</p>
-                    <p className="text-[11px] text-emerald-700 font-sans font-bold mt-0.5">Consultation: ₹{doc.consultationFeeClinic || 300}</p>
+              <div key={doc.id} className="bg-white p-5 sm:p-6 rounded-3xl border border-slate-200/80 shadow-xs space-y-4 hover:border-slate-300 hover:shadow-md transition-all flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center gap-4">
+                    <img
+                      src={doc.avatarUrl || DEFAULT_DOCTOR_AVATAR}
+                      alt={doc.name}
+                      onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_DOCTOR_AVATAR; }}
+                      className="w-14 h-14 rounded-2xl object-cover border-2 border-purple-200/50 shadow-xs shrink-0"
+                    />
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-heading font-extrabold text-base text-slate-900 truncate">{doc.name}</h4>
+                      </div>
+                      <p className="text-xs text-[#5B5588] font-heading font-bold truncate">{doc.specialization}</p>
+                      <span className="inline-block bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-heading font-extrabold px-2.5 py-0.5 rounded-full mt-1">
+                        OPD Fee: ₹{doc.consultationFeeClinic || 300}
+                      </span>
+                    </div>
                   </div>
-                </div>
-                
-                <div className="bg-slate-50 p-4 rounded-2xl text-xs space-y-3 border border-slate-100 font-sans">
-                  <div>
-                    <p className="text-[10px] font-heading font-extrabold text-slate-400 uppercase tracking-wider">Assigned OPD Branches</p>
-                    <p className="font-heading font-bold text-[#0F4C81] text-xs mt-0.5">
-                      {formatAssignedBranches(doc.clinicsCovered, clinics)}
-                    </p>
-                  </div>
-                  <div className="border-t border-slate-200/60 pt-2">
-                    <p className="text-[10px] font-heading font-extrabold text-slate-400 uppercase tracking-wider">Schedule Today</p>
-                    <p className="font-medium text-slate-700 text-xs mt-0.5">{doc.opdScheduleSummary || 'OPD Open 09:00 AM - 02:00 PM'}</p>
+                  
+                  <div className="bg-slate-50/80 p-3.5 sm:p-4 rounded-2xl text-xs space-y-2.5 border border-slate-100 font-sans mt-4">
+                    <div>
+                      <p className="text-[10px] font-heading font-extrabold text-slate-400 uppercase tracking-wider mb-1">Assigned OPD Branches</p>
+                      <p className="font-heading font-bold text-slate-800 text-xs leading-relaxed">
+                        {formatAssignedBranches(doc.clinicsCovered, clinics)}
+                      </p>
+                    </div>
+                    <div className="border-t border-slate-200/60 pt-2 flex items-center justify-between gap-2">
+                      <div>
+                        <p className="text-[10px] font-heading font-extrabold text-slate-400 uppercase tracking-wider">Schedule Today</p>
+                        <p className="font-medium text-slate-700 text-xs mt-0.5">{doc.opdScheduleSummary || 'OPD Open 09:00 AM - 02:00 PM'}</p>
+                      </div>
+                      <span className="shrink-0 bg-purple-50 text-[#5B5588] border border-purple-200/80 text-[10px] font-heading font-bold px-2 py-0.5 rounded-full">
+                        Chamber Open
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -459,26 +568,32 @@ export const DeskStaffPortal: React.FC = () => {
       </div>
 
       {/* WALK-IN PATIENT CASH REGISTRATION MODAL */}
-      {isWalkInModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
-          <div className="bg-white rounded-3xl max-w-xl w-full p-5 sm:p-8 shadow-2xl space-y-6 max-h-[92vh] my-auto overflow-y-auto border border-slate-100 animate-fade-in font-sans">
+      {isWalkInModalOpen && createPortal(
+        <div className="fixed inset-0 min-h-screen w-screen z-999999 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 overflow-y-auto font-sans">
+          <div className="bg-white rounded-3xl max-w-xl w-full shadow-2xl border border-slate-100 flex flex-col max-h-[92vh] my-auto overflow-hidden animate-fade-in relative z-10">
             
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+            {/* Fixed Modal Header */}
+            <div className="flex items-center justify-between p-5 sm:p-6 border-b border-slate-100 shrink-0 bg-white">
               <div className="space-y-1">
-                <span className="bg-emerald-100 text-emerald-900 text-[10px] font-heading font-extrabold px-2.5 py-0.5 rounded-full uppercase border border-emerald-200">
+                <span className="bg-purple-50 text-[#5B5588] text-[10px] font-heading font-extrabold px-2.5 py-0.5 rounded-full uppercase border border-purple-200">
                   FRONT DESK REGISTRATION (CASH)
                 </span>
-                <h3 className="font-heading font-extrabold text-xl text-slate-900 flex items-center gap-2">
-                  <UserCheck className="w-5 h-5 text-emerald-600" />
+                <h3 className="font-heading font-extrabold text-lg sm:text-xl text-slate-900 flex items-center gap-2">
+                  <UserCheck className="w-5 h-5 text-[#5B5588] shrink-0" />
                   <span>Book Walk-in Patient</span>
                 </h3>
               </div>
-              <button onClick={() => setIsWalkInModalOpen(false)} className="p-2 text-slate-400 hover:text-slate-700 rounded-xl hover:bg-slate-100 transition cursor-pointer">
+              <button 
+                onClick={() => setIsWalkInModalOpen(false)} 
+                className="p-2 text-slate-400 hover:text-slate-700 rounded-xl hover:bg-slate-100 transition cursor-pointer"
+                title="Close Modal"
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleWalkInSubmit} className="space-y-4 text-xs">
+            {/* Scrollable Form Body */}
+            <form id="walkin-cash-form" onSubmit={handleWalkInSubmit} className="overflow-y-auto flex-1 p-5 sm:p-6 space-y-4 text-xs">
               
               {/* TOP SELECTION CONTROLS */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -605,7 +720,7 @@ export const DeskStaffPortal: React.FC = () => {
                         maxLength={10}
                         value={walkInForm.patientPhone}
                         onChange={(e) => setWalkInForm({ ...walkInForm, patientPhone: e.target.value.replace(/\D/g, '') })}
-                        placeholder="Enter mobile number"
+                        placeholder="Enter 10-digit mobile number"
                         className="w-full px-4 py-3 bg-[#5B5588]/5 border border-[#5B5588]/20 rounded-xl font-sans font-medium focus:ring-2 focus:ring-[#5B5588] focus:border-[#5B5588] focus:bg-white outline-none transition font-mono"
                       />
                     </div>
@@ -655,42 +770,46 @@ export const DeskStaffPortal: React.FC = () => {
                 </div>
               </div>
 
-              <div className="pt-4 flex justify-end gap-3 border-t border-slate-100">
-                <button
-                  type="button"
-                  onClick={() => setIsWalkInModalOpen(false)}
-                  className="px-5 py-2.5 rounded-xl text-slate-600 font-heading font-bold hover:bg-slate-100 transition cursor-pointer text-xs"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isFormSubmitting}
-                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#5B5588] to-[#6E6B9E] hover:opacity-95 text-white font-heading font-extrabold shadow-md shadow-[#5B5588]/20 flex items-center gap-2 cursor-pointer disabled:opacity-50 transition text-xs"
-                >
-                  {isFormSubmitting ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin text-white" />
-                      <span>Registering Token...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Receipt className="w-4 h-4" />
-                      <span>Collect Cash & Issue Token</span>
-                    </>
-                  )}
-                </button>
-              </div>
-
             </form>
+
+            {/* Fixed Modal Footer with Always Reachable Submit Button */}
+            <div className="p-4 sm:p-5 border-t border-slate-100 bg-slate-50 flex items-center justify-end gap-3 shrink-0">
+              <button
+                type="button"
+                onClick={() => setIsWalkInModalOpen(false)}
+                className="px-5 py-2.5 rounded-xl text-slate-600 font-heading font-bold hover:bg-slate-200/70 transition cursor-pointer text-xs"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                form="walkin-cash-form"
+                disabled={isFormSubmitting}
+                className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#5B5588] to-[#6E6B9E] hover:opacity-95 text-white font-heading font-extrabold shadow-md shadow-[#5B5588]/20 flex items-center gap-2 cursor-pointer disabled:opacity-50 transition text-xs"
+              >
+                {isFormSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin text-white" />
+                    <span>Registering Token...</span>
+                  </>
+                ) : (
+                  <>
+                    <Receipt className="w-4 h-4" />
+                    <span>Collect Cash & Issue Token</span>
+                  </>
+                )}
+              </button>
+            </div>
+
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* PRINTABLE OPD TOKEN RECEIPT MODAL */}
-      {printedTokenAppt && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl space-y-5 border border-slate-100 animate-fade-in text-slate-900 font-sans">
+      {printedTokenAppt && createPortal(
+        <div className="fixed inset-0 min-h-screen w-screen z-999999 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 font-sans">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl space-y-5 border border-slate-100 animate-fade-in text-slate-900 font-sans relative z-10">
             <div className="text-center space-y-1 border-b border-slate-200/80 pb-4">
               <span className="bg-[#5B5588]/10 text-[#5B5588] text-[10px] font-heading font-extrabold px-3 py-0.5 rounded-full uppercase border border-[#5B5588]/20">
                 OFFICIAL OPD TOKEN RECEIPT
@@ -743,7 +862,8 @@ export const DeskStaffPortal: React.FC = () => {
             </div>
 
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* HIDDEN PRINT CONTAINER FOR NATIVE BROWSER PRINT DIALOG */}

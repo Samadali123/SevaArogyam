@@ -40,16 +40,26 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const [staffMenuOpen, setStaffMenuOpen] = useState(false);
 
-  const isStaffOrAdminOrDoctor = Boolean(
-    (currentUser && (
-      currentUser.role === 'DOCTOR' || 
-      currentUser.role === 'ADMIN' || 
-      currentUser.role === 'DESK_STAFF'
-    )) || (
-      isAdminAuthenticated
+  const isStaff = Boolean(
+    currentUser && (
+      currentUser.role === 'DESK_STAFF' || 
+      (currentUser.role as string) === 'STAFF'
     )
   );
+
+  const isDoctor = Boolean(currentUser && currentUser.role === 'DOCTOR');
+
+  const isAdmin = Boolean(
+    (currentUser && currentUser.role === 'ADMIN') || 
+    isAdminAuthenticated ||
+    activeRole === 'ADMIN' ||
+    currentTab === 'admin'
+  );
+
+  const isDoctorOrAdmin = isDoctor || isAdmin;
+  const isStaffOrAdminOrDoctor = isStaff || isDoctorOrAdmin;
 
   const handleLogout = async () => {
     await logout();
@@ -59,9 +69,9 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
     }
   };
 
-  // Prevent background scrolling (hero section bleed) when sidebar menu or login modal is open
+  // Prevent background scrolling when sidebar menu or login modal is open
   useEffect(() => {
-    if (mobileMenuOpen || loginModalOpen) {
+    if (mobileMenuOpen || loginModalOpen || staffMenuOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
@@ -69,7 +79,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
     return () => {
       document.body.style.overflow = '';
     };
-  }, [mobileMenuOpen, loginModalOpen]);
+  }, [mobileMenuOpen, loginModalOpen, staffMenuOpen]);
 
   return (
     <header className="sticky top-0 z-40 glass-nav shadow-xs">
@@ -84,56 +94,111 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
           }}
           className="flex items-center cursor-pointer group shrink-0"
         >
-          <span className="font-outfit font-extrabold text-2xl sm:text-3xl bg-linear-to-r from-[#0B1F3A] via-[#0D2B4E] to-[#0D9488] bg-clip-text text-transparent tracking-tight">
+          <span className={`font-outfit font-extrabold text-2xl sm:text-3xl bg-clip-text text-transparent tracking-tight ${
+            isStaff 
+              ? 'bg-linear-to-r from-[#484270] via-[#5B5588] to-[#7B74A8]' 
+              : isDoctor 
+                ? 'bg-linear-to-r from-[#06241B] via-[#0B3D2E] to-[#125B45]' 
+                : isAdmin
+                  ? 'bg-linear-to-r from-[#7E452B] via-[#9A5B3C] to-[#B37046]'
+                  : 'bg-linear-to-r from-[#0B1F3A] via-[#0D2B4E] to-[#0D9488]'
+          }`}>
             Jansevaarogyam
           </span>
         </div>
 
-        {/* Doctor, Admin & Staff Panel Header: Brand Logo on Left, Language Toggle & Logout on Right */}
+        {/* Panel Header for Staff, Doctor & Admin (Direct Language Select + Logout on Desktop, Menu on Mobile) */}
         {isStaffOrAdminOrDoctor ? (
-          <div className="flex items-center gap-2 shrink-0 ml-auto">
-            {/* Hindi / English Language Toggle */}
-            <div className="flex items-center bg-slate-100 p-0.5 rounded-full border border-slate-200 text-[11px] font-heading font-extrabold shadow-inner shrink-0">
+          <>
+            {/* Desktop Direct Controls for Staff, Doctor & Admin */}
+            <div className="hidden lg:flex items-center gap-3 shrink-0 ml-auto">
+              {/* Language Toggle Control */}
+              <div className="flex items-center bg-slate-100 p-0.5 rounded-full border border-slate-200 text-[11px] font-heading font-extrabold shadow-inner shrink-0">
+                <button
+                  onClick={() => setLanguage('hi')}
+                  className={`px-3.5 py-1 rounded-full transition-all cursor-pointer ${
+                    language === 'hi' 
+                      ? (isStaff 
+                          ? 'bg-[#5B5588] text-white shadow-xs font-bold' 
+                          : isDoctor 
+                            ? 'bg-[#0B3D2E] text-white shadow-xs font-bold' 
+                            : isAdmin
+                              ? 'bg-[#9A5B3C] text-white shadow-xs font-bold'
+                              : 'bg-[#0D9488] text-white shadow-xs font-bold')
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                  title="हिन्दी में वेबसाइट देखें"
+                >
+                  हिंदी
+                </button>
+                <button
+                  onClick={() => setLanguage('en')}
+                  className={`px-3.5 py-1 rounded-full transition-all cursor-pointer ${
+                    language === 'en' 
+                      ? (isStaff 
+                          ? 'bg-[#5B5588] text-white shadow-xs font-bold' 
+                          : isDoctor 
+                            ? 'bg-[#0B3D2E] text-white shadow-xs font-bold' 
+                            : isAdmin
+                              ? 'bg-[#9A5B3C] text-white shadow-xs font-bold'
+                              : 'bg-[#0B1F3A] text-white shadow-xs font-bold')
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                  title="View website in English"
+                >
+                  English
+                </button>
+              </div>
+
+              {/* Logout Button */}
               <button
-                onClick={() => setLanguage('hi')}
-                className={`px-3 py-[2px] rounded-full transition-all cursor-pointer ${
-                  language === 'hi' 
-                    ? 'bg-emerald-600 text-white shadow-xs font-bold' 
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
+                onClick={handleLogout}
+                disabled={isLoggingOut}
+                className={`${
+                  isStaff 
+                    ? 'bg-linear-to-r from-[#5B5588] to-[#6E6B9E] hover:opacity-95 shadow-md shadow-[#5B5588]/25' 
+                    : isDoctor 
+                      ? 'bg-linear-to-r from-[#0B3D2E] to-[#125B45] hover:opacity-95 shadow-md shadow-[#0B3D2E]/25' 
+                      : isAdmin
+                        ? 'bg-linear-to-r from-[#9A5B3C] to-[#B37046] hover:opacity-95 shadow-md shadow-[#9A5B3C]/25'
+                        : 'bg-linear-to-r from-[#0B1F3A] to-[#0D9488] hover:opacity-90 shadow-md'
+                } text-white font-extrabold px-4 py-2 rounded-full text-xs flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed shrink-0`}
               >
-                हिंदी
-              </button>
-              <button
-                onClick={() => setLanguage('en')}
-                className={`px-3 py-[2px] rounded-full transition-all cursor-pointer ${
-                  language === 'en' 
-                    ? 'bg-[#0F4C81] text-white shadow-xs font-bold' 
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                English
+                {isLoggingOut ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>{language === 'en' ? 'Logging out...' : 'लॉग आउट...'}</span>
+                  </>
+                ) : (
+                  <>
+                    <LogOut className="w-3.5 h-3.5" />
+                    <span>{language === 'en' ? 'Logout' : 'लॉग आउट'}</span>
+                  </>
+                )}
               </button>
             </div>
 
-            <button
-              onClick={handleLogout}
-              disabled={isLoggingOut}
-              className="bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 font-extrabold px-3 py-[3px] rounded-full text-[11px] flex items-center gap-1 transition cursor-pointer shadow-xs disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              {isLoggingOut ? (
-                <>
-                  <Loader2 className="w-3.5 h-3.5 animate-spin text-rose-600" />
-                  <span>{language === 'en' ? 'Logging out...' : 'लॉग आउट...'}</span>
-                </>
-              ) : (
-                <>
-                  <LogOut className="w-3.5 h-3.5" />
-                  <span>{language === 'en' ? 'Logout' : 'लॉग आउट'}</span>
-                </>
-              )}
-            </button>
-          </div>
+            {/* Mobile/Tablet Menu Icon for Staff, Doctor & Admin */}
+            <div className="lg:hidden flex items-center shrink-0 ml-auto">
+              <button
+                id="staff-menu-btn"
+                onClick={() => setStaffMenuOpen(true)}
+                className={`p-2.5 rounded-xl transition-all cursor-pointer flex items-center justify-center ${
+                  isStaff 
+                    ? 'text-slate-700 hover:text-[#5B5588] hover:bg-purple-50/50' 
+                    : isDoctor 
+                      ? 'text-slate-700 hover:text-[#0B3D2E] hover:bg-emerald-50/50' 
+                      : isAdmin
+                        ? 'text-slate-700 hover:text-[#9A5B3C] hover:bg-amber-50/50'
+                        : 'text-slate-700 hover:text-[#0B1F3A] hover:bg-slate-100'
+                }`}
+                title={language === 'en' ? 'Menu' : 'मेनू'}
+                aria-label="Panel Menu"
+              >
+                <Menu className={`w-6 h-6 ${isStaff ? 'text-[#5B5588]' : isDoctor ? 'text-[#0B3D2E]' : isAdmin ? 'text-[#9A5B3C]' : 'text-[#0B1F3A]'}`} />
+              </button>
+            </div>
+          </>
         ) : (
           <>
             {/* Desktop Navigation Links - Centered, Compact Padding, Dark Navy Active Color, Teal Hover */}
@@ -320,7 +385,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
                 <button
                   onClick={handleLogout}
                   disabled={isLoggingOut}
-                  className="hidden lg:flex shrink-0 bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 font-extrabold px-3 py-[3px] rounded-full text-[11px] items-center gap-1 transition cursor-pointer shadow-xs disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="hidden lg:flex shrink-0 bg-rose-50 hover:bg-rose-500 text-rose-600 hover:text-white border border-rose-200 hover:border-rose-500 font-extrabold px-3.5 py-1.5 rounded-full text-xs items-center gap-1.5 transition-all cursor-pointer shadow-2xs disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {isLoggingOut ? (
                     <>
@@ -338,10 +403,10 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
                 <div className="hidden lg:block shrink-0">
                   <button
                     onClick={() => setLoginModalOpen(true)}
-                    className="bg-linear-to-r from-[#0B1F3A] to-[#0D9488] hover:opacity-95 text-white font-extrabold px-3.5 py-[3px] rounded-full text-[11px] flex items-center gap-1.5 transition-all cursor-pointer shadow-xs hover:scale-102"
+                    className="bg-linear-to-r from-[#0B1F3A] to-[#0D9488] hover:opacity-95 text-white font-extrabold px-3.5 py-1.5 rounded-full text-xs flex items-center gap-1.5 transition-all cursor-pointer shadow-xs hover:scale-102"
                   >
                     <User className="w-3.5 h-3.5 text-white" />
-                    <span>{language === 'en' ? 'Login as' : 'लॉगइन करें'}</span>
+                    <span>{language === 'en' ? 'Login as' : 'लॉगिन करें'}</span>
                   </button>
                 </div>
               )}
@@ -511,11 +576,11 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
                     setMobileMenuOpen(false);
                   }}
                   disabled={isLoggingOut}
-                  className="w-full max-w-xs mx-auto bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="w-full max-w-xs mx-auto bg-gradient-to-r from-[#0B1F3A] to-[#0D9488] hover:opacity-90 text-white py-3 rounded-2xl text-sm font-extrabold transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed shadow-md"
                 >
                   {isLoggingOut ? (
                     <>
-                      <Loader2 className="w-4 h-4 animate-spin text-rose-600" />
+                      <Loader2 className="w-4 h-4 animate-spin" />
                       <span>{language === 'en' ? 'Logging out...' : 'लॉग आउट हो रहा है...'}</span>
                     </>
                   ) : (
@@ -542,6 +607,193 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, setCurrentTab }) => 
 
               <div className="text-center text-[11px] text-slate-400 font-medium pt-1">
                 Jansevaarogyam Healthcare Network
+              </div>
+            </div>
+
+          </aside>
+        </div>,
+        document.body
+      )}
+
+      {/* STAFF / PANEL MOBILE SLIDE-IN SIDEBAR DRAWER (Matching Patient-side drawer) */}
+      {staffMenuOpen && createPortal(
+        <div className="fixed inset-0 z-99999 flex justify-end animate-in fade-in duration-150 font-sans">
+          {/* Opaque Backdrop Overlay */}
+          <div 
+            onClick={() => setStaffMenuOpen(false)} 
+            className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" 
+          />
+
+          {/* Clean Slide-in Sidebar Panel */}
+          <aside className="relative w-full max-w-sm sm:max-w-md h-full bg-white text-slate-800 shadow-2xl flex flex-col justify-between overflow-y-auto z-10 border-l border-slate-200">
+            
+            {/* Drawer Top Header: Brand Text Logo on Left + Close (X) on Right */}
+            <div className="p-5 sm:p-6 flex items-center justify-between shrink-0 border-b border-slate-100">
+              <div className="flex items-center">
+                <span className={`font-outfit font-extrabold text-2xl bg-clip-text text-transparent tracking-tight block leading-none ${
+                  isStaff 
+                    ? 'bg-linear-to-r from-[#484270] via-[#5B5588] to-[#7B74A8]' 
+                    : isDoctor 
+                      ? 'bg-linear-to-r from-[#06241B] via-[#0B3D2E] to-[#125B45]' 
+                      : isAdmin
+                        ? 'bg-linear-to-r from-[#7E452B] via-[#9A5B3C] to-[#B37046]'
+                        : 'bg-linear-to-r from-[#0B1F3A] via-[#0D2B4E] to-[#0D9488]'
+                }`}>
+                  Jansevaarogyam
+                </span>
+              </div>
+
+              <button
+                onClick={() => setStaffMenuOpen(false)}
+                className="p-2 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition cursor-pointer"
+                title={language === 'en' ? 'Close Menu' : 'मेनू बंद करें'}
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            {/* Content Body: Only Language Select + Logged-in Staff/User Profile Card directly below it */}
+            <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4">
+              
+              {/* Option 1: Language Selector Pill */}
+              <div className="flex items-center justify-between bg-slate-50 p-2.5 rounded-2xl border border-slate-200 text-xs font-heading font-extrabold shadow-xs">
+                <span className="text-slate-500 font-bold px-2">{language === 'en' ? 'Language:' : 'भाषा:'}</span>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => setLanguage('hi')}
+                    className={`px-4 py-2 rounded-xl transition-all cursor-pointer font-bold ${
+                      language === 'hi' 
+                        ? (isStaff 
+                            ? 'bg-[#5B5588] text-white shadow-xs' 
+                            : isDoctor 
+                              ? 'bg-[#0B3D2E] text-white shadow-xs' 
+                              : isAdmin
+                                ? 'bg-[#9A5B3C] text-white shadow-xs'
+                                : 'bg-[#0D9488] text-white shadow-xs') 
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    हिंदी
+                  </button>
+                  <button
+                    onClick={() => setLanguage('en')}
+                    className={`px-4 py-2 rounded-xl transition-all cursor-pointer font-bold ${
+                      language === 'en' 
+                        ? (isStaff 
+                            ? 'bg-[#5B5588] text-white shadow-xs' 
+                            : isDoctor 
+                              ? 'bg-[#0B3D2E] text-white shadow-xs' 
+                              : isAdmin
+                                ? 'bg-[#9A5B3C] text-white shadow-xs'
+                                : 'bg-[#0B1F3A] text-white shadow-xs') 
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    English
+                  </button>
+                </div>
+              </div>
+
+              {/* Option 2: Logged-in User/Doctor/Staff/Admin Name & Profile Card (Directly Below Language) */}
+              {(currentUser || isAdminAuthenticated) && (
+                <div className="bg-slate-50/80 border border-slate-200 rounded-2xl p-4 flex items-center justify-between shadow-2xs">
+                  <div className="flex items-center gap-3.5">
+                    <div className={`w-12 h-12 rounded-2xl text-white font-heading font-extrabold text-lg flex items-center justify-center shadow-xs shrink-0 ${
+                      isStaff 
+                        ? 'bg-linear-to-tr from-[#5B5588] to-[#6E6B9E]' 
+                        : isDoctor 
+                          ? 'bg-linear-to-tr from-[#0B3D2E] to-[#125B45]' 
+                          : isAdmin
+                            ? 'bg-linear-to-tr from-[#9A5B3C] to-[#B37046]'
+                            : 'bg-linear-to-tr from-[#0B1F3A] to-[#0D9488]'
+                    }`}>
+                      {currentUser?.name 
+                        ? currentUser.name.charAt(0).toUpperCase() 
+                        : (isAdmin ? 'A' : isDoctor ? 'D' : 'S')}
+                    </div>
+                    <div>
+                      <h4 className="font-heading font-extrabold text-base text-slate-900 line-clamp-1">
+                        {currentUser?.name || (isAdmin 
+                          ? (language === 'en' ? 'System Administrator' : 'सिस्टम व्यवस्थापक') 
+                          : isDoctor 
+                            ? 'Doctor' 
+                            : (language === 'en' ? 'Staff Member' : 'स्टाफ सदस्य'))
+                        }
+                      </h4>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded border ${
+                          isStaff 
+                            ? 'text-[#5B5588] bg-purple-50 border-purple-200' 
+                            : isDoctor 
+                              ? 'text-[#0B3D2E] bg-emerald-50 border-emerald-200' 
+                              : isAdmin
+                                ? 'text-[#9A5B3C] bg-amber-50 border-amber-200'
+                                : 'text-teal-800 bg-teal-50 border-teal-200'
+                        }`}>
+                          {isStaff 
+                            ? (language === 'en' ? 'Front Desk Staff' : 'फ्रंट डेस्क स्टाफ')
+                            : isDoctor 
+                              ? (language === 'en' ? 'Doctor OPD Portal' : 'डॉक्टर ओपीडी पोर्टल') 
+                              : isAdmin
+                                ? (language === 'en' ? 'Central Admin Console' : 'केंद्रीय व्यवस्थापक')
+                                : (language === 'en' ? 'Administrator' : 'व्यवस्थापक')
+                          }
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Bottom Actions Footer Block: Option 3: Full-width Logout Button */}
+            <div className="p-5 border-t border-slate-200 bg-slate-50 shrink-0 space-y-3">
+              <button
+                onClick={async () => {
+                  setStaffMenuOpen(false);
+                  await handleLogout();
+                }}
+                disabled={isLoggingOut}
+                className={`w-full text-white py-3.5 rounded-2xl text-xs font-black transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md hover:scale-102 disabled:opacity-60 disabled:cursor-not-allowed ${
+                  isStaff 
+                    ? 'bg-linear-to-r from-[#5B5588] to-[#6E6B9E] hover:opacity-95 shadow-[#5B5588]/25' 
+                    : isDoctor 
+                      ? 'bg-linear-to-r from-[#0B3D2E] to-[#125B45] hover:opacity-95 shadow-[#0B3D2E]/25' 
+                      : isAdmin
+                        ? 'bg-linear-to-r from-[#9A5B3C] to-[#B37046] hover:opacity-95 shadow-[#9A5B3C]/25'
+                        : 'bg-[#0B1F3A] hover:bg-[#071527]'
+                }`}
+              >
+                {isLoggingOut ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>{language === 'en' ? 'Logging out...' : 'लॉग आउट...'}</span>
+                  </>
+                ) : (
+                  <>
+                    <LogOut className={`w-4 h-4 ${
+                      isStaff 
+                        ? 'text-purple-200' 
+                        : isDoctor 
+                          ? 'text-emerald-200' 
+                          : isAdmin
+                            ? 'text-amber-200'
+                            : 'text-rose-400'
+                    }`} />
+                    <span>{language === 'en' ? 'Logout' : 'लॉग आउट'}</span>
+                  </>
+                )}
+              </button>
+
+              <div className="text-center text-[11px] text-slate-400 font-medium pt-1">
+                {isStaff 
+                  ? 'Jansevaarogyam Reception Portal' 
+                  : isDoctor 
+                    ? 'Jansevaarogyam Doctor Portal' 
+                    : isAdmin
+                      ? 'Jansevaarogyam Control Panel'
+                      : 'Jansevaarogyam Healthcare Network'
+                }
               </div>
             </div>
 

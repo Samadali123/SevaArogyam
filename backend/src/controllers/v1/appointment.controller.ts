@@ -11,8 +11,8 @@ import crypto from 'crypto';
 
 // Initialize Razorpay
 const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID || 'dummy_key_id',
-  key_secret: process.env.RAZORPAY_KEY_SECRET || 'dummy_key_secret',
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET
 });
 
 /**
@@ -68,7 +68,7 @@ export const bookAppointment = asyncHandler(async (req: Request, res: Response) 
 
   // Auto-Calculate Patient Classification
   let calculatedClassification: 'NEW' | 'EXISTING' | 'FOLLOW_UP' = 'NEW';
-  
+
   const previousAppts = await prisma.appointment.findMany({
     where: {
       patientId,
@@ -132,7 +132,7 @@ export const bookAppointment = asyncHandler(async (req: Request, res: Response) 
   // Handle Document and Voice Note Uploads
   const documents: string[] = [];
   let voiceNoteUrl: string | null = null;
-  
+
   if (req.files && typeof req.files === 'object' && !Array.isArray(req.files)) {
     // Process Documents
     if (req.files['documents']) {
@@ -264,7 +264,7 @@ export const bookAppointment = asyncHandler(async (req: Request, res: Response) 
         console.error('Razorpay API failed (likely invalid keys). Using dummy order ID instead.', err);
       }
     }
-    
+
     await prisma.appointment.update({
       where: { id: appointment.id },
       data: { razorpayOrderId }
@@ -301,7 +301,7 @@ export const verifyPayment = asyncHandler(async (req: Request, res: Response) =>
   }
 
   const appointment = await prisma.appointment.findUnique({ where: { id: appointmentId } });
-  
+
   if (!appointment || !appointment.razorpayOrderId) {
     throw new AppError('Invalid appointment or missing order ID', HTTP_STATUS.BAD_REQUEST, ERROR_CODES.VALIDATION_ERROR, true);
   }
